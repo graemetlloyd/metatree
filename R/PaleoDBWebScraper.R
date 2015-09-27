@@ -1,30 +1,22 @@
-#' Counts the changes in a series of time bins
+#' Scrapes the Paleobiology Database
 #' 
-#' Given a vector of dates for a series of time bins and another for the times when a character change occurred will return the total number of changes in each bin.
+#' Resolve input name with taxonomy in Paleobiology Database
 #' 
-#' Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
+#' Deprecated as replaced by API functions.
 #' 
-#' @param change.times A vector of ages in millions of years at which character changes are hypothesised to have occurred.
-#' @param time.bins A vector of ages in millions of years of time bin boundaries in old-to-young order.
+#' @param taxon The taxon name.
+#' @param taxon.no Alternatively, the taxon number (supercedes taxon name if supplied).
+#' @param occurrences Whether or not to also return information on occurrences (if available).
+#' @param db The database to use, either "Paleobiodb" or "Fossilworks".
 #'
-#' @return A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
+#' @return A matrix.
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @examples
 #' 
-#' # Create a random dataset of 100 changes:
-#' change.times <- runif(100, 0, 100)
-#' 
-#' # Create time bins:
-#' time.bins <- seq(100, 0, length.out=11)
-#' 
-#' # Get N changes for each bin:
-#' ChangesInBins(change.times, time.bins)
-#' 
-#' @export ChangesInBins
-# Function to resolve input name with taxonomy in Paleobiology Database:
-PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Paleobiodb") {
+#' # Nothing yet
+PaleoDBWebScraper <- function(taxon, taxon.no = NULL, occurrences = FALSE, db = "Paleobiodb") {
     
     # Need to set this to avoid "foreign characters" (such as umlauts etc.) from screwing up the code!:
     Sys.setlocale('LC_ALL', 'C')
@@ -39,7 +31,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
         while(length(c(grep("</html>", x), grep("Please select a taxonomic name", x))) == 0) {
             
             # Keep trying to set x:
-            try(x <- readLines(web.address), silent=TRUE)
+            try(x <- readLines(web.address), silent = TRUE)
             
         }
         
@@ -49,7 +41,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
     }
     
     # Function to extract web addresses for each taxon given a list in html format from the PaleoDB:
-    GetPaleoDBTaxonAddresses <- function(html, db=db) {
+    GetPaleoDBTaxonAddresses <- function(html, db = db) {
         
         # Initial set of taxon.numbers:
         taxon.numbers <- matrix(unlist(strsplit(html[grep("a href=\"\\?a=basicTaxon", html)], "taxon_no=")), byrow=TRUE, ncol=2)[, 2]
@@ -71,10 +63,10 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
         }
         
         # Turn taxon numbers into web addresses:
-        if(db == "Paleobiodb") web.addresses <- paste("http://paleobiodb.org/cgi-bin/bridge.pl?a=basicTaxonInfo&taxon_no=", taxon.numbers, sep="")
+        if(db == "Paleobiodb") web.addresses <- paste("http://paleobiodb.org/cgi-bin/bridge.pl?a=basicTaxonInfo&taxon_no=", taxon.numbers, sep = "")
         
         # Turn taxon numbers into web addresses:
-        if(db == "Fossilworks") web.addresses <- paste("http://fossilworks.org/cgi-bin/bridge.pl?a=basicTaxonInfo&taxon_no=", taxon.numbers, sep="")
+        if(db == "Fossilworks") web.addresses <- paste("http://fossilworks.org/cgi-bin/bridge.pl?a=basicTaxonInfo&taxon_no=", taxon.numbers, sep = "")
         
         # Output web addresses:
         return(web.addresses)
@@ -96,7 +88,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Add name to list:
             taxon.name <- taxon.name.line
             
-            # Case if taxon contains additional information (i.e., species name, reference etc.):
+        # Case if taxon contains additional information (i.e., species name, reference etc.):
         } else {
             
             # Case if taxon is genus or species:
@@ -116,7 +108,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     
                 }
                 
-                # Case if taxon is supra-generic:
+            # Case if taxon is supra-generic:
             } else {
                 
                 # Case if taxon is ranked:
@@ -136,7 +128,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                         
                     }
                     
-                    # Case if taxon is unranked clade:
+                # Case if taxon is unranked clade:
                 } else {
                     
                     # Store taxon name:
@@ -196,7 +188,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Set parent name:
             parent.name <- strsplit(gsub("<i>|</i>", "", parent.name.line), "\">|</")[[1]][2]
             
-            # Case if taxon is unassigned:
+        # Case if taxon is unassigned:
         } else {
             
             # Set parent name as unassigned:
@@ -224,7 +216,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Set parent name:
             parent.number <- as.numeric(strsplit(strsplit(parent.name.line, "taxon_no=")[[1]][2], "\"")[[1]][1])
             
-            # Case if taxon is unassigned:
+        # Case if taxon is unassigned:
         } else {
             
             # Set parent name as unassigned:
@@ -255,7 +247,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Record subtaxa:
             subtaxa <- sort(gsub("[0-9]|\"|</a>|<i>|</i>|>|</span>|</p>", "", subtaxa.line))
             
-            # If there are not subtaxa:
+        # If there are not subtaxa:
         } else {
             
             # Set subtaxa as "None":
@@ -289,7 +281,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     # Create empty vector:
                     taxon.numbers <- vector(mode="numeric")
                     
-                    # Case if there are subtaxa:
+                # Case if there are subtaxa:
                 } else {
                     
                     # Modify to help zero in on taxon numbers:
@@ -300,7 +292,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     
                 }
                 
-                # If taxon is a species:
+            # If taxon is a species:
             } else {
                 
                 # Create empty vector:
@@ -358,7 +350,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     # Update subtaxa numbers:
                     subtaxa.numbers <- sort(c(subtaxa.numbers, setdiff(unlist(lapply(new.pass, GetSubtaxaNumbers)), c(taxon.number, subtaxa.numbers))))
                     
-                    # If there are no new subtaxa:
+                # If there are no new subtaxa:
                 } else {
                     
                     # Create empty vector that will break loop:
@@ -368,7 +360,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 
             }
             
-            # Case if there are no subtaxa:
+        # Case if there are no subtaxa:
         } else {
             
             # Set subtaxa numbers as "None":
@@ -390,7 +382,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Record that there are no occurrences of this taxon:
             collection.numbers <- "There are no listed occurrences for this taxon"
             
-            # If there are occurrences:
+        # If there are occurrences:
         } else {
             
             # Case if there is a single occurrence:
@@ -399,7 +391,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 # Store collection number:
                 collection.numbers <- as.numeric(strsplit(strsplit(html[grep("Distribution: found only at ", html)], "collection_no=")[[1]][2], "\"")[[1]][1])
                 
-                # Case if there are no or multiple ocurrences:
+            # Case if there are no or multiple ocurrences:
             } else {
                 
                 # If there are no occurrences (because taxon is too big):
@@ -408,7 +400,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     # Store warning as collection.numbers:
                     collection.numbers <- "There are no listed occurrences for this taxon"
                     
-                    # Case if there are multiple occurrences:
+                # Case if there are multiple occurrences:
                 } else {
                     
                     # Create vector to store occurrence web addresses:
@@ -501,7 +493,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                             # Store collection numbers:
                             if(db == "Fossilworks") collection.numbers <- c(collection.numbers, matrix(unlist(strsplit(occs.list, "\"")), ncol=2, byrow=TRUE)[, 1])
                             
-                            # If there is just a single occurrence:
+                        # If there is just a single occurrence:
                         } else {
                             
                             # Add collection number to list (if present):
@@ -523,7 +515,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Reiterate warning (just a placeholder):
             collection.numbers <- "There are no listed occurrences for this taxon"
             
-            # If there are collection numbers:
+        # If there are collection numbers:
         } else {
             
             # Store collection numbers as numbers:
@@ -643,7 +635,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                             # Store with qualifier for first name:
                             binomial <- rbind(binomial, c(taxon.name.in.parts[1], taxon.name.in.parts[2], qualifier.second.name, second.name))
                             
-                            # If no qualifier is present:
+                        # If no qualifier is present:
                         } else {
                             
                             # Store without qualifier for first name:
@@ -651,7 +643,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                             
                         }
                         
-                        # Case if valid name is in quotes:
+                    # Case if valid name is in quotes:
                     } else {
                         
                         # Store name with quotes as qualifier for first name:
@@ -659,7 +651,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                         
                     }
                     
-                    # Case if formal name:
+                # Case if formal name:
                 } else {
                     
                     # Case if no modification needed:
@@ -671,7 +663,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                         # Add binomial:
                         if(length(strsplit(taxon.names[i], " ")[[1]]) == 2) binomial <- rbind(binomial, c("", strsplit(taxon.names[i], " ")[[1]][1], "", strsplit(taxon.names[i], " ")[[1]][2]))
                         
-                        # Case if some kind of qualifier (e.g., cf., aff. etc.) is present:
+                    # Case if some kind of qualifier (e.g., cf., aff. etc.) is present:
                     } else {
                         
                         # Split name using spaces:
@@ -686,7 +678,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                             # Remove qualifier from name:
                             taxon.name.in.parts <- taxon.name.in.parts[-1]
                             
-                            # If there is no qualifier to first name:
+                        # If there is no qualifier to first name:
                         } else {
                             
                             # Store empty qualifier:
@@ -703,7 +695,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                             # Remove qualifier from name:
                             taxon.name.in.parts <- taxon.name.in.parts[-2]
                             
-                            # If there is no qualifier to the second name:
+                        # If there is no qualifier to the second name:
                         } else {
                             
                             # Store empty qualifier:
@@ -732,7 +724,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
             # Add column names to table:
             colnames(out) <- c("Collection.number", "First.name.qualifier", "First.name", "Second.name.qualifier", "Second.name", "Max.age", "Min.age", "Current.lat", "Current.lon", "Palaeo.lat", "Palaeo.lon")
             
-            # If there are no taxa at the site:
+        # If there are no taxa at the site:
         } else {
             
             # Return null:
@@ -754,7 +746,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
         # Create hypothetical web address for taxon:
         if(db == "Fossilworks") web.address <- paste("http://fossilworks.org/cgi-bin/bridge.pl?a=basicTaxonInfo&taxon_name=", gsub(" ", "%20", taxon), collapse="", sep="")
         
-        # Case if using taxon number:
+    # Case if using taxon number:
     } else {
         
         # Create hypothetical web address for taxon number:
@@ -777,7 +769,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
         # Store name as "Taxon missing from database":
         taxon.name <- "Taxon missing from database"
         
-        # If database has a hit:
+    # If database has a hit:
     } else {
         
         # Case if mutiples "hits" in database:
@@ -795,7 +787,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 # Store name as "Multiple valid hits in database":
                 taxon.name <- "Multiple valid hits in database"
                 
-                # Case of valid name having multiple hits:
+            # Case of valid name having multiple hits:
             } else {
                 
                 # Get web addresses for each taxon:
@@ -819,7 +811,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                     # Get taxon name:
                     taxon.name <- GetTaxonName(x)$taxon.name
                     
-                    # Multiple taxa are different:
+                # Multiple taxa are different:
                 } else {
                     
                     # Output warning with web addresses:
@@ -832,7 +824,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 
             }
             
-            # Case if single hit in database:
+        # Case if single hit in database:
         } else {
             
             # Get taxon name:
@@ -866,7 +858,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 # Get subtaxa numbers:
                 subtaxa.numbers <- GetAllSubtaxa(x, db)
                 
-                # If a species:
+            # If a species:
             } else {
                 
                 # Create empty vector for subtaxa numbers:
@@ -931,7 +923,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                         # Add to rows to keep:
                         rows.to.keep <- sort(unique(c(rows.to.keep, intersect(grep(strsplit(taxon.names[i], " ")[[1]][1], occurrences.table[, "First.name"]), grep(strsplit(taxon.names[i], " ")[[1]][2], occurrences.table[, "Second.name"])))))
                         
-                        # Case if taxon name is supraspecific:
+                    # Case if taxon name is supraspecific:
                     } else {
                         
                         # Add to rows to keep:
@@ -944,7 +936,7 @@ PaleoDBTaxonScraper <- function(taxon, taxon.no=NULL, occurrences=FALSE, db="Pal
                 # Collapse table to just the rows for the taxon:
                 occurrences.table <- occurrences.table[rows.to.keep, ]
                 
-                # If there are no occurrences of the taxon:
+            # If there are no occurrences of the taxon:
             } else {
                 
                 # Store warning for output:
