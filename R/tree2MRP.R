@@ -13,17 +13,22 @@
 #'
 #' @examples
 #' 
-#' # Create a random dataset of 100 changes:
-#' change.times <- runif(100, 0, 100)
-#' 
-#' # Create time bins:
-#' time.bins <- seq(100, 0, length.out=11)
-#' 
-#' # Get N changes for each bin:
-#' ChangesInBins(change.times, time.bins)
-#' 
-#' @export ChangesInBins
-mrp.trees <- function(trees) {
+#' # Nothing yet
+#'
+#' @export tree2MRP
+tree2MRP <- function(trees) {
+    
+    mrp.tree <- function(tree) {
+        mrp <- matrix(0, ncol=(Nnode(tree)-1), nrow=Ntip(tree)) # MRP matrix
+        rownames(mrp) <- tree$tip.label # Name rows as taxa
+        colnames(mrp) <- as.character(c((Ntip(tree)+2):(Ntip(tree)+Nnode(tree)))) # Name columns as nodes
+        for(j in c((Ntip(tree)+2):(Ntip(tree)+Nnode(tree)))) { # For each internal node...
+            mrp[tree$tip.label[FindDescendants(j, tree)], as.character(j)] <- 1 # Fill MRP matrix
+        }
+        mrp <- mrp[sort(rownames(mrp)), ]
+        return(mrp)
+    }
+    
     ntrees <- length(summary(trees)[, 1]) # How many trees are there?
     strict <- consensus(trees) # Make strict consensus tree
     strict <- root(strict, outgroup=strict$tip.label[1], resolve.root=TRUE) # Root it
