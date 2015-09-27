@@ -1,0 +1,13 @@
+citHeader("To cite package 'Claddis' in a publication use:")
+
+citEntry(entry = "Article",
+	title = "Claddis: Measuring Morphological Diversity and Evolutionary Tempo",
+	author = "G. T. Lloyd",
+	journal = "NA",
+  	year = "2015",
+	volume = "X",
+	pages = "Y-Z",
+	textVersion = "Lloyd, Graeme T. (2015). Claddis: Measuring Morphological Diversity and Evolutionary Tempo. R package version 0.2."
+)
+
+citFooter("As Claddis is evolving rapidly, you may want to also cite its version number (found with 'library(help = Claddis)').")
