@@ -21,6 +21,12 @@
 #' @export MRPCollapse
 MRPCollapse <- function(matrix) {
     
+    # REMOVE CONSTANT CHARACTERS ALSO
+    # WARN IF VARYING WEIGHTS
+    # DELETE ZERO WEIGHT CHARACTERS
+    # WARN IF STEP MATRICES
+    # WARN IF MORE THAN TWO STATES
+    
     matrix <- as.matrix(matrix)
     
     taxon.names <- rownames(matrix)
