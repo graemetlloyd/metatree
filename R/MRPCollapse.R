@@ -22,9 +22,9 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
+#' @export MRPCollapse
 # MRP collapse function (removes redundant characters a la Pisani et al. 2002):
-mrp.collapse <- function(matrix) {
+MRPCollapse <- function(matrix) {
     
     matrix <- as.matrix(matrix)
     taxon.names <- rownames(matrix)
