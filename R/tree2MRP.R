@@ -1,15 +1,20 @@
-#' Counts the changes in a series of time bins
+#' Converts tree(s) to an MRP matrix
 #' 
-#' Given a vector of dates for a series of time bins and another for the times when a character change occurred will return the total number of changes in each bin.
+#' Given an input tree or trees creates an MRP matrix.
 #' 
-#' Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
+#' Matrix Representtaion with parsimony (Baum 1992; Ragan 1992).
 #' 
-#' @param change.times A vector of ages in millions of years at which character changes are hypothesised to have occurred.
-#' @param time.bins A vector of ages in millions of years of time bin boundaries in old-to-young order.
+#' @param trees An object of class 'phylo' or 'multi.phylo'.
 #'
-#' @return A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
+#' @return An MRP matrix in \link{ReadMorphNexus} format.
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
+#' @reference
+#'
+#' Baum (1992)
+#'
+#' Ragan (1992)
 #'
 #' @examples
 #' 
@@ -17,6 +22,8 @@
 #'
 #' @export tree2MRP
 tree2MRP <- function(trees) {
+    
+    # Allow Purvis format?
     
     mrp.tree <- function(tree) {
         mrp <- matrix(0, ncol=(Nnode(tree)-1), nrow=Ntip(tree)) # MRP matrix
