@@ -1,30 +1,24 @@
-#' Counts the changes in a series of time bins
+#' Converts TNT MRP output to NEXUS format
 #' 
-#' Given a vector of dates for a series of time bins and another for the times when a character change occurred will return the total number of changes in each bin.
+#' Converts TNT formatted MRP matrix to
 #' 
-#' Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
+#' TNT (Goloboff et al. 2008) \\#NEXUS (Maddison ????)
 #' 
-#' @param change.times A vector of ages in millions of years at which character changes are hypothesised to have occurred.
-#' @param time.bins A vector of ages in millions of years of time bin boundaries in old-to-young order.
+#' @param filename The TNT input file name.
 #'
-#' @return A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
+#' @return A cladistic matrix in \link{ReadMorphNexus} format.
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @examples
 #' 
-#' # Create a random dataset of 100 changes:
-#' change.times <- runif(100, 0, 100)
-#' 
-#' # Create time bins:
-#' time.bins <- seq(100, 0, length.out=11)
-#' 
-#' # Get N changes for each bin:
-#' ChangesInBins(change.times, time.bins)
-#' 
-#' @export ChangesInBins
-tntmrp.to.nexusmrp <- function(file)
-{
+#' # Nothing yet
+#'
+#' @export TNTMRP2NEXUSMRP
+TNTMRP2NEXUSMRP <- function(filename) {
+    
+    # NEEDS A BETTER NAME, NOT REALLY CONVERTING TO NEXUS
+    
     # Read in raw file:
     X <- scan(file = file, what = "", sep = "\n", quiet = TRUE) # Read in NEXUS file
     start <- grep("ROOT", X)+1
@@ -40,7 +34,7 @@ tntmrp.to.nexusmrp <- function(file)
     for(i in 1:length(MATRIX)) char.block[i, ] <- strsplit(characters[i], "")[[1]]
     char.block <- t(char.block)
     characters <- vector(mode="character")
-    for(i in 1:length(char.block[, 1])) characters[i] <- paste(char.block[i, ], collapse="")
+    for(i in 1:length(char.block[, 1])) characters[i] <- paste(char.block[i, ], collapse = "")
     characters <- sort(characters)
     characters <- rle(characters)
     weights <- characters$lengths
