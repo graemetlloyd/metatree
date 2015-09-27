@@ -1,0 +1,17 @@
+Package: metatree
+Type: Package
+Title: Generating Meta-Analytical Phylogenies
+Version: 0.1
+Date: 2015-09-27
+Author: Graeme T. Lloyd
+Maintainer: Graeme T. Lloyd <graemetlloyd@gmail.com>
+Depends:
+	ape,
+	Claddis,
+	strap
+Imports:
+	stats
+Description: Generates meta-analytical phylogenies.
+License: GPL (>=2)
+LazyData: yes
+ByteCompile: yes
