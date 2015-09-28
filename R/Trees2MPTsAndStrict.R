@@ -22,15 +22,31 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
-trees.to.mpts.plus.strict <- function(file)
-{
-    X <- scan(file = file, what = "", sep = "\n", quiet = TRUE) # Read in tnt treefile
-    X <- X[grep("\\(", X)] # Get just the trees
-    X <- gsub(" ", "", X) # Remove spaces
-    strict <- X[length(X)] # Get strict
-    mpts <- X[1:(length(X)-1)] # Get mpts
-    result <- list(mpts, strict) # Make output variable
-    names(result) <- c("mpts", "strict") # Add names
-    return(result) # Return
+#' @export Trees2MPTsAndStrict
+Trees2MPTsAndStrict <- function(file) {
+    
+  # Read in tnt treefile
+  X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+  
+  # Get just the trees
+  X <- X[grep("\\(", X)]
+
+  # Remove spaces
+  X <- gsub(" ", "", X)
+
+  # Get strict
+  strict <- X[length(X)]
+    
+  # Get mpts
+  mpts <- X[1:(length(X) - 1)]
+    
+  # Make output variable
+  result <- list(mpts, strict)
+    
+  # Add names
+  names(result) <- c("mpts", "strict")
+
+  # Return
+  return(result)
+  
 }
