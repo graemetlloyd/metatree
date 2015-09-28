@@ -28,6 +28,9 @@
 #' @import strap
 NULL
 
+#' @importFrom gdata trim
+NULL
+
 #' @importFrom stats dist
 NULL
 

@@ -10,7 +10,7 @@
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
-#' @reference
+#' @references
 #'
 #' Baum (1992)
 #'
