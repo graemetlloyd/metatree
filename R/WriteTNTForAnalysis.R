@@ -22,8 +22,8 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
-write.tnt.fa <- function(clad.matrix, file.name) {
+#' @export WriteTNTForAnalysis
+WriteTNTForAnalysis <- function(clad.matrix, file.name) {
     head <- clad.matrix$header # Separate out header
     mat <- clad.matrix$matrix # Separate out matrix
     ord <- clad.matrix$ordering # Separate out ordering
