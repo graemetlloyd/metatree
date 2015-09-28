@@ -22,9 +22,8 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
-# PaleobioDB taxon scraper that uses API:
-PaleobiodbChildFinder <- function(taxon.name, taxon.number=NULL) {
+#' @export PaleobioDBChildFinder
+PaleobioDBChildFinder <- function(taxon.name, taxon.number=NULL) {
     
     # Load gdata library for trim function:
     require(gdata)

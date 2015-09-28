@@ -22,9 +22,8 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
-# PaleobioDB collection scraper that uses API:
-PaleobiodbCollectionScraper <- function(col.id) {
+#' @export PaleobioDBCollectionScraper
+PaleobioDBCollectionScraper <- function(col.id) {
     
     # Grab the data:
     X <- strsplit(readLines(paste("http://paleobiodb.org/data1.1/colls/single.tsv?id=", col.id, "&show=bin,attr,ref,loc,paleoloc,prot,time,strat,stratext,lith,lithext,geo,rem,ent,entname,crmod", sep=""), warn=T), "\t")
