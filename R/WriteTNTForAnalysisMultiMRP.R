@@ -22,8 +22,8 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
-write.tnt.fa.multimrp <- function(clad.matrix, file.name, n.iterations=20, n.trees=5000) {
+#' @export WriteTNTForAnalysisMultiMRP
+WriteTNTForAnalysisMultiMRP <- function(clad.matrix, file.name, n.iterations=20, n.trees=5000) {
     head <- clad.matrix$header # Separate out header
     mat <- clad.matrix$matrix # Separate out matrix
     ord <- clad.matrix$ordering # Separate out ordering
