@@ -4,8 +4,7 @@
 #' 
 #' Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
 #' 
-#' @param change.times A vector of ages in millions of years at which character changes are hypothesised to have occurred.
-#' @param time.bins A vector of ages in millions of years of time bin boundaries in old-to-young order.
+#' @param filename Text.
 #'
 #' @return A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
 #'
@@ -23,10 +22,10 @@
 #' ChangesInBins(change.times, time.bins)
 #' 
 #' @export Trees2MPTsAndStrict
-Trees2MPTsAndStrict <- function(file) {
+Trees2MPTsAndStrict <- function(filename) {
     
   # Read in tnt treefile
-  X <- scan(file = file, what = "", sep = "\n", quiet = TRUE)
+  X <- scan(file = filename, what = "", sep = "\n", quiet = TRUE)
   
   # Get just the trees
   X <- X[grep("\\(", X)]

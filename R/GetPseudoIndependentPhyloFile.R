@@ -4,8 +4,8 @@
 #' 
 #' Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
 #' 
-#' @param change.times A vector of ages in millions of years at which character changes are hypothesised to have occurred.
-#' @param time.bins A vector of ages in millions of years of time bin boundaries in old-to-young order.
+#' @param xmlwd Text.
+#' @param exclude.list Text.
 #'
 #' @return A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
 #'
