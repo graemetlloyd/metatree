@@ -22,7 +22,7 @@
 #' # Get N changes for each bin:
 #' ChangesInBins(change.times, time.bins)
 #' 
-#' @export ChangesInBins
+#' @export GetPseudoIndependentPhyloFiles
 GetPseudoIndependentPhyloFiles <- function(xmlwd, exclude.list) {
     
     # NB: Is "Pseudo" as taxonomic reconciliation needed to be absolutely sure of which data sets to take as independent
