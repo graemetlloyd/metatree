@@ -26,9 +26,6 @@
 #' @export PaleobioDBTaxonScraper
 PaleobioDBTaxonScraper <- function(taxon.name, taxon.number = NULL, occurrences = FALSE) {
     
-    # Load gdata library for trim function:
-    require(gdata)
-    
     # Set as NA to start:
     X <- NA
     
