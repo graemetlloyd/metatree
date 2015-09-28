@@ -20,8 +20,8 @@
 #' 
 #' # Nothing yet
 #'
-#' @export tree2MRP
-tree2MRP <- function(trees) {
+#' @export Tree2MRP
+Tree2MRP <- function(trees) {
     
     # Allow Purvis format?
     
