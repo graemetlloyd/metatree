@@ -1,4 +1,4 @@
-citHeader("To cite package ‘metatree’ in a publication use:")
+citHeader("To cite package 'metatree' in a publication use:")
 
 citEntry(entry = "Article",
 	title = "metatree: Generating Meta-Analytical Phylogenies",
@@ -10,4 +10,4 @@ citEntry(entry = "Article",
 	textVersion = "Lloyd, Graeme T. (2015). metatree: Generating Meta-Analytical Phylogenies. R package version 0.1."
 )
 
-citFooter("As metatree is evolving rapidly, you may want to also cite its version number (found with 'library(help = metatree)’).”)
+citFooter("As metatree is evolving rapidly, you may want to also cite its version number (found with 'library(help = metatree)').")
