@@ -8,9 +8,13 @@ WriteTNTForAnalysisMultiMRP(clad.matrix, file.name, n.iterations = 20,
   n.trees = 5000)
 }
 \arguments{
-\item{change.times}{A vector of ages in millions of years at which character changes are hypothesised to have occurred.}
+\item{clad.matrix}{Text.}
 
-\item{time.bins}{A vector of ages in millions of years of time bin boundaries in old-to-young order.}
+\item{file.name}{Text.}
+
+\item{n.iterations}{Text.}
+
+\item{n.trees}{Text.}
 }
 \value{
 A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.

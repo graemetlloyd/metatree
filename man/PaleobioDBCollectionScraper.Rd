@@ -7,9 +7,7 @@
 PaleobioDBCollectionScraper(col.id)
 }
 \arguments{
-\item{change.times}{A vector of ages in millions of years at which character changes are hypothesised to have occurred.}
-
-\item{time.bins}{A vector of ages in millions of years of time bin boundaries in old-to-young order.}
+\item{col.id}{Text.}
 }
 \value{
 A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.

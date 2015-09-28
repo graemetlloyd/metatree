@@ -4,12 +4,10 @@
 \alias{Trees2MPTsAndStrict}
 \title{Counts the changes in a series of time bins}
 \usage{
-Trees2MPTsAndStrict(file)
+Trees2MPTsAndStrict(filename)
 }
 \arguments{
-\item{change.times}{A vector of ages in millions of years at which character changes are hypothesised to have occurred.}
-
-\item{time.bins}{A vector of ages in millions of years of time bin boundaries in old-to-young order.}
+\item{filename}{Text.}
 }
 \value{
 A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
