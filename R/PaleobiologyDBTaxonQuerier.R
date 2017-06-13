@@ -32,8 +32,8 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no) {
     # While server has not been reached:
     while(is.na(resolvedjson[[1]][1])) {
         
-        # Acquire resolved taxon string:
-        resolvedjson <- readLines(resolvedhttpstring)
+        # Attempt to acquire resolved taxon string:
+        try(resolvedjson <- readLines(resolvedhttpstring), silent = TRUE)
         
         # If server was not reached:
         if(is.na(resolvedjson[[1]][1])) {
