@@ -4,10 +4,12 @@
 \alias{PaleobiologyDBTaxonQuerier}
 \title{Palaeobiology Database Taxon Querier}
 \usage{
-PaleobiologyDBTaxonQuerier(taxon_no)
+PaleobiologyDBTaxonQuerier(taxon_no, original = TRUE)
 }
 \arguments{
 \item{taxon_no}{The Paleobiology database taxon number.}
+
+\item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 }
 \value{
 A six-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, and the taxon validity (if relevant; returns NA if already valid).

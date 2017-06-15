@@ -5,6 +5,7 @@
 #' Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxon number and returns information on its validity, name, and rank. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
 #' 
 #' @param taxon_no The Paleobiology database taxon number.
+#' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #'
 #' @return A six-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, and the taxon validity (if relevant; returns NA if already valid).
 #'
@@ -18,10 +19,10 @@
 #' PaleobiologyDBTaxonQuerier("52962")
 #' 
 #' @export PaleobiologyDBTaxonQuerier
-PaleobiologyDBTaxonQuerier <- function(taxon_no) {
+PaleobiologyDBTaxonQuerier <- function(taxon_no, original = TRUE) {
     
     # Shows resolved taxon name for a given id:
-    resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?id=var:", taxon_no, "&show=parent", sep = "")
+    ifelse(original, resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?id=var:", taxon_no, "&show=parent", sep = ""), resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?id=txn:", taxon_no, "&show=parent", sep = ""))
     
     # Set resolved json to NA (used later to check results are coming back from server):
     resolvedjson <- NA
