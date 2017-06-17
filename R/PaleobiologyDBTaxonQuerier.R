@@ -7,7 +7,7 @@
 #' @param taxon_no The Paleobiology database taxon number.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #'
-#' @return A six-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, and the taxon validity (if relevant; returns NA if already valid).
+#' @return A eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
@@ -87,11 +87,17 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, original = TRUE) {
         # retrieve taxon validity, if known:
         TaxonValidity <- ParameterExtraction(jsonstring, parameterstring = "\"tdf\":")
         
+        # retrieve taxon validity, if known:
+        AcceptedNumber <- ParameterExtraction(jsonstring, parameterstring = "\"acc\":")
+
+        # retrieve taxon validity, if known:
+        AcceptedName <- ParameterExtraction(jsonstring, parameterstring = "\"acn\":")
+
         # Compile output:
-        output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity)
+        output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName)
         
         # Add names:
-        names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity")
+        names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")
         
         # Return output:
         return(output)

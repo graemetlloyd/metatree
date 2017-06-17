@@ -12,7 +12,7 @@ PaleobiologyDBTaxonQuerier(taxon_no, original = TRUE)
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 }
 \value{
-A six-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, and the taxon validity (if relevant; returns NA if already valid).
+A eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
 }
 \description{
 Given a Paleobiology Database taxon number returns basic information on that taxon.
