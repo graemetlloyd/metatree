@@ -23,7 +23,7 @@
 PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = TRUE) {
     
     # Shows resolved taxon name for a given id:
-    ifelse(original, resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?id=var:", taxon_no, "&show=parent", sep = ""), resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?id=txn:", taxon_no, "&show=parent", sep = ""))
+    resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/single.json?id=var:", taxon_no, "&show=parent", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/single.json?id=txn:", taxon_no, "&show=parent", sep = ""))
     
     # Overwwrite taxon number query if using the taxon name instead:
     if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/single.json?name=", gsub(" ", "%20", trim(taxon_name)), "&show=parent", sep = "")
@@ -34,8 +34,8 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = T
     # Set start value for counter (used later to avoid infinite loop):
     counter <- 0
     
-    # While server has not been reached:
-    while(is.na(resolvedjson[[1]][1])) {
+    # While server has not been reached (and querying a taxon number):
+    while(is.na(resolvedjson[[1]][1]) && is.null(taxon_name)) {
         
         # Attempt to acquire resolved taxon string:
         try(resolvedjson <- readLines(resolvedhttpstring), silent = TRUE)
@@ -53,6 +53,17 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = T
             Sys.sleep(2)
             
         }
+        
+    }
+    
+    # If using a taxon name to query:
+    if(!is.null(taxon_name)) {
+        
+        # Ask server for data:
+        try(resolvedjson <- readLines(resolvedhttpstring), silent = TRUE)
+        
+        # If no data returned tell user:
+        if(length(resolvedjson) == 1) stop(paste("Could not find record for ", taxon_name, " in database.", sep = ""))
         
     }
     
