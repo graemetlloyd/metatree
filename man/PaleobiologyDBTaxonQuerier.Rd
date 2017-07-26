@@ -4,10 +4,12 @@
 \alias{PaleobiologyDBTaxonQuerier}
 \title{Palaeobiology Database Taxon Querier}
 \usage{
-PaleobiologyDBTaxonQuerier(taxon_no, original = TRUE)
+PaleobiologyDBTaxonQuerier(taxon_no, taxon_name = NULL, original = TRUE)
 }
 \arguments{
 \item{taxon_no}{The Paleobiology database taxon number.}
+
+\item{taxon_name}{A taxon name to search for in the database (default left to NULL).}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 }
