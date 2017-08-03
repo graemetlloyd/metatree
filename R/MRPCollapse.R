@@ -43,7 +43,7 @@ MRPCollapse <- function(clad.matrix) {
     taxon.names <- rownames(clad.matrix$matrix)
     
     # Collapse cladistic matrix to just unique characters:
-    clad.matrix$matrix <- matrix(unlist(strsplit(sort(apply(clad.matrix$matrix, 2, paste, collapse = ""))[!duplicated(sort(apply(clad.matrix$matrix, 2, paste, collapse = "")))], "")), ncol = length(taxon.names), dimnames = list(taxon.names, c()))
+    clad.matrix$matrix <- matrix(unlist(strsplit(sort(apply(clad.matrix$matrix, 2, paste, collapse = ""))[!duplicated(sort(apply(clad.matrix$matrix, 2, paste, collapse = "")))], "")), nrow = length(taxon.names), dimnames = list(taxon.names, c()))
     
     # Overwrite ordering to new length:
     clad.matrix$ordering <- rep("unord", ncol(clad.matrix$matrix))
