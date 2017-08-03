@@ -2,9 +2,9 @@
 #' 
 #' Collapses an MRP matrix to unique characters
 #' 
-#' Collapses an MRP matrix to just unique characters followung the protocol aid out in Pisani et al. (2002).
+#' Collapses an MRP matrix to just unique characters following the protocol laid out in Pisani et al. (2002).
 #' 
-#' @param matrix An MRP matrix in \link{ReadMorphNexus} format.
+#' @param clad.matrix An MRP matrix in \link{ReadMorphNexus} format.
 #'
 #' @return An MRP matrix in \link{ReadMorphNexus} format where all characters are unique.
 #'
@@ -19,76 +19,45 @@
 #' # Nothing yet.
 #'
 #' @export MRPCollapse
-MRPCollapse <- function(matrix) {
+MRPCollapse <- function(clad.matrix) {
     
-    # REMOVE CONSTANT CHARACTERS ALSO
-    # WARN IF VARYING WEIGHTS
-    # DELETE ZERO WEIGHT CHARACTERS
-    # WARN IF STEP MATRICES
-    # WARN IF MORE THAN TWO STATES
+    # Find any constant characters:
+    constantcharacters <- which(unlist(lapply(lapply(split(clad.matrix$matrix, rep(1:ncol(clad.matrix$matrix), each = nrow(clad.matrix$matrix))), unique), length)) < 2)
     
-    matrix <- as.matrix(matrix)
+    # Prune these if found:
+    if(length(constantcharacters) > 0) clad.matrix <- MatrixPruner(clad.matrix, characters2prune = constantcharacters)
     
-    taxon.names <- rownames(matrix)
+    # Find any zero-weight characters:
+    zeroweightcharacters <- which(clad.matrix$weights == 0)
     
-    transposed.matrix <- t(matrix)
-    
-    unq.rows <- vector(mode = "numeric")
-    
-    for(i in length(transposed.matrix[, 1]):1) unq.rows <- unique(c(unq.rows, paste(transposed.matrix[i, ], collapse = "")))
+    # Prune these if found:
+    if(length(zeroweightcharacters) > 0) clad.matrix <- MatrixPruner(clad.matrix, characters2prune = zeroweightcharacters)
 
-    unq.rows <- sort(unique(unq.rows), decreasing = TRUE)
+    # Check for step matrices and stop if found:
+    if(!is.null(clad.matrix$step.matrices[[1]][1])) stop("Function not designed to work with step matrices.")
     
-    if(length(unq.rows) > 0) {
-        
-        for(i in length(unq.rows):1) {
-            
-            if(sum(as.numeric(strsplit(unq.rows[i], "")[[1]])) < 2) {
-                
-                unq.rows <- unq.rows[-i]
-                
-            }
-            
-        }
-        
-        if(length(unq.rows) > 0) {
-            
-            transposed.matrix <- vector(mode = "character")
-            
-            for(i in 1:length(unq.rows)) {
-                
-                transposed.matrix <- rbind(transposed.matrix, strsplit(unq.rows[i], "")[[1]])
-                
-            }
-            
-            if(nrow(as.matrix(transposed.matrix)) > 1) {
-                
-                out <- t(transposed.matrix)
-                
-                rownames(out) <- taxon.names
-                
-            } else {
-                
-                out <- as.matrix(transposed.matrix)
-                
-                colnames(out) <- taxon.names
-                
-                out <- t(out)
-                
-            }
-            
-        } else {
-            
-            out <- "There are no informative characters after collapsing"
-            
-        }
-        
-    } else {
-        
-        out <- "There are no informative characters after collapsing"
-        
-    }
+    # Check for non-binary characters and stop if found:
+    if(length(unique(as.vector(clad.matrix$matrix))) != 2) stop("Function not designed for non-binary data.")
     
-    return(out)
+    # Store taxon names:
+    taxon.names <- rownames(clad.matrix$matrix)
+    
+    # Collapse cladistic matrix to just unique characters:
+    clad.matrix$matrix <- matrix(unlist(strsplit(sort(apply(clad.matrix$matrix, 2, paste, collapse = ""))[!duplicated(sort(apply(clad.matrix$matrix, 2, paste, collapse = "")))], "")), ncol = length(taxon.names), dimnames = list(taxon.names, c()))
+    
+    # Overwrite ordering to new length:
+    clad.matrix$ordering <- rep("unord", ncol(clad.matrix$matrix))
+    
+    # Overwrite weights to new length:
+    clad.matrix$weights <- rep(1, ncol(clad.matrix$matrix))
+    
+    # Overwrite max vals to new length:
+    clad.matrix$max.vals <- rep(1, ncol(clad.matrix$matrix))
+    
+    # Overwrite min vals to new length:
+    clad.matrix$min.vals <- rep(0, ncol(clad.matrix$matrix))
+    
+    # Return collapsed matrix:
+    return(clad.matrix)
     
 }

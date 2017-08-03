@@ -4,10 +4,10 @@
 \alias{MRPCollapse}
 \title{Collapse MRP matrix}
 \usage{
-MRPCollapse(matrix)
+MRPCollapse(clad.matrix)
 }
 \arguments{
-\item{matrix}{An MRP matrix in \link{ReadMorphNexus} format.}
+\item{clad.matrix}{An MRP matrix in \link{ReadMorphNexus} format.}
 }
 \value{
 An MRP matrix in \link{ReadMorphNexus} format where all characters are unique.
@@ -16,7 +16,7 @@ An MRP matrix in \link{ReadMorphNexus} format where all characters are unique.
 Collapses an MRP matrix to unique characters
 }
 \details{
-Collapses an MRP matrix to just unique characters followung the protocol aid out in Pisani et al. (2002).
+Collapses an MRP matrix to just unique characters following the protocol laid out in Pisani et al. (2002).
 }
 \examples{
 
