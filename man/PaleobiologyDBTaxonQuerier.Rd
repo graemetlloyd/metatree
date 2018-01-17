@@ -28,10 +28,9 @@ Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxo
 PaleobiologyDBTaxonQuerier("52962")
 
 }
-\author{
-Graeme T. Lloyd \email{graemetlloyd@gmail.com}
-}
 \references{
 Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
 }
-
+\author{
+Graeme T. Lloyd \email{graemetlloyd@gmail.com}
+}

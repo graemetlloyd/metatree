@@ -23,10 +23,9 @@ Collapses an MRP matrix to just unique characters following the protocol laid ou
 # Nothing yet.
 
 }
-\author{
-Graeme T. Lloyd \email{graemetlloyd@gmail.com}
-}
 \references{
 Pisani et al. (2002)
 }
-
+\author{
+Graeme T. Lloyd \email{graemetlloyd@gmail.com}
+}

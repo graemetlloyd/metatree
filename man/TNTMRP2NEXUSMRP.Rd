@@ -26,4 +26,3 @@ TNT (Goloboff et al. 2008) \\#NEXUS (Maddison ????)
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
-

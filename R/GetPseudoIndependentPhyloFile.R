@@ -55,7 +55,7 @@ GetPseudoIndependentPhyloFiles <- function(xmlwd, exclude.list) {
         Ntax[i] <- as.numeric(strsplit(x[grep("<Taxa", x)], "\"")[[1]][2])
         
         # Add number of characters to list:
-        Nchar[i] <- as.numeric(strsplit(x[grep("<Morphological |<Molecular ", x)], "\"")[[1]][2])
+        Nchar[i] <- as.numeric(strsplit(x[grep("<Morphological |<Molecular |<Other ", x)], "\"")[[1]][2])
         
         # Add names to lists:
         names(Ntax)[i] <- names(Nchar)[i] <- filenames[i]

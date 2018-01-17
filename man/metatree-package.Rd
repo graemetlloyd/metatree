@@ -2,8 +2,8 @@
 % Please edit documentation in R/metatree-package.R
 \docType{package}
 \name{metatree-package}
-\alias{metatree}
 \alias{metatree-package}
+\alias{metatree}
 \title{Generating Meta-Analytical Phylogenies}
 \description{
 Generates meta-analytical phylogenies.
@@ -13,11 +13,10 @@ Generates meta-analytical phylogenies.
 # Nothing yet
 
 }
-\author{
-Graeme T. Lloyd <graemetlloyd@gmail.com>
-}
 \references{
 Lloyd et al. (2008).
 }
+\author{
+Graeme T. Lloyd <graemetlloyd@gmail.com>
+}
 \keyword{phylogeny,supertree}
-

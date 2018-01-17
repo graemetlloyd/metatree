@@ -33,4 +33,3 @@ ChangesInBins(change.times, time.bins)
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
-

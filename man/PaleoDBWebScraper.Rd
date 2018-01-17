@@ -32,4 +32,3 @@ Deprecated as replaced by API functions.
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
-

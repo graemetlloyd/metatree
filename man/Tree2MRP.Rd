@@ -23,12 +23,11 @@ Matrix Representtaion with parsimony (Baum 1992; Ragan 1992).
 # Nothing yet
 
 }
-\author{
-Graeme T. Lloyd \email{graemetlloyd@gmail.com}
-}
 \references{
 Baum (1992)
 
 Ragan (1992)
 }
-
+\author{
+Graeme T. Lloyd \email{graemetlloyd@gmail.com}
+}
