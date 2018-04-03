@@ -132,7 +132,7 @@ PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original =
   outputmatrix <- outputmatrix[which(outputmatrix[, "TaxonRank"] == "3"), , drop = FALSE]
   
   # List of types of resolution that require deletion:
-  deletes <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of", "nomen dubium", "nomen vanum", "nomen nudum", "invalid subgroup of")
+  deletes <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of", "nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
   
   # If there are any issues with taxon validity:
   if(any(!is.na(outputmatrix[, "TaxonValidity"]))) {
