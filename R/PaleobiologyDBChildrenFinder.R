@@ -134,14 +134,25 @@ PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original =
   # List of types of resolution that require deletion:
   deletes <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of", "nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
   
-  # If there are any issues with taxon validity:
-  if(any(!is.na(outputmatrix[, "TaxonValidity"]))) {
+  # If all taxa are deletes:
+  if(length(setdiff(unique(outputmatrix[, "TaxonValidity"]), deletes)) == 0) {
     
-    # Find any rows to delete:
-    rowstodelete <- which(apply(apply(as.matrix(deletes), 1, '==', outputmatrix[, "TaxonValidity"]), 1, sum) == 1)
+    # Make empty outputmatrix:
+    outputmatrix <- outputmatrix[-(1:nrow(outputmatrix)), , drop = FALSE]
     
-    # If found, remove them:
-    if(length(rowstodelete) > 0) outputmatrix <- outputmatrix[-rowstodelete, , drop = FALSE]
+  # If at least some taxa are valid:
+  } else {
+    
+    # If there are any issues with taxon validity:
+    if(any(!is.na(outputmatrix[, "TaxonValidity"]))) {
+      
+      # Find any rows to delete:
+      rowstodelete <- which(apply(apply(as.matrix(deletes), 1, '==', outputmatrix[, "TaxonValidity"]), 1, sum) == 1)
+      
+      # If found, remove them:
+      if(length(rowstodelete) > 0) outputmatrix <- outputmatrix[-rowstodelete, , drop = FALSE]
+      
+    }
     
   }
   
