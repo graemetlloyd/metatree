@@ -4,7 +4,8 @@
 \alias{PaleobiologyDBTaxonQuerier}
 \title{Palaeobiology Database Taxon Querier}
 \usage{
-PaleobiologyDBTaxonQuerier(taxon_no, taxon_name = NULL, original = TRUE)
+PaleobiologyDBTaxonQuerier(taxon_no, taxon_name = NULL, original = TRUE,
+  stopfororphans = TRUE)
 }
 \arguments{
 \item{taxon_no}{The Paleobiology database taxon number.}
@@ -12,6 +13,8 @@ PaleobiologyDBTaxonQuerier(taxon_no, taxon_name = NULL, original = TRUE)
 \item{taxon_name}{A taxon name to search for in the database (default left to NULL).}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
+
+\item{stopfororphans}{Whether or not to stop with an Error message if taxon has no parent.}
 }
 \value{
 A eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).

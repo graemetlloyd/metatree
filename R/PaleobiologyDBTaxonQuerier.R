@@ -7,6 +7,7 @@
 #' @param taxon_no The Paleobiology database taxon number.
 #' @param taxon_name A taxon name to search for in the database (default left to NULL).
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
+#' @param stopfororphans Whether or not to stop with an Error message if taxon has no parent.
 #'
 #' @return A eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
 #'
@@ -20,7 +21,7 @@
 #' PaleobiologyDBTaxonQuerier("52962")
 #' 
 #' @export PaleobiologyDBTaxonQuerier
-PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = TRUE) {
+PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = TRUE, stopfororphans = TRUE) {
     
     # Shows resolved taxon name for a given id:
     resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/single.json?id=var:", taxon_no, "&show=parent", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/single.json?id=txn:", taxon_no, "&show=parent", sep = ""))
@@ -121,6 +122,9 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = T
     
     # Get output:
     output <- jsontotext(resolvedjson)
+    
+    # If stopping for orphans check for them (excluding life) and stop if found:
+    if(stopfororphans) if(is.na(output$ParentTaxonNo) && output$TaxonName != "Life") stop(paste(output$TaxonName, " (", gsub("txn:|var:", "", sort(c(output$OriginalTaxonNo, output$ResolvedTaxonNo), decreasing = TRUE)[1]), ") is an orphan. Enter a parent into the Paleobiology Database.", sep = ""))
     
     # Return output:
     return(output)
