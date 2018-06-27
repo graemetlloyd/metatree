@@ -32,10 +32,10 @@ PaleobioDBChildFinder <- function(taxon.name, taxon.number = NULL) {
     if(is.null(taxon.number)) {
         
         # First check database for all taxa matching that name:
-        taxa.found <- strsplit(readLines(paste("http://paleobiodb.org/data1.1/taxa/auto.tsv?name=", taxon.name, "&limit=10", sep=""), warn=T), "\t")
+        taxa.found <- strsplit(readLines(paste("http://paleobiodb.org/data1.1/taxa/auto.tsv?name=", taxon.name, "&limit=10", sep = ""), warn = TRUE), "\t")
         
         # Make output into a matrix:
-        taxa.found <- matrix(unlist(taxa.found), ncol=6, byrow=T)
+        taxa.found <- matrix(unlist(taxa.found), ncol = 6, byrow = TRUE)
         
         # Place column names row as column names:
         colnames(taxa.found) <- taxa.found[1, ]
@@ -44,7 +44,7 @@ PaleobioDBChildFinder <- function(taxon.name, taxon.number = NULL) {
         taxa.found <- taxa.found[taxa.found[, "taxon_name"] == taxon.name, ]
         
         # Ensure result is stll a matrix:
-        if(!is.matrix(taxa.found)) taxa.found <- matrix(taxa.found, nrow=1, dimnames=c("", list(names(taxa.found))))
+        if(!is.matrix(taxa.found)) taxa.found <- matrix(taxa.found, nrow=1, dimnames = c("", list(names(taxa.found))))
         
         # Stop and warn if multiple taxa have that name:
         if(nrow(taxa.found) > 1) stop("Multiple taxa have that name. Check the database manually to verify the one you want and try again using the taxon number.\n")
