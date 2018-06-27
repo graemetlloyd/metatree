@@ -22,11 +22,11 @@
 #' @export PaleobiologyDBChildrenFinder
 PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original = TRUE) {
   
-  # Shows resolved taxon name for a given id:
-  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children", sep = ""))
+  # Shows resolved taxon name for a given id (regular taxa only):
+  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children&pres=regular", sep = ""))
   
-  # Overwwrite taxon number query if using the taxon name instead:
-  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", trim(taxon_name)), "&rel=all_children", sep = "")
+  # Overwwrite taxon number query if using the taxon name instead (regular taxa only):
+  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", trim(taxon_name)), "&rel=all_children&pres=regular", sep = "")
   
   # Set resolved json to NA (used later to check results are coming back from server):
   resolvedjson <- NA
