@@ -44,19 +44,19 @@ PaleobioDBChildFinder <- function(taxon.name, taxon.number = NULL) {
         taxa.found <- taxa.found[taxa.found[, "taxon_name"] == taxon.name, ]
         
         # Ensure result is stll a matrix:
-        if(!is.matrix(taxa.found)) taxa.found <- matrix(taxa.found, nrow=1, dimnames = c("", list(names(taxa.found))))
+        if(!is.matrix(taxa.found)) taxa.found <- matrix(taxa.found, nrow = 1, dimnames = c("", list(names(taxa.found))))
         
         # Stop and warn if multiple taxa have that name:
         if(nrow(taxa.found) > 1) stop("Multiple taxa have that name. Check the database manually to verify the one you want and try again using the taxon number.\n")
         
         # Query database using taxon name:
-        while(is.na(X[1])) X <- trim(strsplit(gsub("\t", "\t ", readLines(paste("http://paleobiodb.org/data1.1/taxa/list.tsv?name=", gsub(" ", "%20", taxon.name), "&rel=all_children&status=valid&show=attr,app,size,phylo,nav,img,ent,entname,crmod", sep=""), warn=T)), "\t"))
+        while(is.na(X[1])) X <- trim(strsplit(gsub("\t", "\t ", readLines(paste("http://paleobiodb.org/data1.1/taxa/list.tsv?name=", gsub(" ", "%20", taxon.name), "&rel=all_children&status=valid&show=attr,app,size,phylo,nav,img,ent,entname,crmod", sep = ""), warn = TRUE)), "\t"))
         
-        # If taxon number is given:
+    # If taxon number is given:
     } else {
         
         # Query database using taxon number:
-        while(is.na(X[1])) X <- trim(strsplit(gsub("\t", "\t ", readLines(paste("http://paleobiodb.org/data1.1/taxa/list.tsv?id=", taxon.number, "&rel=all_children&status=valid&show=attr,app,size,phylo,nav,img,ent,entname,crmod", sep=""), warn=T)), "\t"))
+        while(is.na(X[1])) X <- trim(strsplit(gsub("\t", "\t ", readLines(paste("http://paleobiodb.org/data1.1/taxa/list.tsv?id=", taxon.number, "&rel=all_children&status=valid&show=attr,app,size,phylo,nav,img,ent,entname,crmod", sep = ""), warn = TRUE)), "\t"))
         
     }
     
@@ -64,7 +64,7 @@ PaleobioDBChildFinder <- function(taxon.name, taxon.number = NULL) {
     if(unlist(X)[1] != "THIS REQUEST DID NOT GENERATE ANY OUTPUT RECORDS") {
         
         # Make output into matrix:
-        X <- matrix(unlist(X), nrow=length(X), byrow=T)
+        X <- matrix(unlist(X), nrow = length(X), byrow = TRUE)
         
         # Add first row as headers:
         colnames(X) <- X[1, ]
@@ -72,7 +72,7 @@ PaleobioDBChildFinder <- function(taxon.name, taxon.number = NULL) {
         # Remove first row:
         X <- X[-1, ]
         
-        # If taxon was not found:
+    # If taxon was not found:
     } else {
         
         # Return warning for X
