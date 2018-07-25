@@ -23,10 +23,10 @@
 PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original = TRUE) {
   
   # Shows resolved taxon name for a given id (regular taxa only):
-  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children&pres=regular", sep = ""))
+  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children&pres=regular&show=attr", sep = ""))
   
   # Overwwrite taxon number query if using the taxon name instead (regular taxa only):
-  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", trim(taxon_name)), "&rel=all_children&pres=regular", sep = "")
+  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", gdata::trim(taxon_name)), "&rel=all_children&pres=regular&show=attr", sep = "")
   
   # Set resolved json to NA (used later to check results are coming back from server):
   resolvedjson <- NA
@@ -102,20 +102,23 @@ PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original =
     # Retrieve parent taxon number, if found:
     ParentTaxonNo <- ParameterExtraction(jsonstring, parameterstring = "\"par\":")
     
-    # retrieve taxon validity, if known:
+    # Retrieve taxon validity, if known:
     TaxonValidity <- ParameterExtraction(jsonstring, parameterstring = "\"tdf\":")
     
-    # retrieve taxon validity, if known:
+    # Retrieve taxon validity, if known:
     AcceptedNumber <- ParameterExtraction(jsonstring, parameterstring = "\"acc\":")
     
-    # retrieve taxon validity, if known:
+    # Retrieve taxon validity, if known:
     AcceptedName <- ParameterExtraction(jsonstring, parameterstring = "\"acn\":")
     
+    # Retrieve taxon validity, if known:
+    Attribution <- ParameterExtraction(jsonstring, parameterstring = "\"att\":")
+
     # Compile output:
-    output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName)
+    output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName, Attribution)
     
     # Add names:
-    names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")
+    names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName", "Attribution")
     
     # Return output:
     return(output)
