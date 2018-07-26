@@ -2,6 +2,7 @@
 
 export(GetPseudoIndependentPhyloFiles)
 export(MRPCollapse)
+export(MultiTreeContradiction)
 export(PaleobioDBChildFinder)
 export(PaleobioDBCollectionScraper)
 export(PaleobioDBTaxonScraper)
