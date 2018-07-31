@@ -1,22 +1,37 @@
 #' Pairwise distance matrix for a set of trees
 #'
-#' Given a set of input trees calculates all pariwise tree distances.
+#' Given a set of input trees, calculates all pair-wise tree distances.
 #'
-#' This is effectively an attempt to both do a multi-tree version of the paleotree function "treeContradiction" and a faster version of phytools' "multiRF" function when dealing with very large number of trees or tips (hundreds of trees or tips).
+#' This is effectively an attempt to both do a multi-tree version of the paleotree function
+#' \code{\link[paleotree]{treeContradiction}} and a faster version of phytools' \code{\link{[phytools]{multiRF}} function when
+#' dealing with very large number of trees or tips (hundreds of trees or tips).
 #' The function works by converting the partitions into matrices and operating on those rather than the tree objects.
-#' This can substantially reduce the memory required and hence sped up the calulcations, but only when data sets are large.
-#'
+#' This can substantially reduce the memory required and hence sped up the calculations, but only when data sets are large.
+#' 
+
 #' @param trees An object of class 'multi.phylo'.
 #' @param distance The type of disatnce to use, must be one of "RF" (RObinson-Foulds) or "contradiction" (tree contradiction).
 #' @param scale Whether or not to scale the distance (zero to one).
 #'
+
 #' @return A pairwise tree distance matrix.
 #'
+
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
+
 #' @references
+#' This contradiction difference measure was introduced in:
 #'
-#' Bapst paper (see paleotree package and treeContradiction function)
+#' Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida
+#' (Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology} 67(1):32-48. doi: 10.1093/sysbio/syx049
+
+# Bapst paper (see paleotree package and treeContradiction function)
+
+#' @seealso
+#' A less-optimized function for obtaining the contradiction difference measure
+#' is \code{\link[paleotree]{treeContradiction}}, found in package \code{paleotree}.
+
 #'
 #' @examples
 #'
