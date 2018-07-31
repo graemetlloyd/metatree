@@ -26,7 +26,14 @@ This is effectively an attempt to do for the paleotree function "treeContradicti
 
 }
 \references{
-Bapst paper (see paleotree packahe and treeContradiction function)
+This contradiction difference measure was introduced in:
+
+Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida
+(Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology} 67(1):32-48. doi: 10.1093/sysbio/syx049
+}
+\seealso{
+A less-optimized function for obtaining the contradiction difference measure
+is \code{\link[paleotree]{treeContradiction}}, found in package \code{paleotree}.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}

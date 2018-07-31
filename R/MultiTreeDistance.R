@@ -3,7 +3,7 @@
 #' Given a set of input trees, calculates all pair-wise tree distances.
 #'
 #' This is effectively an attempt to both do a multi-tree version of the paleotree function
-#' \code{\link[paleotree]{treeContradiction}} and a faster version of phytools' \code{\link{[phytools]{multiRF}} function when
+#' \code{\link[paleotree]{treeContradiction}} and a faster version of phytools' \code{\link[phytools]{multiRF}} function when
 #' dealing with very large number of trees or tips (hundreds of trees or tips).
 #' The function works by converting the partitions into matrices and operating on those rather than the tree objects.
 #' This can substantially reduce the memory required and hence sped up the calculations, but only when data sets are large.
