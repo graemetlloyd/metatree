@@ -9,12 +9,12 @@ PaleobiologyDBChildrenFinder(taxon_no, taxon_name = NULL, original = TRUE)
 \arguments{
 \item{taxon_no}{The Paleobiology database taxon number.}
 
-\item{taxon_name}{A taxon name to search for in the database (default left to NULL).}
+\item{taxon_name}{A taxon name to search for in the database (default left to NULL); overrides taxon_no if used.}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 }
 \value{
-An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant) of all species-level children found.
+A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
 }
 \description{
 Given a Paleobiology Database taxon number returns basic information on all species-level children.

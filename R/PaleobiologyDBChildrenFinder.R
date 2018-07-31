@@ -5,10 +5,10 @@
 #' Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
 #'
 #' @param taxon_no The Paleobiology database taxon number.
-#' @param taxon_name A taxon name to search for in the database (default left to NULL).
+#' @param taxon_name A taxon name to search for in the database (default left to NULL); overrides taxon_no if used.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #'
-#' @return An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant) of all species-level children found.
+#' @return A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
@@ -23,10 +23,10 @@
 PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original = TRUE) {
   
   # Shows resolved taxon name for a given id (regular taxa only):
-  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children&pres=regular&show=attr", sep = ""))
+  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_no, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_no, "&rel=all_children&pres=regular&show=attr,is_extant", sep = ""))
   
   # Overwwrite taxon number query if using the taxon name instead (regular taxa only):
-  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", gdata::trim(taxon_name)), "&rel=all_children&pres=regular&show=attr", sep = "")
+  if(!is.null(taxon_name)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", gdata::trim(taxon_name)), "&rel=all_children&pres=regular&show=attr,is_extant", sep = "")
   
   # Set resolved json to NA (used later to check results are coming back from server):
   resolvedjson <- NA
@@ -113,12 +113,15 @@ PaleobiologyDBChildrenFinder <- function(taxon_no, taxon_name = NULL, original =
     
     # Retrieve taxon validity, if known:
     Attribution <- ParameterExtraction(jsonstring, parameterstring = "\"att\":")
+    
+    # Retrieve taxon validity, if known:
+    Extant <- ParameterExtraction(jsonstring, parameterstring = "\"ext\":")
 
     # Compile output:
-    output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName, Attribution)
+    output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName, Attribution, Extant)
     
     # Add names:
-    names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName", "Attribution")
+    names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName", "Attribution", "Extant")
     
     # Return output:
     return(output)
