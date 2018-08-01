@@ -162,7 +162,7 @@ MultiTreeDistance <- function(trees, distance = "contradiction", scale = TRUE) {
     if(distance == "contradiction") {
       
       # Get contradictions sub matrix:
-      ContradictionSubmatrix <- lapply(lapply(lapply(BoundRows, function(x) x[apply(x == 1, 1, sum) == 1, ]), function(x) list(rownames(x)[x[, 1] == 1], rownames(x)[x[, 2] == 1])), function(x) ContradictionMatrix[x[[1]], x[[2]]])
+      ContradictionSubmatrix <- lapply(lapply(lapply(BoundRows, function(x) x[apply(x == 1, 1, sum) == 1, , drop = FALSE]), function(x) list(rownames(x)[x[, 1] == 1], rownames(x)[x[, 2] == 1])), function(x) ContradictionMatrix[x[[1]], x[[2]], drop = FALSE])
       
       # Sum rows and columns that contradict to get score for pair of trees and store:
       OutputMatrix[i, (i + 1):NTrees] <- OutputMatrix[(i + 1):NTrees, i] <- unlist(lapply(lapply(ContradictionSubmatrix, apply, 1, max), sum)) + unlist(lapply(lapply(ContradictionSubmatrix, apply, 2, max), sum))
