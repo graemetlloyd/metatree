@@ -5,19 +5,21 @@
 \title{Palaeobiology Database Taxon Querier}
 \usage{
 PaleobiologyDBTaxonQuerier(taxon_no, taxon_name = NULL, original = TRUE,
-  stopfororphans = TRUE)
+  stopfororphans = TRUE, breaker = 100)
 }
 \arguments{
-\item{taxon_no}{The Paleobiology database taxon number.}
+\item{taxon_no}{A vector of Paleobiology database taxon numbers to retrieve from the database.}
 
-\item{taxon_name}{A taxon name to search for in the database (default left to NULL).}
+\item{taxon_name}{A vector of taxon names to search for in the database (default left to NULL).}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 
 \item{stopfororphans}{Whether or not to stop with an Error message if taxon has no parent.}
+
+\item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).}
 }
 \value{
-A eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
+An eight-item list detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
 }
 \description{
 Given a Paleobiology Database taxon number returns basic information on that taxon.
