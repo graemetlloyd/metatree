@@ -19,7 +19,7 @@
 #' @examples
 #'
 #' # Taxon query for Allosaurus fragilis:
-#' PaleobiologyDBTaxonQuerier("52962")
+#' PaleobiologyDBTaxonQuerier(taxon_no = "52962")
 #'
 #' @export PaleobiologyDBTaxonQuerier
 PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = TRUE, stopfororphans = TRUE, breaker = 100) {
@@ -182,7 +182,7 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = T
     TaxonNumbers <- unlist(lapply(lapply(lapply(apply(cbind(gsub("var:", "", Output[, "OriginalTaxonNo"]), gsub("txn:", "", Output[, "ResolvedTaxonNo"])), 1, as.list), unlist), function(x) x[!is.na(x)]), '[', 1))
     
     # Sort output by taxon numbers in the order they were supplied:
-    Output <- Output[match(taxon_no, TaxonNumbers), ]
+    Output <- Output[match(taxon_no, TaxonNumbers), , drop = FALSE]
 
   }
   
@@ -190,7 +190,7 @@ PaleobiologyDBTaxonQuerier <- function(taxon_no, taxon_name = NULL, original = T
   if(!is.null(taxon_name)) {
     
     # Sort output by taxon names in order they were supplied:
-    Output <- Output[match(gsub("_", " ", taxon_name), Output[, "TaxonName" ]), ]
+    Output <- Output[match(gsub("_", " ", taxon_name), Output[, "TaxonName" ]), , drop = FALSE]
     
   }
   
