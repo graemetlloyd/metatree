@@ -19,7 +19,7 @@
 #' @examples
 #'
 #' # Taxon query for Allosaurus fragilis:
-#' PaleobiologyDBTaxonQuerier(taxon_nos = "52962")
+#' PaleobiologyDBTaxaQuerier(taxon_nos = "52962")
 #'
 #' @export PaleobiologyDBTaxaQuerier
 PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, stopfororphans = TRUE, breaker = 100) {

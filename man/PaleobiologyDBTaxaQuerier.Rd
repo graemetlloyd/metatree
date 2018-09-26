@@ -30,7 +30,7 @@ Uses the Paleobiology Database (\code{paleobiodb.org}) API to query known taxon 
 \examples{
 
 # Taxon query for Allosaurus fragilis:
-PaleobiologyDBTaxonQuerier(taxon_nos = "52962")
+PaleobiologyDBTaxaQuerier(taxon_nos = "52962")
 
 }
 \references{
