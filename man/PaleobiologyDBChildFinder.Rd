@@ -4,7 +4,8 @@
 \alias{PaleobiologyDBChildFinder}
 \title{Palaeobiology Database Child Finder}
 \usage{
-PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE)
+PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE,
+  validonly = TRUE, returnrank = NULL, breaker = 100)
 }
 \arguments{
 \item{taxon_nos}{The Paleobiology database taxon number.}
@@ -12,6 +13,12 @@ PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE)
 \item{taxon_names}{A taxon name to search for in the database (default left to NULL); overrides taxon_nos if used.}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
+
+\item{validonly}{Whether or not to only retunr valid taxa (TRUE) or all taxa (FALSE).}
+
+\item{returnrank}{Whether or not to only return taxa of a specific rank (e.g., "3" for species, "5" for genera). See Paleobiology Database API for more infomation.}
+
+\item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).}
 }
 \value{
 A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
@@ -25,7 +32,7 @@ Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxo
 \examples{
 
 # Taxon query for Loxommatinae:
-PaleobiologyDBChildrenFinder("339413")
+PaleobiologyDBChildFinder("339413", returnrank = "3")
 
 }
 \references{

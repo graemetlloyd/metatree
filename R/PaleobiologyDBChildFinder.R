@@ -7,6 +7,9 @@
 #' @param taxon_nos The Paleobiology database taxon number.
 #' @param taxon_names A taxon name to search for in the database (default left to NULL); overrides taxon_nos if used.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
+#' @param validonly Whether or not to only retunr valid taxa (TRUE) or all taxa (FALSE).
+#' @param returnrank Whether or not to only return taxa of a specific rank (e.g., "3" for species, "5" for genera). See Paleobiology Database API for more infomation.
+#' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).
 #'
 #' @return A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
 #'
@@ -17,75 +20,126 @@
 #' @examples
 #'
 #' # Taxon query for Loxommatinae:
-#' PaleobiologyDBChildrenFinder("339413")
+#' PaleobiologyDBChildFinder("339413", returnrank = "3")
 #'
 #' @export PaleobiologyDBChildFinder
-PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE) {
+PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, validonly = TRUE, returnrank = NULL, breaker = 100) {
   
-  # Shows resolved taxon name for a given id (regular taxa only):
-  resolvedhttpstring <- ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=var:", taxon_nos, "&rel=all_children", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=txn:", taxon_nos, "&rel=all_children&pres=regular&show=attr,is_extant", sep = ""))
-  
-  # Overwwrite taxon number query if using the taxon name instead (regular taxa only):
-  if(!is.null(taxon_names)) resolvedhttpstring <- paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", gsub(" ", "%20", gdata::trim(taxon_names)), "&rel=all_children&pres=regular&show=attr,is_extant", sep = "")
-  
-  # Set resolved json to NA (used later to check results are coming back from server):
-  resolvedjson <- NA
-  
-  # Set start value for counter (used later to avoid infinite loop):
-  counter <- 0
-  
-  # While server has not been reached (and querying a taxon number):
-  while(is.na(resolvedjson[[1]][1]) && is.null(taxon_names)) {
+  # Subfunction to break N numbers into breaker-sized blocks:
+  NumberChunker <- function(N, breaker) {
     
-    # Attempt to acquire resolved taxon string:
-    try(resolvedjson <- readLines(resolvedhttpstring), silent = TRUE)
+    # Get total numebr of chunks:
+    NChunks <- ceiling(N / breaker)
     
-    # If server was not reached:
-    if(is.na(resolvedjson[[1]][1])) {
-      
-      # Update counter to record how many attempts to reach server have been made:
-      counter <- counter + 1
-      
-      # If repeatedly failing to get results stop trying:
-      if(counter == 100) stop("Server not responding after 100 straight attempts")
-      
-      # Wait two seconds before next attempt (also avoids overloading server):
-      Sys.sleep(2)
-      
-    }
+    # Make initial list of numbers:
+    ListOfNumbers <- rep(list(1:breaker), NChunks)
+    
+    # Update last element of list (which can be less than breaker) into the correct size (if required):
+    if((N %% breaker) > 0) ListOfNumbers[[length(ListOfNumbers)]] <- 1:(N %% breaker)
+    
+    # Add cumulative breaker value to all numbers (if required):
+    if(N > breaker) ListOfNumbers <- mapply('+', ListOfNumbers, c(0, cumsum(rep(breaker, NChunks - 1))), SIMPLIFY = FALSE)
+    
+    # Return list of numbers:
+    return(ListOfNumbers)
     
   }
   
-  # If using a taxon name to query:
+  # If querying taxon numbers:
+  if(is.null(taxon_names)) {
+    
+    # Build list of numbers to query:
+    NumbersToQuery <- lapply(NumberChunker(N = length(taxon_nos), breaker = breaker), function(x) taxon_nos[x])
+    
+    # Build HTTP string(s):
+    ResolvedHTTPStrings <- lapply(NumbersToQuery, function(x) ifelse(original, paste("https://paleobiodb.org/data1.2/taxa/list.json?id=", paste(paste("var:", x, sep = ""), collapse = ","), "&rel=all_children&pres=regular&show=attr", sep = ""), paste("https://paleobiodb.org/data1.2/taxa/list.json?id=", paste(paste("txn:", x, sep = ""), collapse = ","), "&rel=all_children&pres=regular&show=attr", sep = "")))
+    
+  }
+  
+  # If querying taxon names:
   if(!is.null(taxon_names)) {
     
-    # Ask server for data:
-    try(resolvedjson <- readLines(resolvedhttpstring), silent = TRUE)
+    # Build list of names to query:
+    NamesToQuery <- lapply(NumberChunker(N = length(taxon_names), breaker = breaker), function(x) taxon_names[x])
     
-    # If no data returned tell user:
-    if(length(resolvedjson) == 1) stop(paste("Could not find record for ", taxon_names, " in database.", sep = ""))
+    # Build HTTP string(s):
+    ResolvedHTTPStrings <- lapply(NamesToQuery, function(x) paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", paste(gsub(" ", "%20", gsub("_", " ", gdata::trim(x))), collapse = ","), "&rel=all_children&pres=regular&show=attr", sep = ""))
     
   }
   
-  # Trim to just taxon rows:
-  resolvedjson <- resolvedjson[which(lapply(strsplit(resolvedjson, ""), '[', 1) == "{")][-1]
+  # Get resolved json strings for each chunk:
+  ResolvedJSON <- lapply(ResolvedHTTPStrings, function(x) {
+    
+    # Set resolved json to NA (used later to check results are coming back from server):
+    resolvedjson <- NA
+    
+    # Set start value for counter (used later to avoid infinite loop):
+    counter <- 0
+    
+    # While server has not been reached (and querying a taxon number):
+    while(is.na(resolvedjson[[1]][1])) {
+      
+      # Attempt to acquire resolved taxon string:
+      try(resolvedjson <- readLines(x), silent = TRUE)
+      
+      # If server was not reached:
+      if(is.na(resolvedjson[[1]][1])) {
+        
+        # Update counter to record how many attempts to reach server have been made:
+        counter <- counter + 1
+        
+        # If repeatedly failing to get results stop trying:
+        if(counter == 100) stop("Server not responding after 100 straight attempts")
+        
+        # Wait two seconds before next attempt (also avoids overloading server):
+        Sys.sleep(2)
+        
+      }
+      
+    }
+    # Return resolvedjson string:
+    return(resolvedjson)
+    
+  })
   
-  # Subfunction to return specific information from json data:
-  jsontotext <- function(jsonstring) {
+  # Extract data from json data:
+  Output <- do.call(rbind, lapply(ResolvedJSON, function(x) {
     
     # Subfunction to extract specific parameter from json string:
     ParameterExtraction <- function(jsonstring, parameterstring) {
       
-      # Extract specific paramter:
-      output <- ifelse(length(grep(parameterstring, jsonstring)) > 0, gsub("\"", "", strsplit(strsplit(jsonstring, parameterstring)[[1]][2], ",")[[1]][1]), NA)
+      # Extract specific parameter:
+      output <- unlist(lapply(as.list(jsonstring), function(x) ifelse(length(grep(parameterstring, x)) > 0, gsub("\"", "", strsplit(strsplit(x, parameterstring)[[1]][2], ",")[[1]][1]), NA)))
       
       # Return output:
       return(output)
       
     }
     
+    # If querying taxon numbers:
+    if(is.null(taxon_names)) {
+      
+      # Find any taxon numbers not in database:
+      UnknownTaxonHits <- grep("Unknown taxon", x)
+      
+      # If found stop and warn user:
+      if(length(UnknownTaxonHits) > 0) stop(paste("The following taxon numbers were not found in the database: ", paste(unlist(lapply(strsplit(x[UnknownTaxonHits], split = "Unknown taxon '|'\""), '[', 2)), collapse = ", "), sep = ""))
+      
+    }
+    
+    # If querying taxon names:
+    if(!is.null(taxon_names)) {
+      
+      # Find any taxon names not in database:
+      UnknownTaxonHits <- grep("The name '", x)
+      
+      # If found stop and warn user:
+      if(length(UnknownTaxonHits) > 0) stop(paste("The following taxon names were not found in the database: ", paste(unlist(lapply(strsplit(x[UnknownTaxonHits], split = "The name '|' did not match"), '[', 2)), collapse = ", "), sep = ""))
+      
+    }
+    
     # Isolate record line:
-    #jsonstring <- jsonstring[(grep("\\[", jsonstring) + 1):(grep("\\]", jsonstring) - 1)]
+    jsonstring <- x[(grep("\\[", x) + 1):(grep("\\]", x) - 1)]
     
     # Retrieve original taxon number (should be same as input!), if found:
     OriginalTaxonNo <- ParameterExtraction(jsonstring, parameterstring = "\"vid\":")
@@ -116,53 +170,25 @@ PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = 
     
     # Retrieve taxon validity, if known:
     Extant <- ParameterExtraction(jsonstring, parameterstring = "\"ext\":")
-
+    
     # Compile output:
-    output <- list(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName, Attribution, Extant)
+    output <- cbind(OriginalTaxonNo, ResolvedTaxonNo, TaxonName, TaxonRank, ParentTaxonNo, TaxonValidity, AcceptedNumber, AcceptedName, Attribution, Extant)
     
     # Add names:
-    names(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName", "Attribution", "Extant")
+    colnames(output) <- c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName", "Attribution", "Extant")
     
     # Return output:
     return(output)
     
-  }
+  }))
   
-  # Format output as list:
-  outputlist <- lapply(as.list(resolvedjson), jsontotext)
+  # If only requesting valid taxa remove all invalids from output:
+  if(validonly) Output <- Output[is.na(Output[, "TaxonValidity"]), , drop = FALSE]
   
-  # Reformat list as matrix:
-  outputmatrix <- matrix(unlist(outputlist), nrow = length(resolvedjson), byrow = TRUE, dimnames = list(c(), names(outputlist[[1]])))
-  
-  # Collapse to just species:
-  outputmatrix <- outputmatrix[which(outputmatrix[, "TaxonRank"] == "3"), , drop = FALSE]
-  
-  # List of types of resolution that require deletion:
-  deletes <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of", "nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
-  
-  # If all taxa are deletes:
-  if(length(setdiff(unique(outputmatrix[, "TaxonValidity"]), deletes)) == 0) {
-    
-    # Make empty outputmatrix:
-    outputmatrix <- outputmatrix[-(1:nrow(outputmatrix)), , drop = FALSE]
-    
-  # If at least some taxa are valid:
-  } else {
-    
-    # If there are any issues with taxon validity:
-    if(any(!is.na(outputmatrix[, "TaxonValidity"]))) {
-      
-      # Find any rows to delete:
-      rowstodelete <- which(apply(apply(as.matrix(deletes), 1, '==', outputmatrix[, "TaxonValidity"]), 1, sum) == 1)
-      
-      # If found, remove them:
-      if(length(rowstodelete) > 0) outputmatrix <- outputmatrix[-rowstodelete, , drop = FALSE]
-      
-    }
-    
-  }
+  # If requesting a specific rank of the output then filter by that rank:
+  if(!is.null(returnrank)) Output <- Output[Output[, "TaxonRank"] == returnrank, , drop = FALSE]
   
   # Return output:
-  return(outputmatrix)
+  return(Output)
   
 }
