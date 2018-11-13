@@ -24,7 +24,7 @@
 #' PaleobiologyDBChildFinder("339413", returnrank = "3")
 #'
 #' @export PaleobiologyDBChildFinder
-PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, validonly = TRUE, returnrank = NULL, breaker = 100) {
+PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, validonly = TRUE, returnrank = NULL, breaker = 100) {
   
   # TO DO: ALLOW EXTANT FILTERING AS WELL AS TIME
   
