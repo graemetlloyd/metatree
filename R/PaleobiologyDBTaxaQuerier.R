@@ -7,6 +7,7 @@
 #' @param taxon_nos A vector of Paleobiology database taxon numbers to retrieve from the database.
 #' @param taxon_names A vector of taxon names to search for in the database (default left to NULL).
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
+#' @param interval The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).
 #' @param stopfororphans Whether or not to stop with an Error message for taxa with no parent.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).
 #'
@@ -22,7 +23,12 @@
 #' PaleobiologyDBTaxaQuerier(taxon_nos = "52962")
 #'
 #' @export PaleobiologyDBTaxaQuerier
-PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, stopfororphans = TRUE, breaker = 100) {
+PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, stopfororphans = TRUE, breaker = 100) {
+  
+  # TO DO: ALLOW EXTANT FILTERING AS WELL AS TIME
+  
+  # List of geologic periods (no stage sor other intervals for now) in geolgic order:
+  GeologicPeriodsInOrder <- c("Cambrian", "Ordovician", "Silurian", "Devonian", "Carboniferous", "Permian", "Triassic", "Jurassic", "Cretaceous", "Paleogene", "Neogene")
   
   # Subfunction to break N numbers into breaker-sized blocks:
   NumberChunker <- function(N, breaker) {
@@ -63,6 +69,29 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
     
     # Build HTTP string(s):
     ResolvedHTTPStrings <- lapply(NamesToQuery, function(x) paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", paste(gsub(" ", "%20", gsub("_", " ", gdata::trim(x))), collapse = ","), "&show=parent", sep = ""))
+    
+  }
+  
+  # If there are intervals supplied:
+  if(!is.null(interval)) {
+    
+    # Check interval inputs are valid:
+    if(length(setdiff(interval, GeologicPeriodsInOrder)) > 0) stop(paste("The following are not geologic periods (or are missspelled:", paste(setdiff(interval, GeologicPeriodsInOrder), collapse = ", ")))
+    
+    # If only one interval duplicate it so the next bit works:
+    if(length(interval) == 1) interval <- c(interval, interval)
+    
+    # Check there aren't more than two periods being specified and stop and warn if found:
+    if(length(interval) > 2) stop("Only supply beginning and end periods (i.e., two values) for interval.")
+    
+    # Get beginning adn ending matches from geologic periods:
+    IntervalMatchesInOrder <- sort(match(interval, GeologicPeriodsInOrder))
+    
+    # Vuild interval string:
+    IntervalStringToAdd <- paste("&interval=", paste(unique(GeologicPeriodsInOrder[IntervalMatchesInOrder[1]:IntervalMatchesInOrder[2]]), collapse =","), sep = "")
+    
+    # Add interval to resolved HTTP strings:
+    ResolvedHTTPStrings <- lapply(ResolvedHTTPStrings, function(x) paste(x, IntervalStringToAdd, sep = ""))
     
   }
   

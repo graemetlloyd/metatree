@@ -5,7 +5,7 @@
 \title{Palaeobiology Database Taxa Querier}
 \usage{
 PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL, original = TRUE,
-  stopfororphans = TRUE, breaker = 100)
+  interval = NULL, stopfororphans = TRUE, breaker = 100)
 }
 \arguments{
 \item{taxon_nos}{A vector of Paleobiology database taxon numbers to retrieve from the database.}
@@ -13,6 +13,8 @@ PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL, original = TRUE,
 \item{taxon_names}{A vector of taxon names to search for in the database (default left to NULL).}
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
+
+\item{interval}{The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).}
 
 \item{stopfororphans}{Whether or not to stop with an Error message for taxa with no parent.}
 
