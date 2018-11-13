@@ -224,13 +224,13 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
   }
   
   # If stopping for orphans check for them (excluding life) and stop if found:
-  if(stopfororphans) if(any(as.numeric(is.na(Output[, "ParentTaxonNo"])) - as.numeric(Output[, "TaxonName"] == "Life") == 1)) {
+  if(stopfororphans) if(any(sort(as.numeric(is.na(Output[, "ParentTaxonNo"])) - as.numeric(Output[, "TaxonName"] == "Life") == 1))) {
     
     # Make vector of orphan tax(a) names:
     OrphanTaxa <- which(as.numeric(is.na(Output[, "ParentTaxonNo"])) - as.numeric(Output[, "TaxonName"] == "Life") == 1)
     
     # Stop and warn user of orphans:
-    stop(paste("The following taxa are orphans: ", paste(Output[OrphanTaxa, "TaxonName"], collapse = ", "), sep = ""))
+    if(length(OrphanTaxa) > 0) stop(paste("The following taxa are orphans: ", paste(Output[OrphanTaxa, "TaxonName"], collapse = ", "), sep = ""))
     
   }
   
