@@ -31,7 +31,7 @@ MRPCollapse <- function(clad.matrix) {
   if(length(constantcharacters) > 0 && length(constantcharacters) < NChars) clad.matrix <- MatrixPruner(clad.matrix, characters2prune = constantcharacters)
   
   # If all characters are constant prune without replacing matrices with NULL:
-  if(length(constantcharacters) == NChars) clad.matrix[2:length(clad.matrix)] <- lapply(clad.matrix[2:length(clad.matrix)], function(x) {x$Matrix <- x$Matrix[, -(1:ncol(x)), drop = FALSE]; return(x)})
+  if(length(constantcharacters) == NChars) clad.matrix[2:length(clad.matrix)] <- lapply(clad.matrix[2:length(clad.matrix)], function(x) {x$Matrix <- x$Matrix[, -(1:ncol(x$Matrix)), drop = FALSE]; x$Ordering <- vector(mode = "character"); x$Weights <- x$MinVals <- x$MinVals <- vector(mode = "numeric"); return(x)})
   
   # Only continue if matrix still has at least one column:
   if(ncol(clad.matrix$Matrix_1$Matrix) > 0) {
