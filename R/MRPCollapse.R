@@ -21,11 +21,17 @@
 #' @export MRPCollapse
 MRPCollapse <- function(clad.matrix) {
   
+  # Get number of characters:
+  NChars <- sum(unlist(lapply(lapply(clad.matrix[2:length(clad.matrix)], '[[', "Matrix"), ncol)))
+  
   # Find any constant characters:
   constantcharacters <- which(unlist(lapply(lapply(split(clad.matrix$Matrix_1$Matrix, rep(1:ncol(clad.matrix$Matrix_1$Matrix), each = nrow(clad.matrix$Matrix_1$Matrix))), unique), length)) < 2)
   
-  # Prune these if found:
-  if(length(constantcharacters) > 0) clad.matrix <- MatrixPruner(clad.matrix, characters2prune = constantcharacters)
+  # Prune these if found (unless all characters are constant):
+  if(length(constantcharacters) > 0 && length(constantcharacters) < NChars) clad.matrix <- MatrixPruner(clad.matrix, characters2prune = constantcharacters)
+  
+  # If all characters are constant prune without replacing matrices with NULL:
+  if(length(constantcharacters) == NChars) clad.matrix[2:length(clad.matrix)] <- lapply(clad.matrix[2:length(clad.matrix)], function(x) {x$Matrix <- x$Matrix[, -(1:ncol(x)), drop = FALSE]; return(x)})
   
   # Only continue if matrix still has at least one column:
   if(ncol(clad.matrix$Matrix_1$Matrix) > 0) {
