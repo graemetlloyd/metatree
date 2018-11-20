@@ -8,6 +8,7 @@
 #' @param taxon_names A vector of taxon names to search for in the database (default left to NULL).
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #' @param interval The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).
+#' @param extant What to do with extant taxa, one of: "only" (only return extant taxa), "exclude" (exclude extant taxa), or "include" (make no distinction, the default).
 #' @param stopfororphans Whether or not to stop with an Error message for taxa with no parent.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
 #'
@@ -23,12 +24,24 @@
 #' PaleobiologyDBTaxaQuerier(taxon_nos = "52962")
 #'
 #' @export PaleobiologyDBTaxaQuerier
-PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, stopfororphans = TRUE, breaker = 100) {
+PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, breaker = 100) {
   
   # TO DO: ALLOW EXTANT FILTERING AS WELL AS TIME
   
   # List of geologic periods (no stage sor other intervals for now) in geolgic order:
   GeologicPeriodsInOrder <- c("Cambrian", "Ordovician", "Silurian", "Devonian", "Carboniferous", "Permian", "Triassic", "Jurassic", "Cretaceous", "Paleogene", "Neogene")
+  
+  # Check extant option is a valid chocie and stop and warn user f not
+  if(length(setdiff(extant, c("exclude", "include", "only"))) > 0) stop("extant must be one of \"exclude\", \"include\", or \"only\".")
+  
+  # If extant option is include set text to empty string (will be default in API):
+  if(extant == "include") extantoption <- ""
+  
+  # If extant option is only set text to extant=yes:
+  if(extant == "only") extantoption <- "&extant=yes"
+  
+  # If extant option is exclude set text to extant=no:
+  if(extant == "exclude") extantoption <- "&extant=no"
   
   # Subfunction to break N numbers into breaker-sized blocks:
   NumberChunker <- function(N, breaker) {
@@ -71,6 +84,9 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
     ResolvedHTTPStrings <- lapply(NamesToQuery, function(x) paste("https://paleobiodb.org/data1.2/taxa/list.json?name=", paste(gsub(" ", "%20", gsub("_", " ", gdata::trim(x))), collapse = ","), "&show=parent", sep = ""))
     
   }
+  
+  # Add extant option to query:
+  ResolvedHTTPStrings <- paste(ResolvedHTTPStrings, extantoption, sep = "")
   
   # If there are intervals supplied:
   if(!is.null(interval)) {

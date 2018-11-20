@@ -8,6 +8,7 @@
 #' @param taxon_names A taxon name to search for in the database (default left to NULL); overrides taxon_nos if used.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #' @param interval The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).
+#' @param extant What to do with extant taxa, one of: "only" (only return extant taxa), "exclude" (exclude extant taxa), or "include" (make no distinction, the default).
 #' @param validonly Whether or not to only retunr valid taxa (TRUE) or all taxa (FALSE).
 #' @param returnrank Whether or not to only return taxa of a specific rank (e.g., "3" for species, "5" for genera). See Paleobiology Database API for more infomation.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
@@ -24,12 +25,24 @@
 #' PaleobiologyDBChildFinder("339413", returnrank = "3")
 #'
 #' @export PaleobiologyDBChildFinder
-PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, validonly = TRUE, returnrank = NULL, breaker = 100) {
+PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", validonly = TRUE, returnrank = NULL, breaker = 100) {
   
   # TO DO: ALLOW EXTANT FILTERING AS WELL AS TIME
   
   # List of geologic periods (no stage sor other intervals for now) in geolgic order:
   GeologicPeriodsInOrder <- c("Cambrian", "Ordovician", "Silurian", "Devonian", "Carboniferous", "Permian", "Triassic", "Jurassic", "Cretaceous", "Paleogene", "Neogene")
+  
+  # Check extant option is a valid chocie and stop and warn user f not
+  if(length(setdiff(extant, c("exclude", "include", "only"))) > 0) stop("extant must be one of \"exclude\", \"include\", or \"only\".")
+  
+  # If extant option is include set text to empty string (will be default in API):
+  if(extant == "include") extantoption <- ""
+  
+  # If extant option is only set text to extant=yes:
+  if(extant == "only") extantoption <- "&extant=yes"
+  
+  # If extant option is exclude set text to extant=no:
+  if(extant == "exclude") extantoption <- "&extant=no"
 
   # Subfunction to break N numbers into breaker-sized blocks:
   NumberChunker <- function(N, breaker) {
@@ -73,6 +86,9 @@ PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = 
     
   }
   
+  # Add extant option to query:
+  ResolvedHTTPStrings <- paste(ResolvedHTTPStrings, extantoption, sep = "")
+
   # If there are intervals supplied:
   if(!is.null(interval)) {
     

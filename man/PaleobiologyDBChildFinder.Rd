@@ -5,7 +5,8 @@
 \title{Palaeobiology Database Child Finder}
 \usage{
 PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE,
-  interval = NULL, validonly = TRUE, returnrank = NULL, breaker = 100)
+  interval = NULL, extant = "include", validonly = TRUE,
+  returnrank = NULL, breaker = 100)
 }
 \arguments{
 \item{taxon_nos}{The Paleobiology database taxon number.}
@@ -15,6 +16,8 @@ PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE,
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 
 \item{interval}{The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).}
+
+\item{extant}{What to do with extant taxa, one of: "only" (only return extant taxa), "exclude" (exclude extant taxa), or "include" (make no distinction, the default).}
 
 \item{validonly}{Whether or not to only retunr valid taxa (TRUE) or all taxa (FALSE).}
 
