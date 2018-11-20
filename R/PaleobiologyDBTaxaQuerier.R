@@ -26,8 +26,6 @@
 #' @export PaleobiologyDBTaxaQuerier
 PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, breaker = 100) {
   
-  # TO DO: ALLOW EXTANT FILTERING AS WELL AS TIME
-  
   # List of geologic periods (no stage sor other intervals for now) in geolgic order:
   GeologicPeriodsInOrder <- c("Cambrian", "Ordovician", "Silurian", "Devonian", "Carboniferous", "Permian", "Triassic", "Jurassic", "Cretaceous", "Paleogene", "Neogene")
   
