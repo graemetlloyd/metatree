@@ -9,7 +9,7 @@
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #' @param interval The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).
 #' @param stopfororphans Whether or not to stop with an Error message for taxa with no parent.
-#' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).
+#' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
 #'
 #' @return An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of each taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
 #'

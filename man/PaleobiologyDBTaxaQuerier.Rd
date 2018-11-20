@@ -18,7 +18,7 @@ PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL, original = TRUE,
 
 \item{stopfororphans}{Whether or not to stop with an Error message for taxa with no parent.}
 
-\item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries).}
+\item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).}
 }
 \value{
 An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of each taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
