@@ -4,9 +4,9 @@
 \alias{PaleobiologyDBTaxaQuerier}
 \title{Palaeobiology Database Taxa Querier}
 \usage{
-PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL, original = TRUE,
-  interval = NULL, extant = "include", stopfororphans = TRUE,
-  breaker = 100)
+PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL,
+  original = TRUE, interval = NULL, extant = "include",
+  stopfororphans = TRUE, breaker = 100)
 }
 \arguments{
 \item{taxon_nos}{A vector of Paleobiology database taxon numbers to retrieve from the database.}

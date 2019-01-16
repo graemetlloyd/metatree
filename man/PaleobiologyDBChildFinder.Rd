@@ -4,9 +4,9 @@
 \alias{PaleobiologyDBChildFinder}
 \title{Palaeobiology Database Child Finder}
 \usage{
-PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL, original = TRUE,
-  interval = NULL, extant = "include", validonly = TRUE,
-  returnrank = NULL, breaker = 100)
+PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL,
+  original = TRUE, interval = NULL, extant = "include",
+  validonly = TRUE, returnrank = NULL, breaker = 100)
 }
 \arguments{
 \item{taxon_nos}{The Paleobiology database taxon number.}
