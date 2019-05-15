@@ -4,10 +4,10 @@
 \alias{Tree2MRP}
 \title{Converts tree(s) to an MRP matrix}
 \usage{
-Tree2MRP(trees)
+Tree2MRP(Trees)
 }
 \arguments{
-\item{trees}{An object of class 'phylo' or 'multi.phylo'.}
+\item{Trees}{An object of class 'phylo' or 'multi.phylo'.}
 }
 \value{
 An MRP matrix in \link{ReadMorphNexus} format.
