@@ -73,10 +73,10 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   # If using taxon names:
   if(!is.null(taxon_names)) {
     
-    # If a single taxn name (meaning all children are being requested:
+    # If a single taxon name (meaning all children are being requested:
     if(length(taxon_names) == 1) {
       
-      # Ste taxon numbers as descendants of taxon name:
+      # Set taxon numbers as descendants of taxon name:
       taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBChildFinder(taxon_nos = "1", taxon_names = taxon_names, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
       
       # Now nullify taxon names:
@@ -85,8 +85,8 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
     # If multiple taxon names:
     } else {
       
-      # Set numbers arbitrarily:
-      taxon_nos <- as.character(1:length(taxon_names))
+      # Set numbers for names:
+      taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBTaxaQuerier(taxon_nos = as.character(1:length(taxon_names)), taxon_names = taxon_names, original = original, interval = interval, extant = extant, stopfororphans = TRUE, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
       
     }
     
