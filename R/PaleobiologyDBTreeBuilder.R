@@ -41,11 +41,9 @@
 #'
 #' # Build a phylogenetic tree out of some famous
 #  # dinosaurs:
-#' PaleobiologyDBTreeBuilder(taxon_names <-
+#' PaleobiologyDBTreeBuilder(taxon_names =
 #'   c("Tyrannosaurus rex", "Triceratops horridus",
 #'   "Brontosaurus excelsus"), plot.tree = TRUE)
-#'
-#' @name PaleobiologyDBTreeBuilder
 #'
 #' @export PaleobiologyDBTreeBuilder
 PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, validonly = TRUE, returnrank = "3", breaker = 100, plot.tree = FALSE) {
@@ -55,6 +53,8 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   # NEED CHECKS NAMES ARE VALID AND THAT RANKS ARE AT LEAST APPROXIMATELY EQUIVALENT (SPECIES OR GENERA?)
   # SINGLE TAXON INPUT MEANS FIND ALL TAXA ASSIGNED TO IT MULTIPLE MEANS USE THEM AS INPUT?
   # FOR MULTIPLE CLADE LABELS OFFER OPTION TO ONLY USE LEAST INCLUSIVE (LOWEST LEVEL) ONE (OR JUST DO THIS)
+  
+  cat(length(taxon_names))
   
   # Check at least one of numbers or names has been set:
   if(is.null(taxon_nos) && is.null(taxon_names)) stop("Must define at least one taxon name or taxon number")
@@ -82,11 +82,15 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
       # Now nullify taxon names:
       taxon_names <- NULL
       
+      cat("Single taxon name as input.")
+      
     # If multiple taxon names:
     } else {
       
       # Set numbers for names:
       taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBTaxaQuerier(taxon_nos = as.character(1:length(taxon_names)), taxon_names = taxon_names, original = original, interval = interval, extant = extant, stopfororphans = TRUE, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
+      
+      cat("Multiple taxon names as input.")
       
     }
     
@@ -95,6 +99,8 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
     
     # If a single taxon number then get all children of that taxon and set as new taxon numbers:
     if(length(taxon_nos) == 1) taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBChildFinder(taxon_nos = taxon_nos, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
+    
+    cat("Single taxon number as input.")
     
   }
   

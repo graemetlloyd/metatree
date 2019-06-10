@@ -52,7 +52,7 @@ Finally, note that typically the resulting tree will contain multiple multifurca
 \examples{
 
 # Build a phylogenetic tree out of some famous
-PaleobiologyDBTreeBuilder(taxon_names <-
+PaleobiologyDBTreeBuilder(taxon_names =
   c("Tyrannosaurus rex", "Triceratops horridus",
   "Brontosaurus excelsus"), plot.tree = TRUE)
 
