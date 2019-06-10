@@ -37,6 +37,8 @@
 #'
 #' Soul, L. C. and Friedman, M., 2015, Taxonomy and phylogeny can yield comparable results in comparative paleontological analyses. Systematic Biology, 64, 608-620.
 #'
+#' @seealso See also the \code{makePBDBtaxonTree} function in the \code{paleotree} package.
+#'
 #' @examples
 #'
 #' # Build a phylogenetic tree out of some famous

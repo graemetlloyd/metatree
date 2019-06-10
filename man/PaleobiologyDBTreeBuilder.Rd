@@ -64,6 +64,9 @@ Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic d
 
 Soul, L. C. and Friedman, M., 2015, Taxonomy and phylogeny can yield comparable results in comparative paleontological analyses. Systematic Biology, 64, 608-620.
 }
+\seealso{
+See also the \code{makePBDBtaxonTree} function in the \code{paleotree} package.
+}
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
