@@ -5,7 +5,7 @@
 \title{Palaeobiology Database Occurrence Querier}
 \usage{
 PaleobiologyDBOccurrenceQuerier(taxon_nos, original = TRUE,
-  breaker = 100)
+  breaker = 100, RetainUncertainOccurrences = FALSE)
 }
 \arguments{
 \item{taxon_nos}{A vector of Paleobiology database taxon number(s) to retrieve from the database.}
@@ -13,6 +13,8 @@ PaleobiologyDBOccurrenceQuerier(taxon_nos, original = TRUE,
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE) of names.}
 
 \item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).}
+
+\item{RetainUncertainOccurrences}{Logical indicating whether or not to retain uncertain (i.e., aff, cf., ?, "") occurrences (defaults to FALSE).}
 }
 \value{
 A multi-column matrix with rows as occurrences.

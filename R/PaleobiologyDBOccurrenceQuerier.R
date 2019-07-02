@@ -7,6 +7,7 @@
 #' @param taxon_nos A vector of Paleobiology database taxon number(s) to retrieve from the database.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE) of names.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
+#' @param RetainUncertainOccurrences Logical indicating whether or not to retain uncertain (i.e., aff, cf., ?, "") occurrences (defaults to FALSE).
 #'
 #' @return A multi-column matrix with rows as occurrences.
 #'
@@ -18,7 +19,7 @@
 #' PaleobiologyDBOccurrenceQuerier(taxon_nos = "52962")
 #'
 #' @export PaleobiologyDBOccurrenceQuerier
-PaleobiologyDBOccurrenceQuerier <- function(taxon_nos, original = TRUE, breaker = 100) {
+PaleobiologyDBOccurrenceQuerier <- function(taxon_nos, original = TRUE, breaker = 100, RetainUncertainOccurrences = FALSE) {
   
   # SOME WAY TO ADD GEOGRAPHIC DATA FOR EXTANT TIPS?
   
@@ -132,13 +133,24 @@ PaleobiologyDBOccurrenceQuerier <- function(taxon_nos, original = TRUE, breaker 
     
   }
   
+  # If do not want to retain uncertain occurrences:
+  if(!RetainUncertainOccurrences) {
+    
+    # Identify any uncertain occurrences:
+    UncertainOccurrences <- grep("\\\\|cf\\.|aff\\.|\\?", Output[, "IdentifiedName"])
+    
+    # If found, remove these from the output:
+    if(length(UncertainOccurrences) > 0) Output <- Output[-UncertainOccurrences, , drop = FALSE]
+    
+  }
+
   # Perform a taxon query (to check for extant and no occurrence taxa):
   TaxonQuery <- PaleobiologyDBChildFinder(taxon_nos = taxon_nos)
   
   # If extant taxa are found add them to the matrix:
   if(any(TaxonQuery[, "Extant"] == "1")) Output <- rbind(Output, do.call(rbind, lapply(as.list(TaxonQuery[TaxonQuery[, "Extant"] == "1", "TaxonName"]), function(x) c("0", x, x, "Extant", "0", "0", NA, NA, NA, NA))))
   
-  # Find any taxa without occurrences (excludes extant taxa):
+  # Find any taxa without (definite) occurrences (excludes extant taxa):
   NoOccurrenceTaxa <- setdiff(TaxonQuery[, "TaxonName"], unique(Output[, "TaxonName"]))
   
   # If no occurrence are found add them to the matrix with NAs:
