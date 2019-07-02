@@ -7,7 +7,7 @@
 PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
   original = TRUE, interval = NULL, extant = "include",
   stopfororphans = TRUE, validonly = TRUE, returnrank = "3",
-  breaker = 100, plot.tree = FALSE)
+  breaker = 100, plot.tree = FALSE, TimeScale = FALSE)
 }
 \arguments{
 \item{taxon_nos}{Either a vector of Paleobiology database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.}
@@ -29,6 +29,8 @@ PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
 \item{breaker}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
 \item{plot.tree}{Logical whether or not to produce a plot of the resulting tree alongside the output (default is FALSE).}
+
+\item{TimeScale}{Logical indicating whether or not to timescale the tree.}
 }
 \value{
 A phylo object in ape format with node labels. Note that sometimes multiple labels may be valid for a node and if so these are separated by "_et_".
