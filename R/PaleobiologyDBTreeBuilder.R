@@ -24,6 +24,7 @@
 #' @param returnrank Option to be passed to \link{PaleobiologyDBChildFinder}. Default is "3" (species level).
 #' @param breaker Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.
 #' @param plot.tree Logical whether or not to produce a plot of the resulting tree alongside the output (default is FALSE).
+#' @param TimeScale Logical indicating whether or not to timescale the tree.
 #'
 #' @return A phylo object in ape format with node labels. Note that sometimes multiple labels may be valid for a node and if so these are separated by "_et_".
 #'
@@ -48,13 +49,25 @@
 #'   "Brontosaurus excelsus"), plot.tree = TRUE)
 #'
 #' @export PaleobiologyDBTreeBuilder
-PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, validonly = TRUE, returnrank = "3", breaker = 100, plot.tree = FALSE) {
-  
+PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, validonly = TRUE, returnrank = "3", breaker = 100, plot.tree = FALSE, TimeScale = FALSE) {
+
   # FOR FUTURE ADD TIMESCALING!
   
   # NEED CHECKS NAMES ARE VALID AND THAT RANKS ARE AT LEAST APPROXIMATELY EQUIVALENT (SPECIES OR GENERA?)
   # SINGLE TAXON INPUT MEANS FIND ALL TAXA ASSIGNED TO IT MULTIPLE MEANS USE THEM AS INPUT?
   # FOR MULTIPLE CLADE LABELS OFFER OPTION TO ONLY USE LEAST INCLUSIVE (LOWEST LEVEL) ONE (OR JUST DO THIS)
+  
+  taxon_nos = NULL
+  taxon_names = "Dinosauria"
+  original = TRUE
+  interval = c("Triassic", "Triassic")
+  extant = "include"
+  stopfororphans = TRUE
+  validonly = TRUE
+  returnrank = "3"
+  breaker = 100
+  plot.tree = FALSE
+  
   
   # Check at least one of numbers or names has been set:
   if(is.null(taxon_nos) && is.null(taxon_names)) stop("Must define at least one taxon name or taxon number")
@@ -217,6 +230,22 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
     
     # Make star tree as output:
     Tree <- ape::read.tree(text = paste("(", paste(gsub(" ", "_", taxon_names), collapse = ","), ")", TargetClade, ";", sep = ""))
+    
+  }
+  
+  # If time-scaling the tree:
+  if(TimeScale) {
+    
+    # CHECK NAMES STILL MATCH TIP MATRIX HERE! AND WHAT TO DO IF THEY DO NOT?
+
+    # Collapse tip matrix to just tree taxa:
+    TipMatrix <- TipMatrix[match(Tree$tip.label, gsub(" ", "_", TipMatrix[, "TaxonName"])), ]
+    
+    # Record occurrence numbers to use for checking for tip data:
+    OccurrenceNumbers <- unname(unlist(lapply(apply(TipMatrix[, 1:2], 1, as.list), function(x) unlist(x)[!is.na(unlist(x))][1])))
+    
+    # Get occurrence data for tips:
+    TipOccurrences <- PaleobiologyDBOccurrenceQuerier(taxon_nos = OccurrenceNumbers, original = TRUE, breaker = breaker)
     
   }
   
