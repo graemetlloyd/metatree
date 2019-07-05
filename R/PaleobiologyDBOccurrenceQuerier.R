@@ -148,7 +148,7 @@ PaleobiologyDBOccurrenceQuerier <- function(taxon_nos, original = TRUE, breaker 
   TaxonQuery <- PaleobiologyDBChildFinder(taxon_nos = taxon_nos)
   
   # If extant taxa are found add them to the matrix:
-  if(any(TaxonQuery[, "Extant"] == "1")) Output <- rbind(Output, do.call(rbind, lapply(as.list(TaxonQuery[TaxonQuery[, "Extant"] == "1", "TaxonName"]), function(x) c("0", x, x, "Extant", "0", "0", NA, NA, NA, NA))))
+  if(any(sort(TaxonQuery[, "Extant"] == "1"))) Output <- rbind(Output, do.call(rbind, lapply(as.list(TaxonQuery[TaxonQuery[, "Extant"] == "1", "TaxonName"]), function(x) c("0", x, x, "Extant", "0", "0", NA, NA, NA, NA))))
   
   # Find any taxa without (definite) occurrences (excludes extant taxa):
   NoOccurrenceTaxa <- setdiff(TaxonQuery[, "TaxonName"], unique(Output[, "TaxonName"]))
