@@ -139,6 +139,7 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
       }
       
     }
+    
     # Return resolvedjson string:
     return(resolvedjson)
     
@@ -165,7 +166,7 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
       UnknownTaxonHits <- grep("Unknown taxon", x)
       
       # If found stop and warn user:
-      if(length(UnknownTaxonHits) > 0) stop(paste("The following taxon numbers were not found in the database: ", paste(unlist(lapply(strsplit(x[UnknownTaxonHits], split = "Unknown taxon '|'\""), '[', 2)), collapse = ", "), sep = ""))
+      if(length(UnknownTaxonHits) > 0 && original) stop(paste("The following taxon numbers were not found in the database: ", paste(unlist(lapply(strsplit(x[UnknownTaxonHits], split = "Unknown taxon '|'\""), '[', 2)), collapse = ", "), sep = ""))
       
     }
     
@@ -181,7 +182,7 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
     }
     
     # Isolate record line:
-    jsonstring <- x[(grep("\\[", x) + 1):(grep("\\]", x) - 1)]
+    jsonstring <- x[(rev(grep("\\[", x))[1] + 1):(rev(grep("\\]", x))[1] - 1)]
     
     # Retrieve original taxon number (should be same as input!), if found:
     OriginalTaxonNo <- ParameterExtraction(jsonstring, parameterstring = "\"vid\":")
@@ -198,7 +199,7 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
     # Retrieve parent taxon number, if found:
     ParentTaxonNo <- ParameterExtraction(jsonstring, parameterstring = "\"par\":")
     
-    # retrieve taxon validity, if known:
+    # Retrieve taxon validity, if known:
     TaxonValidity <- ParameterExtraction(jsonstring, parameterstring = "\"tdf\":")
     
     # retrieve taxon validity, if known:
@@ -219,7 +220,7 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
   }))
   
   # If querying based on taxon number(s):
-  if(is.null(taxon_names)) {
+  if(is.null(taxon_names) && original) {
     
     # Extract taxon numbers found in database:
     TaxonNumbers <- unlist(lapply(lapply(lapply(apply(cbind(gsub("var:", "", Output[, "OriginalTaxonNo"]), gsub("txn:", "", Output[, "ResolvedTaxonNo"])), 1, as.list), unlist), function(x) x[!is.na(x)]), '[', 1))
