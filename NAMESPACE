@@ -2,6 +2,7 @@
 
 export(EmbiggenMatrix)
 export(GetPseudoIndependentPhyloFiles)
+export(ListPosition2ListCoordinates)
 export(MRPCollapse)
 export(MultiTreeContradiction)
 export(MultiTreeDistance)
