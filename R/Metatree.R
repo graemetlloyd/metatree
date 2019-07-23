@@ -33,7 +33,7 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(), IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL) {
   
-  # NewOptions
+  # New Options (requires code to actually use them)
   #
   # HigherTaxaToCollapse Vector can be empty.
   # VeilLine TRUE/FALSE (will be in output)
@@ -42,7 +42,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default.
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default.
   
-
   # CHECK PARENT IS A DATA SET AND NOT A REFERENCE, E.G., IF ENTER A REFERENCE AS PARENT THEN PARENT TURNS OUT TO HAVE TWO DATA SETS
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
   # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY)
@@ -54,10 +53,31 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
   # CHECK FOR ABSENT RECON NAMES OR NUMBERS ("")
   
-  # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE.
+  # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE?
   
-  # Write a bunch of checks to make sure input values make sense
+  # Check MRPDirectory is formatted correctly adn stop and warn user if not:
+  if(!all(is.character(MRPDirectory)) || length(MRPDirectory) != 1) stop("MRPDirectory must be a single character string indicating the path to the folder containing the MRP files.")
   
+  # Check XMLDirectory is formatted correctly adn stop and warn user if not:
+  if(!all(is.character(XMLDirectory)) || length(XMLDirectory) != 1) stop("XMLDirectory must be a single character string indicating the path to the folder containing the XML files.")
+  
+  # Check TargetClade is formatted correctly adn stop and warn user if not:
+  if(!all(is.character(TargetClade)) || length(TargetClade) != 1) stop("TargetClade must be a single character string indicating the desired clade the metatree will represent.")
+  
+  # Check MissingSpecies respresents a valid option:
+  if(length(setdiff(MissingSpecies, c("all", "exclude", "genus"))) > 0) stop("MissingSpecies must be one of \"all\", \"exclude\", or \"genus\".")
+  
+  # Check VeilLine is a logical and stop and warn user if not:
+  if(!is.logical(VeilLine)) stop("VeilLine must be a logical (TRUE or FALSE).")
+  
+  # Check IncludeSpecimenLevelOTUs is a logical and stop and warn user if not:
+  if(!is.logical(IncludeSpecimenLevelOTUs)) stop("IncludeSpecimenLevelOTUs must be a logical (TRUE or FALSE).")
+  
+  # If not a NULL read backbone constraint (checks it is a valid Newick format):
+  if(!is.null(BackboneConstraintTree)) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
+  
+  # If not a NULL read monophyly constraint (checks it is a valid Newick format):
+  if(!is.null(MonophylyConstraintTree)) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
   
   # List of types of resolution that require finding a senior synonym:
   synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
