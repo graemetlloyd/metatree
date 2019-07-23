@@ -193,15 +193,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Warn user about any unsampled parents and/or siblings:
   if(length(setdiff(ParentAndSiblingNames, names(MRPList))) > 0) print(paste("The following parents and siblings are not in the sample (check they are correct or add them into the sample): ", paste(setdiff(ParentAndSiblingNames, names(MRPList)), collapse = ", "), sep = ""))
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  # GOT TO HERE WITH REFACTOR
   
   # Print current processing status:
   cat("Done\nFinding initial multiple-taxon reconciliations...")
@@ -210,7 +202,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in names(MRPList)) {
     
     # Find comma rows (multiple taxa in initial reconciliation):
-    commarows <- grep(",", rownames(MRPList[[i]]$matrix))
+    commarows <- grep(",", rownames(MRPList[[i]]$Matrix))
     
     # If there is at least one multiple-taxon reconciliation:
     if(length(commarows) > 0) {
@@ -219,7 +211,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       for(j in rev(commarows)) {
         
         # Get multiple names of reconciliation:
-        multiplenames <- strsplit(rownames(MRPList[[i]]$matrix)[j], "%%%%")[[1]]
+        multiplenames <- strsplit(rownames(MRPList[[i]]$Matrix)[j], "%%%%")[[1]]
         
         # Get multiple-taxon numbers:
         multitaxonnumbers <- strsplit(multiplenames[1], ";")[[1]]
@@ -231,16 +223,22 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
         if(length(multitaxonnumbers) != length(multitaxonnames)) stop(paste("Problem with multiple-taxon reconciliation(s) in ", i, " (check commas and semi-colons are correct; i.e., of same length).", sep = ""))
         
         # Add new rows at base of matrix:
-        MRPList[[i]]$matrix <- rbind(MRPList[[i]]$matrix, matrix(rep(MRPList[[i]]$matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
+        MRPList[[i]]$Matrix <- rbind(MRPList[[i]]$Matrix, matrix(rep(MRPList[[i]]$Matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
         
         # Remove now redundant row from matrix:
-        MRPList[[i]]$matrix <- MRPList[[i]]$matrix[-j, , drop = FALSE]
+        MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[-j, , drop = FALSE]
         
       }
       
     }
     
   }
+  
+  
+  
+  
+  
+  
   
   # Print current processing status:
   cat("Done\nRemoving taxa with initial reconciliations of \"DELETE\"...")
@@ -249,16 +247,16 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in names(MRPList)) {
     
     # Find delete rows (initial ones - may remove some later through:
-    deleterows <- which(matrix(unlist(strsplit(rownames(MRPList[[i]]$matrix), "%%%%")), ncol = 2, byrow = TRUE)[, 2] == "DELETE")
+    deleterows <- which(matrix(unlist(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%")), ncol = 2, byrow = TRUE)[, 2] == "DELETE")
     
     # If there are deletes:
     if(length(deleterows) > 0) {
       
       # Remove deleted taxon rows:
-      MRPList[[i]]$matrix <- MRPList[[i]]$matrix[-deleterows, , drop = FALSE]
+      MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[-deleterows, , drop = FALSE]
       
       # If less than three taxa then just delete all columns (characters) too:
-      if(nrow(MRPList[[i]]$matrix) < 3) MRPList[[i]]$matrix <- MRPList[[i]]$matrix[, -c(1:ncol(MRPList[[i]]$matrix)), drop = FALSE]
+      if(nrow(MRPList[[i]]$Matrix) < 3) MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[, -c(1:ncol(MRPList[[i]]$Matrix)), drop = FALSE]
       
     }
     
@@ -268,10 +266,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nPruning any data sets where all taxa were marked as \"DELETE\"...")
   
   # If there are any
-  if(length(which(unlist(lapply(lapply(MRPList, '[[', "matrix"), ncol)) == 0)) > 0) {
+  if(length(which(unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol)) == 0)) > 0) {
     
     # Get names of data sets to be pruned:
-    NamesToRemove <- names(which(unlist(lapply(lapply(MRPList, '[[', "matrix"), ncol)) == 0))
+    NamesToRemove <- names(which(unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol)) == 0))
     
     # Prune from MRP List:
     MRPList <- MRPList[-match(NamesToRemove, names(MRPList))]
@@ -288,33 +286,33 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in names(MRPList)) {
     
     # Case if any (initially) resolved names are non-unique:
-    if(any(duplicated(sort(rownames(MRPList[[i]]$matrix))))) {
+    if(any(duplicated(sort(rownames(MRPList[[i]]$Matrix))))) {
       
       # Get duplicated taxon name(s):
-      duplicatedtaxa <- unique(sort(rownames(MRPList[[i]]$matrix))[duplicated(sort(rownames(MRPList[[i]]$matrix)))])
+      duplicatedtaxa <- unique(sort(rownames(MRPList[[i]]$Matrix))[duplicated(sort(rownames(MRPList[[i]]$Matrix)))])
       
       # For each duplicated taxon:
       for(j in duplicatedtaxa) {
         
         # Get rows for taxon:
-        duplicaterows <- which(rownames(MRPList[[i]]$matrix) == j)
+        duplicaterows <- which(rownames(MRPList[[i]]$Matrix) == j)
         
         # Build duplicated matrix from other taxa:
-        tempMRPmatrix <- matrix(rep(MRPList[[i]]$matrix[-duplicaterows, ], length(duplicaterows)), ncol = ncol(MRPList[[i]]$matrix) * length(duplicaterows), dimnames = list(rownames(MRPList[[i]]$matrix)[-duplicaterows], c()))
+        tempMRPmatrix <- matrix(rep(MRPList[[i]]$Matrix[-duplicaterows, ], length(duplicaterows)), ncol = ncol(MRPList[[i]]$Matrix) * length(duplicaterows), dimnames = list(rownames(MRPList[[i]]$Matrix)[-duplicaterows], c()))
         
         # Add duplicated taxon as single row:
-        tempMRPmatrix <- rbind(tempMRPmatrix, as.vector(t(MRPList[[i]]$matrix[duplicaterows, ])))
+        tempMRPmatrix <- rbind(tempMRPmatrix, as.vector(t(MRPList[[i]]$Matrix[duplicaterows, ])))
         
         # Add duplicated taxon name:
         rownames(tempMRPmatrix)[nrow(tempMRPmatrix)] <- j
         
         # Update stored MRP matrix:
-        MRPList[[i]]$matrix <- tempMRPmatrix
+        MRPList[[i]]$Matrix <- tempMRPmatrix
         
       }
       
       # Collapse to just unique characters (has to be outside the above or breaks if more than one duplicate taxon):
-      MRPList[[i]]$matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$matrix)), ordering = rep("unord", ncol(MRPList[[i]]$matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
+      MRPList[[i]]$Matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
       
       # Store duplicated OTU names:
       duplicatedresolvedOTUs <- c(duplicatedresolvedOTUs, paste("Duplicated resolved OTUs (", paste(unlist(lapply(strsplit(duplicatedtaxa, "%%%%"), '[', 2)), collapse = ", "), ") in: ", i, ".\n", sep = ""))
@@ -322,10 +320,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     }
     
     # Format MRP as NEXUS type matrix:
-    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$matrix)), ordering = rep("unord", ncol(MRPList[[i]]$matrix)), equalise.weights = FALSE)
+    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE)
     
     # Collapse MRP matrix (removes redundant characters created by taxon deletions):
-    MRPList[[i]]$matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
+    MRPList[[i]]$Matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
     
   }
   
@@ -336,7 +334,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nBuilding initial taxonomy matrix...")
   
   # Create taxonomy matrix to store all taxon resolution data:
-  TaxonomyMatrix <- matrix(unlist(strsplit(sort(unique(unlist(lapply(lapply(MRPList, '[[', "matrix"), rownames)))), "%%%%")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("TaxonNo", "TaxonName")))
+  TaxonomyMatrix <- matrix(unlist(strsplit(sort(unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)))), "%%%%")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("TaxonNo", "TaxonName")))
   
   # Print current processing status:
   cat("Done\nChecking for missing taxon numbers...")
@@ -509,7 +507,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   numberstodelete <- resolvedtaxonnumbers[deleterows, "InputNo"]
   
   # Create list of taxon numbers to check for data sets with DELETE resolutions:
-  taxonnumberslist <- lapply(lapply(lapply(lapply(lapply(lapply(lapply(lapply(MRPList[which(unlist(lapply(lapply(lapply(MRPList, '[[', "matrix"), rownames), length)) > 0)], '[[', 1), rownames), strsplit, split = "%%%%"), unlist), matrix, ncol = 2, byrow = TRUE), '[', ,1), strsplit, split = "&"), unlist)
+  taxonnumberslist <- lapply(lapply(lapply(lapply(lapply(lapply(lapply(lapply(MRPList[which(unlist(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), length)) > 0)], '[[', 1), rownames), strsplit, split = "%%%%"), unlist), matrix, ncol = 2, byrow = TRUE), '[', ,1), strsplit, split = "&"), unlist)
   
   # Create empty vector to store datasets with deletes (that cna then be processed):
   datasetswithdeletes <- vector(mode = "character")
@@ -521,7 +519,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in datasetswithdeletes) {
     
     # Isolate taxon numbers for current dataset:
-    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$matrix), "%%%%"), '[', 1))
+    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 1))
     
     # Convert into list to deal with multi-number higher taxa:
     taxonnumbers <- lapply(lapply(as.list(taxonnumbers), strsplit, split = "&"), unlist)
@@ -536,13 +534,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     multinumberhighertaxatodelete <- taxatodelete[which(unlist(lapply(taxonnumbers[taxatodelete], length)) > 1)]
     
     # Stop if you find a multi-number higher taxon that is (at least partially) to be deleted):
-    if(length(multinumberhighertaxatodelete) > 0) stop(paste("Multi-number higher tax(a) listed to delete: ", paste(unlist(lapply(strsplit(rownames(MRPList[[i]]$matrix), "%%%%"), '[', 2))[multinumberhighertaxatodelete], sep = ","), " (NB: check the status of these).", sep = ""))
+    if(length(multinumberhighertaxatodelete) > 0) stop(paste("Multi-number higher tax(a) listed to delete: ", paste(unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))[multinumberhighertaxatodelete], sep = ","), " (NB: check the status of these).", sep = ""))
     
     # Create MRP matrix:
-    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$matrix[-taxatodelete, , drop = FALSE], header = "", weights = rep(1, ncol(MRPList[[i]]$matrix[-taxatodelete, , drop = FALSE])), ordering = rep("unord", ncol(MRPList[[i]]$matrix[-taxatodelete, , drop = FALSE])), equalise.weights = FALSE)
+    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE], header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE])), ordering = rep("unord", ncol(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE])), equalise.weights = FALSE)
     
     # Overwrite matrix with collapsed version following taxon deletions:
-    MRPList[[i]]$matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
+    MRPList[[i]]$Matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
     
   }
   
@@ -562,7 +560,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in datasetswithjuniorsynonyms) {
     
     # Isolate taxon numbers for current dataset:
-    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$matrix), "%%%%"), '[', 1))
+    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 1))
     
     # Convert into list to deal with multi-number higher taxa:
     taxonnumbers <- lapply(lapply(as.list(taxonnumbers), strsplit, split = "&"), unlist)
@@ -574,7 +572,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     for(j in numberstosynonymise) taxatosynonymise <- sort(unique(c(taxatosynonymise, which(unlist(lapply(lapply(taxonnumbers, '==', j), any))))))
     
     # Find any multi-number higher taxa to synonymise:
-    multinumberhighertaxontosynonymise <- unlist(lapply(strsplit(rownames(MRPList[[i]]$matrix), "%%%%"), '[', 2))[taxatosynonymise[which(unlist(lapply(taxonnumbers[taxatosynonymise], length)) > 1)]]
+    multinumberhighertaxontosynonymise <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))[taxatosynonymise[which(unlist(lapply(taxonnumbers[taxatosynonymise], length)) > 1)]]
     
     # Stop if you find a multi-number higher taxon that is (at least partially) to be deleted):
     if(length(multinumberhighertaxontosynonymise) > 0) stop(paste("Multi-number higher tax(a) listed to synonymise: ", paste(multinumberhighertaxontosynonymise, sep = ","), " (NB: check the status of these).", sep = ""))
@@ -583,10 +581,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     for(j in taxatosynonymise) {
       
       # Find corresponding row number in senior synonyms list:
-      seniorrownumber <- which(juniorsynonyms[, "InputNo"] == strsplit(rownames(MRPList[[i]]$matrix)[j], "%%%%")[[1]][1])
+      seniorrownumber <- which(juniorsynonyms[, "InputNo"] == strsplit(rownames(MRPList[[i]]$Matrix)[j], "%%%%")[[1]][1])
       
       # Overwrite junior with senior synonym:
-      rownames(MRPList[[i]]$matrix)[j] <- paste(gsub("txn:|var:", "", rev(sort(seniorsynonyms[seniorrownumber, c("OriginalTaxonNo", "ResolvedTaxonNo")]))[1]), gsub(" ", "_", seniorsynonyms[seniorrownumber, "TaxonName"]), sep = "%%%%")
+      rownames(MRPList[[i]]$Matrix)[j] <- paste(gsub("txn:|var:", "", rev(sort(seniorsynonyms[seniorrownumber, c("OriginalTaxonNo", "ResolvedTaxonNo")]))[1]), gsub(" ", "_", seniorsynonyms[seniorrownumber, "TaxonName"]), sep = "%%%%")
       
     }
     
@@ -596,7 +594,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nBuilding taxonomy...")
   
   # Get a list of the valid OTU names (may be pruned down later to just those in target clade):
-  ValidOTUNames <- unique(unlist(lapply(lapply(MRPList, '[[', "matrix"), rownames)))[grep("_", unique(unlist(lapply(lapply(MRPList, '[[', "matrix"), rownames))))]
+  ValidOTUNames <- unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)))[grep("_", unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames))))]
   
   # Replace junior with senior synonyms in resolved names matrix:
   resolvedtaxonnumbers[synonymrows, c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms
@@ -795,7 +793,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(length(subgenerarows) > 0) colnames(TaxonomyMRP)[subgenerarows] <- gsub("\\(|\\)| ", "", colnames(TaxonomyMRP)[subgenerarows])
   
   # Correct subgenera in MRP list too:
-  MRPList <- lapply(MRPList, function(x) {NamesToCheck <- rownames(x$matrix); NamesToCheck <- gsub("_\\(|\\)", "", NamesToCheck); rownames(x$matrix) <- NamesToCheck; x})
+  MRPList <- lapply(MRPList, function(x) {NamesToCheck <- rownames(x$Matrix); NamesToCheck <- gsub("_\\(|\\)", "", NamesToCheck); rownames(x$Matrix) <- NamesToCheck; x})
   
   # Print current processing status:
   cat("Done\nTidying up taxonomy...")
@@ -838,7 +836,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(!all(is.null(Interval))) NewValidOTUs <- setdiff(NewValidOTUs, gsub(" ", "_", resolvedtaxonnumbersInterval[, "TaxonName"]))
   
   # Can now strip out numbers from taxon names:
-  for(i in 1:length(MRPList)) if(!is.null(rownames(MRPList[[i]]$matrix))) rownames(MRPList[[i]]$matrix) <- unlist(lapply(strsplit(rownames(MRPList[[i]]$matrix), "%%%%"), '[', 2))
+  for(i in 1:length(MRPList)) if(!is.null(rownames(MRPList[[i]]$Matrix))) rownames(MRPList[[i]]$Matrix) <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))
   
   # Collapse taxonomy MRP to just new valid taxa:
   TaxonomyMRP <- TaxonomyMRP[NewValidOTUs, ]
@@ -865,7 +863,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nSubstituting valid OTUs for supraspecific taxa...")
   
   # Find datasets with (valid) surpaspecific OTUs:
-  datasetswithsupraspecificOTUs <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "matrix"), rownames), intersect, y = colnames(TaxonomyMRP)), length)) > 0)
+  datasetswithsupraspecificOTUs <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), intersect, y = colnames(TaxonomyMRP)), length)) > 0)
   
   # If such data sets exist:
   if(length(datasetswithsupraspecificOTUs)) {
@@ -874,7 +872,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     for(i in datasetswithsupraspecificOTUs) {
       
       # Find higher taxa that will need to be replaced:
-      highertaxatoreplace <- intersect(rownames(MRPList[[i]]$matrix), colnames(TaxonomyMRP))
+      highertaxatoreplace <- intersect(rownames(MRPList[[i]]$Matrix), colnames(TaxonomyMRP))
       
       # For each higher taxon to replace:
       for(j in highertaxatoreplace) {
@@ -883,10 +881,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
         substitutenames <- names(which(TaxonomyMRP[, j] == 1))
         
         # Add these to end of matrix using coding for higher taxon:
-        MRPList[[i]]$matrix <- rbind(MRPList[[i]]$matrix, matrix(rep(MRPList[[i]]$matrix[j, ], length(substitutenames)), nrow = length(substitutenames), byrow = TRUE, dimnames = list(substitutenames, c())))
+        MRPList[[i]]$Matrix <- rbind(MRPList[[i]]$Matrix, matrix(rep(MRPList[[i]]$Matrix[j, ], length(substitutenames)), nrow = length(substitutenames), byrow = TRUE, dimnames = list(substitutenames, c())))
         
         # Remove now replaced higher taxon from matrix:
-        MRPList[[i]]$matrix <- MRPList[[i]]$matrix[-which(rownames(MRPList[[i]]$matrix) == j), , drop = FALSE]
+        MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[-which(rownames(MRPList[[i]]$Matrix) == j), , drop = FALSE]
         
       }
       
@@ -898,13 +896,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nRetracting subspecies into species...")
   
   # Replace all subspecies with their species name:
-  MRPList <- lapply(MRPList, function(x) {UnderscoreAndCapitalCounts <- matrix(unlist(lapply(strsplit(rownames(x$matrix), split = ""), function(y) c(sum(y == "_"), length(grep("[:A-Z:]", y))))), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Underscores", "Capitals"))); SubspeciesRows <- intersect(which(UnderscoreAndCapitalCounts[, "Underscores"] == 2), which(UnderscoreAndCapitalCounts[, "Capitals"] == 1)); if(length(SubspeciesRows) > 0) rownames(x$matrix)[SubspeciesRows] <- unlist(lapply(strsplit(rownames(x$matrix)[SubspeciesRows], split = "_"), function(z) paste(z[1:2], collapse = "_"))); x})
+  MRPList <- lapply(MRPList, function(x) {UnderscoreAndCapitalCounts <- matrix(unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) c(sum(y == "_"), length(grep("[:A-Z:]", y))))), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Underscores", "Capitals"))); SubspeciesRows <- intersect(which(UnderscoreAndCapitalCounts[, "Underscores"] == 2), which(UnderscoreAndCapitalCounts[, "Capitals"] == 1)); if(length(SubspeciesRows) > 0) rownames(x$Matrix)[SubspeciesRows] <- unlist(lapply(strsplit(rownames(x$Matrix)[SubspeciesRows], split = "_"), function(z) paste(z[1:2], collapse = "_"))); x})
   
   # Find datatsets with duplicated OTU names:
-  DuplicatedOTUDatasets <- which(unlist(lapply(MRPList, function(x) any(duplicated(rownames(x$matrix))))))
+  DuplicatedOTUDatasets <- which(unlist(lapply(MRPList, function(x) any(duplicated(rownames(x$Matrix))))))
   
   # If duplicated OTU names then collapse these matrices to just unique taxa:
-  if(length(DuplicatedOTUDatasets) > 0) MRPList[DuplicatedOTUDatasets] <- lapply(MRPList[DuplicatedOTUDatasets], function(x) {MorphMatrix <- list(list("", NULL), list(NA, "STANDARD", x$matrix, rep("unord", ncol(x$matrix)), rep(1, ncol(x$matrix)), rep(0, ncol(x$matrix)), rep(1, ncol(x$matrix)), list(c("0", "1"), "?", "-"))); names(MorphMatrix) <- c("Topper", "Matrix_1"); names(MorphMatrix[[1]]) <- c("Header", "StepMatrices"); names(MorphMatrix[[2]]) <- c("BlockName", "Datatype", "Matrix", "Ordering", "Weights", "MinVals", "MaxVals", "Characters"); names(MorphMatrix[[2]][[8]]) <- c("Symbols", "Missing", "Gap"); x$matrix <- CompactifyMatrix(MorphMatrix)$Matrix_1$Matrix; x})
+  if(length(DuplicatedOTUDatasets) > 0) MRPList[DuplicatedOTUDatasets] <- lapply(MRPList[DuplicatedOTUDatasets], function(x) {MorphMatrix <- list(list("", NULL), list(NA, "STANDARD", x$Matrix, rep("unord", ncol(x$Matrix)), rep(1, ncol(x$Matrix)), rep(0, ncol(x$Matrix)), rep(1, ncol(x$Matrix)), list(c("0", "1"), "?", "-"))); names(MorphMatrix) <- c("Topper", "Matrix_1"); names(MorphMatrix[[1]]) <- c("Header", "StepMatrices"); names(MorphMatrix[[2]]) <- c("BlockName", "Datatype", "Matrix", "Ordering", "Weights", "MinVals", "MaxVals", "Characters"); names(MorphMatrix[[2]][[8]]) <- c("Symbols", "Missing", "Gap"); x$Matrix <- CompactifyMatrix(MorphMatrix)$Matrix_1$Matrix; x})
   
   # Print current processing status:
   cat("Done\nFurther tidying of taxonomy...")
@@ -958,13 +956,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nRemoving outgroups, empty supraspecific taxa and those outside the sampling interval...")
   
   # Find any remaining taxa that now need to be deleted (outgroups to target clade and empty higher taxa):
-  TaxaToDelete <- setdiff(unlist(lapply(lapply(MRPList, '[[', "matrix"), rownames)), NewValidOTUs)
+  TaxaToDelete <- setdiff(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)), NewValidOTUs)
   
   # If applying an Interval then add taxa outside of it to the deletes list:
   if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", resolvedtaxonnumbersInterval[resolvedtaxonnumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
   
   # Find data sets with taxa to delete:
-  datasetswithtaxatodelete <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "matrix"), rownames), intersect, y = TaxaToDelete), length)) > 0)
+  datasetswithtaxatodelete <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), intersect, y = TaxaToDelete), length)) > 0)
   
   # If there are such data sets:
   if(length(datasetswithtaxatodelete) > 0) {
@@ -973,19 +971,19 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     for(i in rev(datasetswithtaxatodelete)) {
       
       # Collapse matrix to just valid OTUs:
-      MRPList[[i]]$matrix <- MRPList[[i]]$matrix[intersect(rownames(MRPList[[i]]$matrix), NewValidOTUs), , drop = FALSE]
+      MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[intersect(rownames(MRPList[[i]]$Matrix), NewValidOTUs), , drop = FALSE]
       
       # Get logical for how many characters are variable:
-      VariableCharacters <- unlist(lapply(lapply(lapply(apply(matrix(apply(MRPList[[i]]$matrix, 2, paste, collapse = "")), 1, strsplit, split = ""), unlist), unique), length)) > 1
+      VariableCharacters <- unlist(lapply(lapply(lapply(apply(matrix(apply(MRPList[[i]]$Matrix, 2, paste, collapse = "")), 1, strsplit, split = ""), unlist), unique), length)) > 1
       
       # As long as there are variable characters:
       if(any(VariableCharacters)) {
         
         # If there are less than three taxa left collapse to a zero-column matrix:
-        if(nrow(MRPList[[i]]$matrix) < 3) MRPList[[i]]$matrix <- MRPList[[i]]$matrix[, -c(1:ncol(MRPList[[i]]$matrix)), drop = FALSE]
+        if(nrow(MRPList[[i]]$Matrix) < 3) MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[, -c(1:ncol(MRPList[[i]]$Matrix)), drop = FALSE]
         
         # If there are at least three taxa left (minimum for meaning) collapse to just meaningful:
-        if(nrow(MRPList[[i]]$matrix) >= 3) MRPList[[i]]$matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$matrix)), ordering = rep("unord", ncol(MRPList[[i]]$matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
+        if(nrow(MRPList[[i]]$Matrix) >= 3) MRPList[[i]]$Matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
         
         # If there are no variable characters:
       } else {
@@ -1063,10 +1061,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   publicationyears <- as.numeric(gsub("[:a-z:]", "", gsub("inpress", strsplit(as.character(Sys.Date()), "-")[[1]][1], unlist(lapply(lapply(strsplit(names(MRPList), "_"), rev), '[', 1)))))
   
   # Get parent (data set) data:
-  parentsdata <- unlist(lapply(MRPList, '[[', "parent"))
+  parentsdata <- unlist(lapply(MRPList, '[[', "Parent"))
   
   # Get sibling (data set) data:
-  siblingsdata <- unlist(lapply(MRPList, '[[', "sibling"))
+  siblingsdata <- unlist(lapply(MRPList, '[[', "Sibling"))
   
   # Get multiple-offspring data sets:
   multioffspringdatasets <- unique(sort(parentsdata[which(nchar(parentsdata) > 0)])[which(duplicated(sort(parentsdata[which(nchar(parentsdata) > 0)])))])
@@ -1089,7 +1087,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in parentspresentinpool) {
     
     # Case if parent made redundant:
-    if(any(unlist(lapply(lapply(lapply(lapply(MRPList[which(parentsdata == i)], '[[', 1), rownames), setdiff, x = rownames(MRPList[[i]]$matrix)), length)) == 0)) {
+    if(any(unlist(lapply(lapply(lapply(lapply(MRPList[which(parentsdata == i)], '[[', 1), rownames), setdiff, x = rownames(MRPList[[i]]$Matrix)), length)) == 0)) {
       
       # Add data set to remove list:
       datasetstoremove <- c(datasetstoremove, i)
@@ -1129,7 +1127,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   independenceweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), length))), 2, max)
   
   # Get N characters weight (to avoid ucnertain data sets swamping the signal):
-  Ncharacterweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(MRPList, '[[', "matrix"), ncol))), 2, max)
+  Ncharacterweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol))), 2, max)
   
   # Combine weights (just a product for now, but other options should be explored!:
   publicationweights <- publicationyearweights * independenceweights * Ncharacterweights
@@ -1156,13 +1154,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in 1:length(MRPList)) {
     
     # Find taxa not present in full matrix:
-    taxanotinmatrix <- setdiff(NewValidOTUs, rownames(MRPList[[i]]$matrix))
+    taxanotinmatrix <- setdiff(NewValidOTUs, rownames(MRPList[[i]]$Matrix))
     
     # Add data set block (including missing taxa as NAs) into full matrix:
-    FullMRPMatrix <- cbind(FullMRPMatrix, rbind(MRPList[[i]]$matrix, matrix(NA, nrow = length(taxanotinmatrix), ncol = ncol(MRPList[[i]]$matrix), dimnames = list(taxanotinmatrix, rep(names(MRPList)[i], ncol(MRPList[[i]]$matrix)))))[rownames(FullMRPMatrix), ])
+    FullMRPMatrix <- cbind(FullMRPMatrix, rbind(MRPList[[i]]$Matrix, matrix(NA, nrow = length(taxanotinmatrix), ncol = ncol(MRPList[[i]]$Matrix), dimnames = list(taxanotinmatrix, rep(names(MRPList)[i], ncol(MRPList[[i]]$Matrix)))))[rownames(FullMRPMatrix), ])
     
     # Add character weights using publication weights:
-    characterweights <- c(characterweights, rep(publicationweights[i], ncol(MRPList[[i]]$matrix)))
+    characterweights <- c(characterweights, rep(publicationweights[i], ncol(MRPList[[i]]$Matrix)))
     
   }
   
