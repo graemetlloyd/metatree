@@ -109,7 +109,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
-  MRPList <- lapply(lapply(as.list(MRPFileList), ReadMorphNexus), function(x) list(x$Matrix_1$Matrix, x$Topper$Header, x$Topper$Header))
+  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) list(x$Matrix_1$Matrix, x$Topper$Header, x$Topper$Header))
   
   # Set names of MRP files:
   names(MRPList) <- MRPFileList
