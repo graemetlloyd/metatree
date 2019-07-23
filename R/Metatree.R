@@ -74,10 +74,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(!is.logical(IncludeSpecimenLevelOTUs)) stop("IncludeSpecimenLevelOTUs must be a logical (TRUE or FALSE).")
   
   # If not a NULL read backbone constraint (checks it is a valid Newick format):
-  if(!is.null(BackboneConstraintTree)) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
+  if(!is.null(BackboneConstraint)) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
   
   # If not a NULL read monophyly constraint (checks it is a valid Newick format):
-  if(!is.null(MonophylyConstraintTree)) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
+  if(!is.null(MonophylyConstraint)) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
   
   # List of types of resolution that require finding a senior synonym:
   synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
