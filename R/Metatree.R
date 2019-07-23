@@ -112,7 +112,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) list(x$Matrix_1$Matrix, x$Topper$Header, x$Topper$Header))
   
   # Set names of MRP files:
-  names(MRPList) <- MRPFileList
+  names(MRPList) <- gsub("mrp.nex", "", MRPFileList)
   
   # Print current processing status:
   cat("Done\nReading XML data...")
@@ -128,9 +128,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Stop if MRP datasets not listed as XMLs and vice versa:
   if(length(MRPXMLunion) > 0) stop(paste("Datasets do not match (MRP and XML)!:", MRPXMLunion, collapse = " "))
-  
-  # Update MRP names with stripped down file name:
-  names(MRPList) <- gsub("mrp.nex", "", names(MRPList))
   
   # Empty vectors to store error-creating data sets:
   duplicatedtaxonnames <- namematchissues <- vector(mode = "character")
