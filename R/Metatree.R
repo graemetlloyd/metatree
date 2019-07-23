@@ -105,8 +105,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Set working directory as MRP directory:
   setwd(MRPDirectory)
   
-  # List MRP files (or just use inslusivedatalist if set):
-  MRPFileList <- strsplit(ifelse(is.null(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
+  # List MRP files (or just use inclusivedatalist if set):
+  MRPFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
   MRPList <- lapply(lapply(as.list(MRPFileList), ReadMorphNexus), function(x) list(x$Matrix_1$Matrix, x$Topper$Header, x$Topper$Header))
@@ -121,7 +121,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   setwd(XMLDirectory)
   
   # List MRP files (or just use inslusivedatalist if set):
-  XMLFileList <- strsplit(ifelse(is.null(InclusiveDataList), paste(setdiff(gsub("\\.xml", "", list.files()), ExclusiveDataList), ".xml", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), ".xml", sep = "", collapse = "%%")), "%%")[[1]]
+  XMLFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("\\.xml", "", list.files()), ExclusiveDataList), ".xml", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), ".xml", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Check there are no MRPs not listed as XMLs and vice versa (should return empty vector):
   MRPXMLunion <- c(setdiff(gsub("\\.xml", "", XMLFileList), gsub("mrp\\.nex", "", MRPFileList)), setdiff(gsub("mrp\\.nex", "", MRPFileList), gsub("\\.xml", "", XMLFileList)))
