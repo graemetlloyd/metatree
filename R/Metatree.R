@@ -47,6 +47,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   BackboneConstraint = NULL
   MonophylyConstraint = NULL
   
+  # unique and sorted filenames!
+  
   # New Options (requires code to actually use them)
   #
   # HigherTaxaToCollapse Vector can be empty.
@@ -65,7 +67,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # MAKE STR OPTIONAL (SAVES A LITTLE TIME)
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
-  # CHECK FOR ABSENT RECON NAMES OR NUMBERS ("")
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE?
   
@@ -106,10 +107,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   setwd(MRPDirectory)
   
   # List MRP files (or just use inclusivedatalist if set):
-  MRPFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
+  MRPFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(sort(unique(InclusiveDataList)), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
-  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) list(x$Matrix_1$Matrix, x$Topper$Header, x$Topper$Header))
+  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", ""); names(y) <- c("Matrix", "Weights", "Parent", "Sibling"); y})
   
   # Set names of MRP files:
   names(MRPList) <- gsub("mrp.nex", "", MRPFileList)
@@ -121,7 +122,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   setwd(XMLDirectory)
   
   # List MRP files (or just use inslusivedatalist if set):
-  XMLFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("\\.xml", "", list.files()), ExclusiveDataList), ".xml", sep = "", collapse = "%%"), paste(setdiff(InclusiveDataList, ExclusiveDataList), ".xml", sep = "", collapse = "%%")), "%%")[[1]]
+  XMLFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("\\.xml", "", list.files()), sort(unique(ExclusiveDataList))), ".xml", sep = "", collapse = "%%"), paste(setdiff(sort(unique(InclusiveDataList)), sort(unique(ExclusiveDataList))), ".xml", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Check there are no MRPs not listed as XMLs and vice versa (should return empty vector):
   MRPXMLunion <- c(setdiff(gsub("\\.xml", "", XMLFileList), gsub("mrp\\.nex", "", MRPFileList)), setdiff(gsub("mrp\\.nex", "", MRPFileList), gsub("\\.xml", "", XMLFileList)))
@@ -129,70 +130,78 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Stop if MRP datasets not listed as XMLs and vice versa:
   if(length(MRPXMLunion) > 0) stop(paste("Datasets do not match (MRP and XML)!:", MRPXMLunion, collapse = " "))
   
-  # Empty vectors to store error-creating data sets:
-  duplicatedtaxonnames <- namematchissues <- vector(mode = "character")
+  # Read in all XML files and store in a list:
+  XMLList <- lapply(as.list(XMLFileList), function(x) ReadMetatreeXML(x))
   
-  # For each data set:
-  for(i in XMLFileList) {
-    
-    # Get currentfilename:
-    currentfilename <- gsub(".xml", "", i)
-    
-    # Extract XML text:
-    XMLString <- readLines(i)
-    
-    # Extract taxonomic resolution text only:
-    TaxonNoNameMatrix <- matrix(unlist(lapply(strsplit(unlist(lapply(strsplit(XMLString[grep("recon_name", XMLString)], "recon_name=\""), '[', 2)), "\" recon_no=\"|\"|</List>|>"), '[', c(1, 2, 4))), ncol = 3, byrow = TRUE, dimnames = list(c(), c("PaleoDBname", "PaleoDBnumber", "OTUName")))[, c(2, 1, 3)]
-    
-    # Deal with subgenera formatting:
-    TaxonNoNameMatrix[, "PaleoDBname"] <- gsub("_\\(|\\)", "", TaxonNoNameMatrix[, "PaleoDBname"])
-    
-    # Check for spaces in taxon names:
-    if(length(grep(" ", TaxonNoNameMatrix[, "OTUName"])) > 0) stop(paste("Found spaces in taxon names in ", i, ".", collapse = ""))
-    
-    # Check for spaces in taxon numbers:
-    if(length(grep(" ", TaxonNoNameMatrix[, "PaleoDBnumber"])) > 0) stop(paste("Found spaces in taxon numbers in ", i, ".", collapse = ""))
-    
-    # Match OTU names with initial reconciled values:
-    taxonmatches <- match(rownames(MRPList[[currentfilename]][[1]]), TaxonNoNameMatrix[, "OTUName"])
-    
-    # Check everything does match (if not add to match issues vector):
-    if(any(is.na(taxonmatches))) namematchissues <- c(namematchissues, currentfilename)
-    
-    # Check there are not duplicate taxa:
-    if(any(duplicated(sort((taxonmatches))))) duplicatedtaxonnames <- c(duplicatedtaxonnames, currentfilename)
-    
-    # Perform initial reconciliation of matrix names:
-    rownames(MRPList[[currentfilename]][[1]]) <- paste(TaxonNoNameMatrix[taxonmatches, "PaleoDBnumber"], TaxonNoNameMatrix[taxonmatches, "PaleoDBname"], sep = "%%%%")
-    
-    # Extract parent string:
-    ParentString <- gsub("\t|<Parent|Parent>|<|>|/| ", "", XMLString[grep("<Parent", XMLString)])
-    
-    # Extract sibling string:
-    SiblingString <- gsub("\t|<Sibling|Sibling>|<|>|/| ", "", XMLString[grep("<Sibling", XMLString)])
-    
-    # Update names of empty headers to their actual use (parent adn sibling strings):
-    names(MRPList[[currentfilename]])[1:3] <- c("matrix", "parent", "sibling")
-    
-    # Store parent and sibling strings ("" is empty as NULL deletes them from list):
-    MRPList[[currentfilename]][c("parent", "sibling")] <- c(ParentString, SiblingString)
-    
-  }
+  # Add names to XML list:
+  names(XMLList) <- gsub(".xml", "", XMLFileList)
   
-  # Stop and return braces issue (or non-matching taxa issue):
-  if(length(namematchissues) > 0) stop(paste(paste("Possible missing braces (<>), rogue period(s) (.), or non-matching taxon names in ", namematchissues, " XML file.", sep = ""), collapse = "\n"))
+  # Collapse to just pertinent information:
+  XMLList <- lapply(XMLList, function(x) {y <- list(); y[["TaxonMatrix"]] <- x$SourceTree$Taxa$TagContents; y[["Parent"]] <- unname(unlist(x$SourceTree$Parent)); y[["Sibling"]] <- unname(unlist(x$SourceTree$Sibling)); y})
   
-  # Stop and return duplicated OTU name matrices (if any):
-  if(length(duplicatedtaxonnames) > 0) stop(paste(paste("Possible duplicated taxa in ", duplicatedtaxonnames, " XML file.", sep = ""), collapse = "\n"))
+  # Find any files that contain duplicated taxon names:
+  FilesWithDuplicatedTaxonNames <- names(XMLList)[which(unlist(lapply(XMLList, function(x) any(duplicated(x$TaxonMatrix[, "ListValue"])))))]
   
+  # If duplicate names were found stop and warn user:
+  if(length(FilesWithDuplicatedTaxonNames) > 0) stop(paste("The following files contain duplicate taxon names: ", paste(FilesWithDuplicatedTaxonNames, collapse = ", "), ". Ensure all taxon names are unique and try again.", sep = ""))
+  
+  # Find any taxon names that do not match between MRP and XML:
+  TaxonMismatches <- mapply(function(x, y) {MRPNames <- rownames(x$Matrix); XMLNames <- y$TaxonMatrix[, "ListValue"]; c(setdiff(MRPNames, XMLNames), setdiff(XMLNames, MRPNames))}, x = MRPList, y = XMLList)
+  
+  # Find any files with mismatching taxon names between MRP and XML:
+  FilesWithTaxonMismatches <- names(TaxonMismatches)[which(unlist(lapply(TaxonMismatches, function(x) length(x))) > 0)]
+  
+  # If such files are found then stop and warn user:
+  if(length(FilesWithTaxonMismatches) > 0) stop(paste("The following files contain mismatching taxon names between the MRP and XML versions: ", paste(FilesWithTaxonMismatches, collapse = ", "), ". Ensure all taxon names match and try again.", sep = ""))
+  
+  # Compile any name issues:
+  NameIssues <- lapply(XMLList, function(x) {TaxonMatrix <- x$TaxonMatrix; SpacesFound <- c(grep(" ", TaxonMatrix[, "recon_name"]), grep(" ", TaxonMatrix[, "recon_no"]), grep(" ", TaxonMatrix[, "ListValue"])); EmptyValuesFound <- c(which(TaxonMatrix[, "recon_name"] == ""), which(TaxonMatrix[, "recon_no"] == ""), which(TaxonMatrix[, "ListValue"] == "")); RogueNumberCharacters <- setdiff(unique(unlist(strsplit(TaxonMatrix[, "recon_no"], ""))), c(0:9, ";", "-")); RogueNameCharacters <- setdiff(unique(c(unlist(strsplit(TaxonMatrix[, "recon_name"], "")), unlist(strsplit(TaxonMatrix[, "ListValue"], "")))), c(LETTERS, letters, 0:9, "_", ",")); y <- list(SpacesFound, EmptyValuesFound, RogueNumberCharacters, RogueNameCharacters); names(y) <- c("SpacesFound", "EmptyValuesFound", "RogueNumberCharacters", "RogueNameCharacters"); y})
+  
+  # Find any files with spaces in taxon names:
+  FilesWithSpaces <- names(NameIssues)[unlist(lapply(NameIssues, function(x) length(x$SpacesFound))) > 0]
+  
+  # Find any values with empty values for taxon names:
+  FilesWithEmptyValues <- names(NameIssues)[unlist(lapply(NameIssues, function(x) length(x$EmptyValuesFound))) > 0]
+  
+  # Files with rogue values in the recon number field:
+  FilesWithRogueTaxonNumbers <- names(NameIssues)[unlist(lapply(NameIssues, function(x) length(x$RogueNumberCharacters))) > 0]
+  
+  # Files with rogue values in the name fields:
+  FilesWithRogueTaxonNames <- names(NameIssues)[unlist(lapply(NameIssues, function(x) length(x$RogueNameCharacters))) > 0]
+  
+  # If issues with spaces in names stop and warn user:
+  if(length(FilesWithSpaces) > 0) stop(paste("The following files contain spaces in the taxonomic reconciliation (names or numbers): ", paste(FilesWithSpaces, collapse = ", "), ". Remove spaces and try again.", sep = ""))
+  
+  # If issues with empty names stop and warn user:
+  if(length(FilesWithEmptyValues) > 0) stop(paste("The following files contain empty values in the taxonomic reconciliation (names or numbers): ", paste(FilesWithEmptyValues, collapse = ", "), ". Ensure all values are filled and try again.", sep = ""))
+  
+  # If issues with rogue characters in number field stop and warn user:
+  if(length(FilesWithRogueTaxonNumbers) > 0) stop(paste("The following files contain rogue values in the taxonomic reconciliation (numbers): ", paste(FilesWithRogueTaxonNumbers, collapse = ", "), ". Ensure all taxon numbers only include semicolon(s) (the separating character) or dashes (for negative values) and try again.", sep = ""))
+  
+  # If issues with rogue characters in name field stop and warn user:
+  if(length(FilesWithRogueTaxonNames) > 0) stop(paste("The following files contain rogue values in the taxonomic reconciliation (names): ", paste(FilesWithRogueTaxonNames, collapse = ", "), ". Ensure all taxon names are formed from alphanumerics, commas (the separating character) or underscores and try again.", sep = ""))
+  
+  # Reconcile OTU names with XMP version:
+  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList, y = XMLList, SIMPLIFY = FALSE)
+
   # Print current processing status:
   cat("Done\nChecking for unsampled parents and siblings...")
   
   # Extract parent and sibling names:
-  ParentAndSiblingNames <- sort(unlist(lapply(as.list(unique(unname(unlist(lapply(MRPList, '[', c("parent", "sibling")))))), function(x) x[nchar(x) > 0])))
+  ParentAndSiblingNames <- sort(unlist(lapply(as.list(unique(unname(unlist(lapply(MRPList, '[', c("Parent", "Sibling")))))), function(x) x[nchar(x) > 0])))
   
   # Warn user about any unsampled parents and/or siblings:
   if(length(setdiff(ParentAndSiblingNames, names(MRPList))) > 0) print(paste("The following parents and siblings are not in the sample (check they are correct or add them into the sample): ", paste(setdiff(ParentAndSiblingNames, names(MRPList)), collapse = ", "), sep = ""))
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   # Print current processing status:
   cat("Done\nFinding initial multiple-taxon reconciliations...")
