@@ -264,13 +264,16 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Collapse any duplicate taxon names:
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
   
-  # GOT TO HERE WITH REFACTOR
-
   # Print current processing status:
   cat("Done\nBuilding initial taxonomy matrix...")
   
   # Create taxonomy matrix to store all taxon resolution data:
-  TaxonomyMatrix <- matrix(unlist(strsplit(sort(unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)))), "%%%%")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("TaxonNo", "TaxonName")))
+  TaxonomyMatrix <- do.call(matrix, strsplit(unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) rownames(x$Matrix))))), split ="%%%%"), ncol = 2)
+  
+  # Add column names:
+  colnames(TaxonomyMatrix) <- c("TaxonNo", "TaxonName")
+  
+  # GOT TO HERE WITH REFACTOR
   
   # Print current processing status:
   cat("Done\nChecking for missing taxon numbers...")
