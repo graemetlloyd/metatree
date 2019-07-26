@@ -268,12 +268,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nBuilding initial taxonomy matrix...")
   
   # Create taxonomy matrix to store all taxon resolution data:
-  TaxonomyMatrix <- do.call(matrix, strsplit(unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) rownames(x$Matrix))))), split ="%%%%"), ncol = 2)
+  TaxonomyMatrix <- do.call(rbind, strsplit(unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) rownames(x$Matrix))))), split ="%%%%"))
   
   # Add column names:
   colnames(TaxonomyMatrix) <- c("TaxonNo", "TaxonName")
-  
-  # GOT TO HERE WITH REFACTOR
   
   # Print current processing status:
   cat("Done\nChecking for missing taxon numbers...")
@@ -282,40 +280,40 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(any(TaxonomyMatrix[, "TaxonNo"] == "-1")) stop(paste("The following taxa have the reconciliation number \"-1\": ", paste(TaxonomyMatrix[TaxonomyMatrix[, "TaxonNo"] == "-1", "TaxonName"], collapse = ", "), sep = ""))
   
   # Print current processing status:
-  cat("Done\nChecking for combined taxon numbers...")
+  cat("Done\nChecking for combined taxon numbers (&)...")
   
-  # If any "-1" taxa found stop and tell user:
+  # If any "&" taxa found stop and tell user:
   if(length(grep("&", TaxonomyMatrix[, "TaxonNo"]))) stop(paste("The following taxa have multiple reconciliation numbers: ", paste(TaxonomyMatrix[grep("&", TaxonomyMatrix[, "TaxonNo"]), "TaxonName"], collapse = ", "), sep = ""))
   
   # Print current processing status:
   cat("Done\nBuilding initial Paleobiology Database reconciliation list...")
   
   # Create resolved taxon numbers matrix:
-  resolvedtaxonnumbers <- cbind(unique(TaxonomyMatrix[, "TaxonNo"]), PaleobiologyDBTaxaQuerier(taxon_nos = unique(TaxonomyMatrix[, "TaxonNo"]), interval = NULL))
+  ResolvedTaxonNumbers <- cbind(unique(TaxonomyMatrix[, "TaxonNo"]), PaleobiologyDBTaxaQuerier(taxon_nos = unique(TaxonomyMatrix[, "TaxonNo"]), interval = NULL))
   
   # Deal with subgenera:
-  resolvedtaxonnumbers[, "TaxonName"] <- gsub(" \\(|\\)", "", resolvedtaxonnumbers[, "TaxonName"])
+  ResolvedTaxonNumbers[, "TaxonName"] <- gsub(" \\(|\\)", "", ResolvedTaxonNumbers[, "TaxonName"])
   
   # Add column names to first value (input number):
-  colnames(resolvedtaxonnumbers)[1] <- "InputNo"
+  colnames(ResolvedTaxonNumbers)[1] <- "InputNo"
   
   # If specifying an Interval:
   if(!all(is.null(Interval))) {
     
     # Do same query for just taxa in Interval:
-    resolvedtaxonnumbersInterval <- cbind(unique(TaxonomyMatrix[, "TaxonNo"]), PaleobiologyDBTaxaQuerier(taxon_nos = unique(TaxonomyMatrix[, "TaxonNo"]), interval = Interval))
+    ResolvedTaxonNumbersInterval <- cbind(unique(TaxonomyMatrix[, "TaxonNo"]), PaleobiologyDBTaxaQuerier(taxon_nos = unique(TaxonomyMatrix[, "TaxonNo"]), interval = Interval))
     
     # Deal with subgenera:
-    resolvedtaxonnumbersInterval[, "TaxonName"] <- gsub(" \\(|\\)", "", resolvedtaxonnumbersInterval[, "TaxonName"])
+    ResolvedTaxonNumbersInterval[, "TaxonName"] <- gsub(" \\(|\\)", "", ResolvedTaxonNumbersInterval[, "TaxonName"])
     
     # Invert variable so only includes taxa outside Interval:
-    resolvedtaxonnumbersInterval <- resolvedtaxonnumbers[is.na(resolvedtaxonnumbersInterval[, "TaxonName"]), ]
+    ResolvedTaxonNumbersInterval <- ResolvedTaxonNumbers[is.na(ResolvedTaxonNumbersInterval[, "TaxonName"]), ]
     
     # Find any nomen dubia etc. to delete:
-    deleterows <- which(unlist(lapply(lapply(lapply(as.list(resolvedtaxonnumbersInterval[, "TaxonValidity"]), match, x = deletes), sort), length)) > 0)
+    deleterows <- which(unlist(lapply(lapply(lapply(as.list(ResolvedTaxonNumbersInterval[, "TaxonValidity"]), match, x = deletes), sort), length)) > 0)
     
     # If there are deletes then remove them from the matrix:
-    if(length(deleterows) > 0) resolvedtaxonnumbersInterval <- resolvedtaxonnumbersInterval[-deleterows, , drop = FALSE]
+    if(length(deleterows) > 0) ResolvedTaxonNumbersInterval <- ResolvedTaxonNumbersInterval[-deleterows, , drop = FALSE]
     
   }
   
@@ -329,7 +327,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in 1:nrow(TaxonomyMatrix)) {
     
     # Get resolved name:
-    resolvedname <- gsub(" ", "_", resolvedtaxonnumbers[which(resolvedtaxonnumbers[, "InputNo"] == TaxonomyMatrix[i, "TaxonNo"]), "TaxonName"])
+    resolvedname <- gsub(" ", "_", ResolvedTaxonNumbers[which(ResolvedTaxonNumbers[, "InputNo"] == TaxonomyMatrix[i, "TaxonNo"]), "TaxonName"])
     
     # Get input name:
     inputname <- TaxonomyMatrix[i, "TaxonName"]
@@ -354,7 +352,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nChecking taxon validities...")
   
   # Check for any new kind of resolution (should be empty vector):
-  newresolutions <- setdiff(sort(unique(resolvedtaxonnumbers[, "TaxonValidity"])), c(deletes, synonyms))
+  newresolutions <- setdiff(sort(unique(ResolvedTaxonNumbers[, "TaxonValidity"])), c(deletes, synonyms))
   
   # Stop if new resolutiosn found (need to add these to the resolution types above):
   if(length(newresolutions) > 0) stop(paste("New resolution type found!: ", newresolutions, sep = ""))
@@ -366,16 +364,16 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   synonymrows <- c()
   
   # Find all junior synonym rows:
-  for(i in synonyms) synonymrows <- sort(c(synonymrows, which(resolvedtaxonnumbers[, "TaxonValidity"] == i)))
+  for(i in synonyms) synonymrows <- sort(c(synonymrows, which(ResolvedTaxonNumbers[, "TaxonValidity"] == i)))
   
   # Set junior synonym matrix:
-  juniorsynonyms <- resolvedtaxonnumbers[synonymrows, ]
+  juniorsynonyms <- ResolvedTaxonNumbers[synonymrows, ]
   
   # Create empty matrix to store senior synoyms:
   seniorsynonyms <- matrix(nrow = 0, ncol = 8, dimnames = list(c(), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")))
   
   # Reconcile senior synonym with database:
-  currenttaxa <- PaleobiologyDBTaxaQuerier(gsub("txn:", "", resolvedtaxonnumbers[synonymrows, "AcceptedNumber"]))
+  currenttaxa <- PaleobiologyDBTaxaQuerier(gsub("txn:", "", ResolvedTaxonNumbers[synonymrows, "AcceptedNumber"]))
   
   # Deal with subgenera:
   currenttaxa[, "TaxonName"] <- gsub(" \\(|\\)", "", currenttaxa[, "TaxonName"])
@@ -401,38 +399,45 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(!all(is.null(Interval))) {
     
     # Update resolved taxon numbers to valid taxa only:
-    resolvedtaxonnumbersInterval[which(!is.na(match(resolvedtaxonnumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms[match(resolvedtaxonnumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"])[!is.na(match(resolvedtaxonnumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
+    ResolvedTaxonNumbersInterval[which(!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms[match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"])[!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
     
   }
   
-  # Print current processing status:
-  cat("Done\nChecking validity of indeterminate taxon reconciliations...")
-  
-  # Get list of indeterminates:
-  indeterminates <- TaxonomyMatrix[which((unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "aff"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "cf"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "indet"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "sp"), sum))) > 0), "TaxonName"]
-  
-  # For each indeterminate:
-  for(i in indeterminates) {
+  # Only complete this step if including specimen-level OTUs:
+  if(IncludeSpecimenLevelOTUs) {
     
-    # Get resolved row number:
-    resolvedrownumber <- which(resolvedtaxonnumbers[, "InputNo"] == TaxonomyMatrix[which(TaxonomyMatrix[, "TaxonName"] == i), "TaxonNo"])
+    # Print current processing status:
+    cat("Done\nChecking validity of indeterminate taxon reconciliations...")
     
-    # If a possible invalid taxon (validity is not blank):
-    if(!is.na(resolvedtaxonnumbers[resolvedrownumber, "TaxonValidity"])) {
+    # Get list of indeterminates:
+    indeterminates <- TaxonomyMatrix[which((unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "aff"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "cf"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "indet"), sum)) + unlist(lapply(lapply(strsplit(TaxonomyMatrix[, "TaxonName"], "_"), '==', "sp"), sum))) > 0), "TaxonName"]
+    
+    # For each indeterminate:
+    for(i in indeterminates) {
       
-      # Get accepted number of taxon (may be NA):
-      AcceptedNumber <- gsub("txn:", "", resolvedtaxonnumbers[resolvedrownumber, "AcceptedNumber"])
+      # Get resolved row number:
+      resolvedrownumber <- which(ResolvedTaxonNumbers[, "InputNo"] == TaxonomyMatrix[which(TaxonomyMatrix[, "TaxonName"] == i), "TaxonNo"])
       
-      # If accepted number is blank (NA) stop adn warn user taxon is invalid:
-      if(is.na(AcceptedNumber)) stop(paste(i, " assigned to a taxon that is invalid, consider renaming.", sep = ""))
-      
-      # If accepted numebr is different to input number stop and warn user taxon is synonymised:
-      if(AcceptedNumber != resolvedtaxonnumbers[resolvedrownumber, "InputNo"]) stop(paste(i, " assigned to a taxon that is invalid, consider renaming.", sep = ""))
+      # If a possible invalid taxon (validity is not blank):
+      if(!is.na(ResolvedTaxonNumbers[resolvedrownumber, "TaxonValidity"])) {
+        
+        # Get accepted number of taxon (may be NA):
+        AcceptedNumber <- gsub("txn:", "", ResolvedTaxonNumbers[resolvedrownumber, "AcceptedNumber"])
+        
+        # If accepted number is blank (NA) stop adn warn user taxon is invalid:
+        if(is.na(AcceptedNumber)) stop(paste(i, " assigned to a taxon that is invalid, consider renaming.", sep = ""))
+        
+        # If accepted numebr is different to input number stop and warn user taxon is synonymised:
+        if(AcceptedNumber != ResolvedTaxonNumbers[resolvedrownumber, "InputNo"]) stop(paste(i, " assigned to a taxon that is invalid, consider renaming.", sep = ""))
+        
+      }
       
     }
     
   }
   
+  # GOT TO HERE WITH REFACTOR
+
   # Print current processing status:
   cat("Done\nDeleting taxa resolved as nomen dubium and the like...")
   
@@ -440,10 +445,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   deleterows <- deleterowsInterval <- c()
   
   # Find all junior synonym rows:
-  for(i in deletes) deleterows <- sort(c(deleterows, which(resolvedtaxonnumbers[, "TaxonValidity"] == i)))
+  for(i in deletes) deleterows <- sort(c(deleterows, which(ResolvedTaxonNumbers[, "TaxonValidity"] == i)))
   
   # Get input numbers that should be deleted:
-  numberstodelete <- resolvedtaxonnumbers[deleterows, "InputNo"]
+  numberstodelete <- ResolvedTaxonNumbers[deleterows, "InputNo"]
   
   # Create list of taxon numbers to check for data sets with DELETE resolutions:
   taxonnumberslist <- lapply(lapply(lapply(lapply(lapply(lapply(lapply(lapply(MRPList[which(unlist(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), length)) > 0)], '[[', 1), rownames), strsplit, split = "%%%%"), unlist), matrix, ncol = 2, byrow = TRUE), '[', ,1), strsplit, split = "&"), unlist)
@@ -536,22 +541,22 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   ValidOTUNames <- unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)))[grep("_", unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames))))]
   
   # Replace junior with senior synonyms in resolved names matrix:
-  resolvedtaxonnumbers[synonymrows, c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms
+  ResolvedTaxonNumbers[synonymrows, c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms
   
   # Overwrite resolved number with resolved taxon number:
-  resolvedtaxonnumbers[, "ResolvedTaxonNo"] <- gsub("txn:|var:", "", unlist(lapply(lapply(apply(resolvedtaxonnumbers[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, sort), rev), '[', 1)))
+  ResolvedTaxonNumbers[, "ResolvedTaxonNo"] <- gsub("txn:|var:", "", unlist(lapply(lapply(apply(ResolvedTaxonNumbers[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, sort), rev), '[', 1)))
   
   # Remove original taxon number column:
-  resolvedtaxonnumbers <- resolvedtaxonnumbers[, -which(colnames(resolvedtaxonnumbers) == "OriginalTaxonNo")]
+  ResolvedTaxonNumbers <- ResolvedTaxonNumbers[, -which(colnames(ResolvedTaxonNumbers) == "OriginalTaxonNo")]
   
   # Remove deleted taxa from resolved names matrix (if there are any):
-  if(length(which(!is.na(resolvedtaxonnumbers[, "TaxonValidity"]))) > 0) resolvedtaxonnumbers <- resolvedtaxonnumbers[-which(!is.na(resolvedtaxonnumbers[, "TaxonValidity"])), ]
+  if(length(which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"]))) > 0) ResolvedTaxonNumbers <- ResolvedTaxonNumbers[-which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"])), ]
   
   # Reformat parent taxon numbers into just numbers:
-  resolvedtaxonnumbers[, "ParentTaxonNo"] <- gsub("txn:", "", resolvedtaxonnumbers[, "ParentTaxonNo"])
+  ResolvedTaxonNumbers[, "ParentTaxonNo"] <- gsub("txn:", "", ResolvedTaxonNumbers[, "ParentTaxonNo"])
   
   # Collapse resolved matrix to just field with values (i.e., drop valid and senior synonym columns):
-  resolvedtaxonnumbers <- resolvedtaxonnumbers[, c("ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo")]
+  ResolvedTaxonNumbers <- ResolvedTaxonNumbers[, c("ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo")]
   
   # If doing something with missing species (i.e., those not currently included as OTUs, but existing in target clade):
   if(MissingSpecies != "exclude") {
@@ -563,13 +568,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     AllChildren[, "TaxonName"] <- gsub(" \\(|\\)", "", AllChildren[, "TaxonName"])
     
     # If inserting all missing species get all possible species parent numbers:
-    if(MissingSpecies == "all") CurrentSpeciesParentNumbers <- unique(c(gsub("txn:", "", AllChildren[, "ParentTaxonNo"]), resolvedtaxonnumbers[which(resolvedtaxonnumbers[, "TaxonRank"] == 3), "ParentTaxonNo"]))
+    if(MissingSpecies == "all") CurrentSpeciesParentNumbers <- unique(c(gsub("txn:", "", AllChildren[, "ParentTaxonNo"]), ResolvedTaxonNumbers[which(ResolvedTaxonNumbers[, "TaxonRank"] == 3), "ParentTaxonNo"]))
     
     # If only inserting missing species at genus-level find parent numbers of all current species (i.e., potential genera to add):
-    if(MissingSpecies == "genus") CurrentSpeciesParentNumbers <- unique(resolvedtaxonnumbers[which(resolvedtaxonnumbers[, "TaxonRank"] == 3), "ParentTaxonNo"])
+    if(MissingSpecies == "genus") CurrentSpeciesParentNumbers <- unique(ResolvedTaxonNumbers[which(ResolvedTaxonNumbers[, "TaxonRank"] == 3), "ParentTaxonNo"])
     
     # Find any parents not already present in resolved numbers matrix:
-    AsYetUnsampledSpeciesParents <- setdiff(CurrentSpeciesParentNumbers, resolvedtaxonnumbers[, "ResolvedTaxonNo"])
+    AsYetUnsampledSpeciesParents <- setdiff(CurrentSpeciesParentNumbers, ResolvedTaxonNumbers[, "ResolvedTaxonNo"])
     
     # If such parents exist:
     if(length(AsYetUnsampledSpeciesParents) > 0) {
@@ -584,7 +589,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       ValidGenusRows <- intersect(which(is.na(CurrentSpeciesParents[, "TaxonValidity"])), which(CurrentSpeciesParents[, "TaxonRank"] == "5"))
       
       # If there are valid genera then add these to resolved taxon numbers:
-      if(length(ValidGenusRows) > 0) resolvedtaxonnumbers <- rbind(resolvedtaxonnumbers, cbind(unname(gsub("txn:|var:", "", unlist(lapply(lapply(lapply(apply(CurrentSpeciesParents[ValidGenusRows, c("OriginalTaxonNo", "ResolvedTaxonNo"), drop = FALSE], 1, list), unlist), sort, decreasing = TRUE), '[', 1)))), CurrentSpeciesParents[ValidGenusRows, c("TaxonName", "TaxonRank")] , gsub("txn:", "", CurrentSpeciesParents[ValidGenusRows, "ParentTaxonNo"])))
+      if(length(ValidGenusRows) > 0) ResolvedTaxonNumbers <- rbind(ResolvedTaxonNumbers, cbind(unname(gsub("txn:|var:", "", unlist(lapply(lapply(lapply(apply(CurrentSpeciesParents[ValidGenusRows, c("OriginalTaxonNo", "ResolvedTaxonNo"), drop = FALSE], 1, list), unlist), sort, decreasing = TRUE), '[', 1)))), CurrentSpeciesParents[ValidGenusRows, c("TaxonName", "TaxonRank")] , gsub("txn:", "", CurrentSpeciesParents[ValidGenusRows, "ParentTaxonNo"])))
       
     }
     
@@ -603,7 +608,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     if(MissingSpecies == "genus") {
       
       # Get current genus numbers (to check what has already been included):
-      CurrentGenusNumbers <- resolvedtaxonnumbers[which(resolvedtaxonnumbers[, "TaxonRank"] == 5), "ResolvedTaxonNo"]
+      CurrentGenusNumbers <- ResolvedTaxonNumbers[which(ResolvedTaxonNumbers[, "TaxonRank"] == 5), "ResolvedTaxonNo"]
       
       # Get children of sampled genera:
       GeneraChildren <- PaleobiologyDBChildFinder(taxon_nos = CurrentGenusNumbers, validonly = TRUE, returnrank = "3")
@@ -620,15 +625,15 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     }
     
     # Find any new children not already included in resolved taxon numbers list:
-    ChildrenToAdd <- setdiff(NewChildren[, 1], resolvedtaxonnumbers[, "ResolvedTaxonNo"])
+    ChildrenToAdd <- setdiff(NewChildren[, 1], ResolvedTaxonNumbers[, "ResolvedTaxonNo"])
     
     # If there are children to add then add them to resolved taxon numbers:
-    if(length(ChildrenToAdd) > 0) resolvedtaxonnumbers <- rbind(resolvedtaxonnumbers, NewChildren[match(ChildrenToAdd, NewChildren[, 1]), ])
+    if(length(ChildrenToAdd) > 0) ResolvedTaxonNumbers <- rbind(ResolvedTaxonNumbers, NewChildren[match(ChildrenToAdd, NewChildren[, 1]), ])
     
   }
   
   # Get initial parent child relationships based on OTUs:
-  parentchildrelationships <- paste(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), resolvedtaxonnumbers[match(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to ")
+  parentchildrelationships <- paste(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[match(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to ")
   
   # Find which rows correspond to indeterminate and sp taxa (i.e., those where parent should be initial reconciliation):
   indetsandsps <- sort(c(which(unlist(lapply(lapply(lapply(lapply(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 2), strsplit, split = "_"), unlist), '==', "indet"), any))), which(unlist(lapply(lapply(lapply(lapply(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 2), strsplit, split = "_"), unlist), '==', "sp"), any)))))
@@ -643,7 +648,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   while(length(newchildren) > 0) {
     
     # Find any numbers missing for the taxonomy name resolution matrix:
-    missingfromresolutions <- newchildren[which(is.na(match(newchildren, resolvedtaxonnumbers[, "ResolvedTaxonNo"])))]
+    missingfromresolutions <- newchildren[which(is.na(match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"])))]
     
     # If there are such numbers:
     if(length(missingfromresolutions) > 0) {
@@ -655,29 +660,29 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       rawquery[, "TaxonName"] <- gsub(" \\(|\\)", "", rawquery[, "TaxonName"])
       
       # Add formatted results of query to resolved names matrix:
-      resolvedtaxonnumbers <- rbind(resolvedtaxonnumbers, cbind(gsub("txn:|var:", "", unname(unlist(lapply(lapply(lapply(apply(rawquery[, c("OriginalTaxonNo", "ResolvedTaxonNo"), drop = FALSE], 1, list), unlist), sort, decreasing = TRUE), '[', 1)))), rawquery[, c("TaxonName", "TaxonRank"), drop = FALSE], gsub("txn:", "", rawquery[, "ParentTaxonNo"])))
+      ResolvedTaxonNumbers <- rbind(ResolvedTaxonNumbers, cbind(gsub("txn:|var:", "", unname(unlist(lapply(lapply(lapply(apply(rawquery[, c("OriginalTaxonNo", "ResolvedTaxonNo"), drop = FALSE], 1, list), unlist), sort, decreasing = TRUE), '[', 1)))), rawquery[, c("TaxonName", "TaxonRank"), drop = FALSE], gsub("txn:", "", rawquery[, "ParentTaxonNo"])))
       
     }
     
     # Add new parent child relationships to list:
-    parentchildrelationships <- c(parentchildrelationships, paste(resolvedtaxonnumbers[match(newchildren, resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "ResolvedTaxonNo"], resolvedtaxonnumbers[match(newchildren, resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to "))
+    parentchildrelationships <- c(parentchildrelationships, paste(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ResolvedTaxonNo"], ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to "))
     
     # Update new children:
-    newchildren <- setdiff(resolvedtaxonnumbers[match(newchildren, resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], "28595")
+    newchildren <- setdiff(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], "28595")
     
   }
   
   # If Life is missing then add it at bottom:
-  if(all(!resolvedtaxonnumbers[, "ResolvedTaxonNo"] == "28595")) resolvedtaxonnumbers <- rbind(resolvedtaxonnumbers, c("28595", "Life", "25", NA))
+  if(all(!ResolvedTaxonNumbers[, "ResolvedTaxonNo"] == "28595")) ResolvedTaxonNumbers <- rbind(ResolvedTaxonNumbers, c("28595", "Life", "25", NA))
   
   # Convert parent-child relationships into a matrix (columns for child and parent):
   parentchildmatrix <- matrix(unlist(strsplit(parentchildrelationships, split = " belongs to ")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Child", "Parent")))
   
   # Update parent-child matrix with child names:
-  parentchildmatrix[, "Child"] <- resolvedtaxonnumbers[match(parentchildmatrix[, "Child"], resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "TaxonName"]
+  parentchildmatrix[, "Child"] <- ResolvedTaxonNumbers[match(parentchildmatrix[, "Child"], ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "TaxonName"]
   
   # Update parent-child matrix with parent names:
-  parentchildmatrix[, "Parent"] <- resolvedtaxonnumbers[match(parentchildmatrix[, "Parent"], resolvedtaxonnumbers[, "ResolvedTaxonNo"]), "TaxonName"]
+  parentchildmatrix[, "Parent"] <- ResolvedTaxonNumbers[match(parentchildmatrix[, "Parent"], ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "TaxonName"]
   
   # Add valid OTU names into parent-child matrix:
   parentchildmatrix[c(1:length(ValidOTUNames)), "Child"] <- unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 2))
@@ -772,7 +777,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   }
   
   # Modify this if using intervals:
-  if(!all(is.null(Interval))) NewValidOTUs <- setdiff(NewValidOTUs, gsub(" ", "_", resolvedtaxonnumbersInterval[, "TaxonName"]))
+  if(!all(is.null(Interval))) NewValidOTUs <- setdiff(NewValidOTUs, gsub(" ", "_", ResolvedTaxonNumbersInterval[, "TaxonName"]))
   
   # Can now strip out numbers from taxon names:
   for(i in 1:length(MRPList)) if(!is.null(rownames(MRPList[[i]]$Matrix))) rownames(MRPList[[i]]$Matrix) <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))
@@ -850,7 +855,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(!all(is.null(Interval))) {
     
     # Find any rows to delete (because they represent taxa outside the Interval):
-    RowsToDelete <- sort(match(gsub(" ", "_", resolvedtaxonnumbersInterval[resolvedtaxonnumbersInterval[, "TaxonRank"] == "3", "TaxonName"]), rownames(TaxonomyMRP)))
+    RowsToDelete <- sort(match(gsub(" ", "_", ResolvedTaxonNumbersInterval[ResolvedTaxonNumbersInterval[, "TaxonRank"] == "3", "TaxonName"]), rownames(TaxonomyMRP)))
     
     # If found then remove these from the taxonomy MRP:
     if(length(RowsToDelete) > 0) TaxonomyMRP <- TaxonomyMRP[-RowsToDelete, , drop = FALSE]
@@ -898,7 +903,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   TaxaToDelete <- setdiff(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)), NewValidOTUs)
   
   # If applying an Interval then add taxa outside of it to the deletes list:
-  if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", resolvedtaxonnumbersInterval[resolvedtaxonnumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
+  if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", ResolvedTaxonNumbersInterval[ResolvedTaxonNumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
   
   # Find data sets with taxa to delete:
   datasetswithtaxatodelete <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), intersect, y = TaxaToDelete), length)) > 0)
