@@ -258,20 +258,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # GOT TO HERE WITH REFACTOR
 
   # Print current processing status:
-  cat("Done\nPruning any data sets where all taxa were marked as \"DELETE\"...")
-  
-  # If there are any
-  if(length(which(unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol)) == 0)) > 0) {
-    
-    # Get names of data sets to be pruned:
-    NamesToRemove <- names(which(unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol)) == 0))
-    
-    # Prune from MRP List:
-    MRPList <- MRPList[-match(NamesToRemove, names(MRPList))]
-    
-  }
-  
-  # Print current processing status:
   cat("Done\nSearching for and collapsing pre-reconciliation duplicated taxa...")
   
   # Create empty vector to store data sets with duplicated initially reconciled OTU names:
