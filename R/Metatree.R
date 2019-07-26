@@ -36,7 +36,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
   XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
   TargetClade <- "Ichthyopterygia"
-  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a"))
+  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
   ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
   HigherTaxaToCollapse = c()
   MissingSpecies = "exclude"
@@ -67,6 +67,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE?
   
+  # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
+  ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
+
   # Check MRPDirectory is formatted correctly adn stop and warn user if not:
   if(!all(is.character(MRPDirectory)) || length(MRPDirectory) != 1) stop("MRPDirectory must be a single character string indicating the path to the folder containing the MRP files.")
   
@@ -143,7 +146,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(length(FilesWithDuplicatedTaxonNames) > 0) stop(paste("The following files contain duplicate taxon names: ", paste(FilesWithDuplicatedTaxonNames, collapse = ", "), ". Ensure all taxon names are unique and try again.", sep = ""))
   
   # Find any taxon names that do not match between MRP and XML:
-  TaxonMismatches <- mapply(function(x, y) {MRPNames <- rownames(x$Matrix); XMLNames <- y$TaxonMatrix[, "ListValue"]; c(setdiff(MRPNames, XMLNames), setdiff(XMLNames, MRPNames))}, x = MRPList, y = XMLList)
+  TaxonMismatches <- mapply(function(x, y) {MRPNames <- rownames(x$Matrix); XMLNames <- y$TaxonMatrix[, "ListValue"]; c(setdiff(MRPNames, XMLNames), setdiff(XMLNames, MRPNames))}, x = MRPList[names(MRPList)], y = XMLList[names(MRPList)])
   
   # Find any files with mismatching taxon names between MRP and XML:
   FilesWithTaxonMismatches <- names(TaxonMismatches)[which(unlist(lapply(TaxonMismatches, function(x) length(x))) > 0)]
@@ -178,8 +181,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # If issues with rogue characters in name field stop and warn user:
   if(length(FilesWithRogueTaxonNames) > 0) stop(paste("The following files contain rogue values in the taxonomic reconciliation (names): ", paste(FilesWithRogueTaxonNames, collapse = ", "), ". Ensure all taxon names are formed from alphanumerics, commas (the separating character) or underscores and try again.", sep = ""))
   
-  # Reconcile OTU names with XMP version:
-  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); x$FileName <- y$FileName; if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList, y = XMLList, SIMPLIFY = FALSE)
+  # Reconcile OTU names with XML version:
+  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); x$FileName <- y$FileName; if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList[names(MRPList)], y = XMLList[names(MRPList)], SIMPLIFY = FALSE)
 
   # Print current processing status:
   cat("Done\nChecking for unsampled parents and siblings...")
@@ -235,13 +238,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Separate out multi-taxon reconcilations:
   MRPList <- lapply(MRPList, SeparateMultiTaxonReconciliations)
   
-  # If excluding speciman-level OTUs:
+  # If excluding specimen-level OTUs:
   if(!IncludeSpecimenLevelOTUs) {
     
     # Print current processing status:
     cat("Done\nRemoving specimen-level OTUs...")
     
-    # Convert specimen-;evel OTUs to taxa to DELETE:
+    # Convert specimen-level OTUs to taxa to DELETE:
     MRPList <- lapply(MRPList, function(x) {RowNamesToDelete <- which(unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) sum(y == "_") > 2))); if(length(RowNamesToDelete) > 0) rownames(x$Matrix)[RowNamesToDelete] <- "0%%%%DELETE"; x})
     
   }
@@ -253,64 +256,16 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList <- lapply(MRPList, function(x) {DeleteRows <- which(unlist(lapply(strsplit(rownames(x$Matrix), split = "%%%%"), function(y) y[2])) == "DELETE"); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
   
   # Prune matrices following deletion:
-  MRPList <- lapply(MRPList, function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
-  
-  # GOT TO HERE WITH REFACTOR
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
 
   # Print current processing status:
   cat("Done\nSearching for and collapsing pre-reconciliation duplicated taxa...")
   
-  # Create empty vector to store data sets with duplicated initially reconciled OTU names:
-  duplicatedresolvedOTUs <- vector(mode = "character")
+  # Collapse any duplicate taxon names:
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
   
-  # For each data set:
-  for(i in names(MRPList)) {
-    
-    # Case if any (initially) resolved names are non-unique:
-    if(any(duplicated(sort(rownames(MRPList[[i]]$Matrix))))) {
-      
-      # Get duplicated taxon name(s):
-      duplicatedtaxa <- unique(sort(rownames(MRPList[[i]]$Matrix))[duplicated(sort(rownames(MRPList[[i]]$Matrix)))])
-      
-      # For each duplicated taxon:
-      for(j in duplicatedtaxa) {
-        
-        # Get rows for taxon:
-        duplicaterows <- which(rownames(MRPList[[i]]$Matrix) == j)
-        
-        # Build duplicated matrix from other taxa:
-        tempMRPmatrix <- matrix(rep(MRPList[[i]]$Matrix[-duplicaterows, ], length(duplicaterows)), ncol = ncol(MRPList[[i]]$Matrix) * length(duplicaterows), dimnames = list(rownames(MRPList[[i]]$Matrix)[-duplicaterows], c()))
-        
-        # Add duplicated taxon as single row:
-        tempMRPmatrix <- rbind(tempMRPmatrix, as.vector(t(MRPList[[i]]$Matrix[duplicaterows, ])))
-        
-        # Add duplicated taxon name:
-        rownames(tempMRPmatrix)[nrow(tempMRPmatrix)] <- j
-        
-        # Update stored MRP matrix:
-        MRPList[[i]]$Matrix <- tempMRPmatrix
-        
-      }
-      
-      # Collapse to just unique characters (has to be outside the above or breaks if more than one duplicate taxon):
-      MRPList[[i]]$Matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
-      
-      # Store duplicated OTU names:
-      duplicatedresolvedOTUs <- c(duplicatedresolvedOTUs, paste("Duplicated resolved OTUs (", paste(unlist(lapply(strsplit(duplicatedtaxa, "%%%%"), '[', 2)), collapse = ", "), ") in: ", i, ".\n", sep = ""))
-      
-    }
-    
-    # Format MRP as NEXUS type matrix:
-    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE)
-    
-    # Collapse MRP matrix (removes redundant characters created by taxon deletions):
-    MRPList[[i]]$Matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
-    
-  }
-  
-  # Warn user if there are initially duplicated reconciled taxa (user should check):
-  if(length(duplicatedresolvedOTUs) > 0) cat(paste(duplicatedresolvedOTUs, collapse = ""))
-  
+  # GOT TO HERE WITH REFACTOR
+
   # Print current processing status:
   cat("Done\nBuilding initial taxonomy matrix...")
   
