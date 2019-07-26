@@ -246,30 +246,17 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  # GOT TO HERE WITH REFACTOR
-
   # Print current processing status:
   cat("Done\nRemoving taxa with initial reconciliations of \"DELETE\"...")
   
-  # For each data set:
-  for(i in names(MRPList)) {
-    
-    # Find delete rows (initial ones - may remove some later through:
-    deleterows <- which(matrix(unlist(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%")), ncol = 2, byrow = TRUE)[, 2] == "DELETE")
-    
-    # If there are deletes:
-    if(length(deleterows) > 0) {
-      
-      # Remove deleted taxon rows:
-      MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[-deleterows, , drop = FALSE]
-      
-      # If less than three taxa then just delete all columns (characters) too:
-      if(nrow(MRPList[[i]]$Matrix) < 3) MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[, -c(1:ncol(MRPList[[i]]$Matrix)), drop = FALSE]
-      
-    }
-    
-  }
+  # Remove any taxa reconciled as DELETE:
+  MRPList <- lapply(MRPList, function(x) {DeleteRows <- which(unlist(lapply(strsplit(rownames(x$Matrix), split = "%%%%"), function(y) y[2])) == "DELETE"); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
   
+  # Prune matrices following deletion:
+  MRPList <- lapply(MRPList, function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  
+  # GOT TO HERE WITH REFACTOR
+
   # Print current processing status:
   cat("Done\nPruning any data sets where all taxa were marked as \"DELETE\"...")
   
