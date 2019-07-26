@@ -47,8 +47,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   BackboneConstraint = NULL
   MonophylyConstraint = NULL
   
-  # unique and sorted filenames!
-  
   # New Options (requires code to actually use them)
   #
   # HigherTaxaToCollapse Vector can be empty.
@@ -110,7 +108,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPFileList <- strsplit(ifelse(exists(InclusiveDataList), paste(setdiff(gsub("mrp\\.nex", "", list.files()), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(sort(unique(InclusiveDataList)), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
-  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", ""); names(y) <- c("Matrix", "Weights", "Parent", "Sibling"); y})
+  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", "", ""); names(y) <- c("Matrix", "Weights", "FileName", "Parent", "Sibling"); y})
   
   # Set names of MRP files:
   names(MRPList) <- gsub("mrp.nex", "", MRPFileList)
@@ -137,7 +135,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   names(XMLList) <- gsub(".xml", "", XMLFileList)
   
   # Collapse to just pertinent information:
-  XMLList <- lapply(XMLList, function(x) {y <- list(); y[["TaxonMatrix"]] <- x$SourceTree$Taxa$TagContents; y[["Parent"]] <- unname(unlist(x$SourceTree$Parent)); y[["Sibling"]] <- unname(unlist(x$SourceTree$Sibling)); y})
+  XMLList <- lapply(XMLList, function(x) {y <- list(); y[["TaxonMatrix"]] <- x$SourceTree$Taxa$TagContents; y[["FileName"]] <- unname(unlist(x$SourceTree$Filename)); y[["Parent"]] <- unname(unlist(x$SourceTree$Parent)); y[["Sibling"]] <- unname(unlist(x$SourceTree$Sibling)); y})
   
   # Find any files that contain duplicated taxon names:
   FilesWithDuplicatedTaxonNames <- names(XMLList)[which(unlist(lapply(XMLList, function(x) any(duplicated(x$TaxonMatrix[, "ListValue"])))))]
@@ -182,7 +180,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(length(FilesWithRogueTaxonNames) > 0) stop(paste("The following files contain rogue values in the taxonomic reconciliation (names): ", paste(FilesWithRogueTaxonNames, collapse = ", "), ". Ensure all taxon names are formed from alphanumerics, commas (the separating character) or underscores and try again.", sep = ""))
   
   # Reconcile OTU names with XMP version:
-  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList, y = XMLList, SIMPLIFY = FALSE)
+  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); x$FileName <- y$FileName; if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList, y = XMLList, SIMPLIFY = FALSE)
 
   # Print current processing status:
   cat("Done\nChecking for unsampled parents and siblings...")
@@ -193,16 +191,14 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Warn user about any unsampled parents and/or siblings:
   if(length(setdiff(ParentAndSiblingNames, names(MRPList))) > 0) print(paste("The following parents and siblings are not in the sample (check they are correct or add them into the sample): ", paste(setdiff(ParentAndSiblingNames, names(MRPList)), collapse = ", "), sep = ""))
   
-  # GOT TO HERE WITH REFACTOR
-  
   # Print current processing status:
   cat("Done\nFinding initial multiple-taxon reconciliations...")
   
-  # For each data set:
-  for(i in names(MRPList)) {
-    
+  # Subfunction to make multi-taxon reconciliations unique OTUs:
+  SeparateMultiTaxonReconciliations <- function(ListBlock) {
+  
     # Find comma rows (multiple taxa in initial reconciliation):
-    commarows <- grep(",", rownames(MRPList[[i]]$Matrix))
+    commarows <- grep(",", rownames(ListBlock$Matrix))
     
     # If there is at least one multiple-taxon reconciliation:
     if(length(commarows) > 0) {
@@ -211,7 +207,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       for(j in rev(commarows)) {
         
         # Get multiple names of reconciliation:
-        multiplenames <- strsplit(rownames(MRPList[[i]]$Matrix)[j], "%%%%")[[1]]
+        multiplenames <- strsplit(rownames(ListBlock$Matrix)[j], "%%%%")[[1]]
         
         # Get multiple-taxon numbers:
         multitaxonnumbers <- strsplit(multiplenames[1], ";")[[1]]
@@ -219,26 +215,31 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
         # Get multiple-taxon names:
         multitaxonnames <- strsplit(multiplenames[2], ",")[[1]]
         
-        # Check data intergirty with respect to multiple-taxon values:
-        if(length(multitaxonnumbers) != length(multitaxonnames)) stop(paste("Problem with multiple-taxon reconciliation(s) in ", i, " (check commas and semi-colons are correct; i.e., of same length).", sep = ""))
+        # Check data integrity with respect to multiple-taxon values:
+        if(length(multitaxonnumbers) != length(multitaxonnames)) stop(paste("Problem with multiple-taxon reconciliation(s) in ", ListBlock$FileName, " (check commas and semi-colons are correct; i.e., of same length).", sep = ""))
         
         # Add new rows at base of matrix:
-        MRPList[[i]]$Matrix <- rbind(MRPList[[i]]$Matrix, matrix(rep(MRPList[[i]]$Matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
+        ListBlock$Matrix <- rbind(ListBlock$Matrix, matrix(rep(ListBlock$Matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
         
         # Remove now redundant row from matrix:
-        MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[-j, , drop = FALSE]
+        ListBlock$Matrix <- ListBlock$Matrix[-j, , drop = FALSE]
         
       }
       
     }
     
+    # Return updated list block:
+    return(ListBlock)
+    
   }
   
+  # Separate out multi-taxon reconcilations:
+  MRPList <- lapply(MRPList, SeparateMultiTaxonReconciliations)
   
-  
-  
-  
-  
+  # GOT TO HERE WITH REFACTOR
+
+  #IncludeSpecimenLevelOTUs
+  #lapply(MRPList, function(x) rownames(x$Matrix)[unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) sum(y == "_") > 2))])
   
   # Print current processing status:
   cat("Done\nRemoving taxa with initial reconciliations of \"DELETE\"...")
