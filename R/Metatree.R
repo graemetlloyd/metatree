@@ -52,7 +52,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # HigherTaxaToCollapse Vector can be empty.
   # VeilLine TRUE/FALSE (will be in output)
   # SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
-  # IncludeSpecimenLevelOTUs TRUE/FALSE
   # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default.
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default.
   
@@ -236,11 +235,19 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Separate out multi-taxon reconcilations:
   MRPList <- lapply(MRPList, SeparateMultiTaxonReconciliations)
   
+  # If excluding speciman-level OTUs:
+  if(!IncludeSpecimenLevelOTUs) {
+    
+    # Print current processing status:
+    cat("Done\nRemoving specimen-level OTUs...")
+    
+    # Convert specimen-;evel OTUs to taxa to DELETE:
+    MRPList <- lapply(MRPList, function(x) {RowNamesToDelete <- which(unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) sum(y == "_") > 2))); if(length(RowNamesToDelete) > 0) rownames(x$Matrix)[RowNamesToDelete] <- "0%%%%DELETE"; x})
+    
+  }
+  
   # GOT TO HERE WITH REFACTOR
 
-  #IncludeSpecimenLevelOTUs
-  #lapply(MRPList, function(x) rownames(x$Matrix)[unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) sum(y == "_") > 2))])
-  
   # Print current processing status:
   cat("Done\nRemoving taxa with initial reconciliations of \"DELETE\"...")
   
