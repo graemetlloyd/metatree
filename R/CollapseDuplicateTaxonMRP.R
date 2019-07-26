@@ -55,9 +55,9 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
     CharactersToUse <- unlist(mapply(function(x, y) rep(x, y), x = as.list(1:ncol(DuplicatedBlock)), y = as.list(apply(DuplicatedBlock, 2, function(x) length(unique(x))))))
     
     # Build new block (without duplicated taxon):
-    NewBlock <- MRPMatrix$Matrix_1$Matrix[-DuplicateRows, CharactersToUse]
+    NewBlock <- MRPMatrix$Matrix_1$Matrix[-DuplicateRows, CharactersToUse, drop = FALSE]
     
-    # Add duplicatd taxon to new block:
+    # Add duplicated taxon to new block:
     NewBlock <- rbind(NewBlock, unlist(apply(DuplicatedBlock, 2, function(x) as.list(unique(x)))))
     
     # Add duplicated taxon as row name:
@@ -87,7 +87,7 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
   for(i in DuplicatedNames) MRPMatrix <- CollapseDuplicateTaxonMRPMatrix(MRPMatrix = MRPMatrix, DuplicatedTaxon = i)
   
   # Resort matrix by original taxon ordering:
-  MRPMatrix$Matrix_1$Matrix <- MRPMatrix$Matrix_1$Matrix[UniqueTaxonNames, ]
+  MRPMatrix$Matrix_1$Matrix <- MRPMatrix$Matrix_1$Matrix[UniqueTaxonNames, , drop = FALSE]
   
   # Return MRP matrix:
   return(MRPMatrix)
