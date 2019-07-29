@@ -33,27 +33,26 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(), IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL) {
   
-  #MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
-  #XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
-  #TargetClade <- "Ichthyopterygia"
-  #InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
-  #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  #HigherTaxaToCollapse = c()
-  #MissingSpecies = "exclude"
-  #Interval = NULL
-  #VeilLine = TRUE
-  #SpeciesToExclude = c()
-  #IncludeSpecimenLevelOTUs = TRUE
-  #BackboneConstraint = NULL
-  #MonophylyConstraint = NULL
+  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
+  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
+  TargetClade <- "Ichthyopterygia"
+  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
+  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  HigherTaxaToCollapse = c()
+  MissingSpecies = "exclude"
+  Interval = NULL
+  VeilLine = TRUE
+  SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
+  IncludeSpecimenLevelOTUs = TRUE
+  BackboneConstraint = NULL
+  MonophylyConstraint = NULL
   
   # New Options (requires code to actually use them)
   #
   # HigherTaxaToCollapse Vector can be empty.
   # VeilLine TRUE/FALSE (will be in output)
-  # SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
-  # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default.
-  # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default.
+  # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default. Allow to be an input file too.
+  # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
   
   # CHECK PARENT IS A DATA SET AND NOT A REFERENCE, E.G., IF ENTER A REFERENCE AS PARENT THEN PARENT TURNS OUT TO HAVE TWO DATA SETS
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
@@ -898,10 +897,24 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Find any remaining taxa that now need to be deleted (outgroups to target clade and empty higher taxa):
   TaxaToDelete <- setdiff(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)), NewValidOTUs)
   
+  # If there are species to exclude:
+  if(length(SpeciesToExclude) > 0) {
+    
+    # Build vector of all current OTU names:
+    OTUNames <- unique(unlist(lapply(MRPList, function(x) rownames(x$Matrix))))
+    
+    # Find any missing names (in exclude list but not in tree):
+    MissingNames <- setdiff(SpeciesToExclude, OTUNames)
+    
+    # If any are found stop and warn user:
+    if(length(MissingNames) > 0) stop(paste("The following SpeciesToExclude were not actually found in the data: ", paste(MissingNames, collapse = ", "), ". Check they are spelled correctly and try again.", sep = ""))
+    
+    # Add species to exclude to taxa to delete:
+    TaxaToDelete <- unique(c(TaxaToDelete, SpeciesToExclude))
   
-  ####
-  # ADD IN TXA TO DLETE HERE ENSURING THEY INTERSECT WITH VALID OTUS AND WARN IF NOT THERE
+  }
   
+  ###
   
   # If applying an Interval then add taxa outside of it to the deletes list:
   if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", ResolvedTaxonNumbersInterval[ResolvedTaxonNumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
