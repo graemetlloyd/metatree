@@ -34,9 +34,9 @@ Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
 
 \item{IncludeSpecimenLevelOTUs}{A logical indicating whther specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.}
 
-\item{BackboneConstraint}{A Newick string of a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
+\item{BackboneConstraint}{Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 
-\item{MonophylyConstraint}{A Newick string of a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
+\item{MonophylyConstraint}{Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 }
 \value{
 TBC.

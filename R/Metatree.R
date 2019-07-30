@@ -33,19 +33,19 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(), IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL) {
   
-  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
-  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
-  TargetClade <- "Ichthyopterygia"
-  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
-  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
-  MissingSpecies = "exclude"
-  Interval = NULL
-  VeilLine = TRUE
-  SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
-  IncludeSpecimenLevelOTUs = TRUE
-  BackboneConstraint = "Moon_inpressa"
-  MonophylyConstraint = NULL
+  #MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
+  #XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
+  #TargetClade <- "Ichthyopterygia"
+  #InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
+  #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  #HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
+  #MissingSpecies = "exclude"
+  #Interval = NULL
+  #VeilLine = TRUE
+  #SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
+  #IncludeSpecimenLevelOTUs = TRUE
+  #BackboneConstraint = "Moon_inpressa"
+  #MonophylyConstraint = NULL
   
   # New Options (requires code to actually use them)
   #
@@ -53,10 +53,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
   
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES TOO (AND CHECK THEY CAN EVEN MESH!)
-  # CHECK PARENT IS A DATA SET AND NOT A REFERENCE, E.G., IF ENTER A REFERENCE AS PARENT THEN PARENT TURNS OUT TO HAVE TWO DATA SETS
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
   # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY)
-  # NEED SOME TEST THAT HELPS CHECK ROOT IS SENSIBLE
+  # NEED SOME TEST THAT HELPS CHECK ROOT IS SENSIBLE (CAN DO WHEN MATCH TAXONOMY TO DATA SETS FOR CHUNKING)
   # NEED SOME TEST THAT HELPS DETERMINE IF MULTIPLE OCCURRENCES OF SAME TAXON AFTER RECONCILIATION IS CORRECT OR AN ERROR
   # ADD MORE COMPLEX WEIGHTS BY USING ADDITIONAL CHARACTER STATES! (EACH DATASET TOTAL WEIGHT DETERMINED BY YEAR AND DEPENDENCE THEN SUBDIVIDED ACROSS CHARACTER?) - BUT THIS SEEMS TO SLOW THINGS DRAMATICALLY MAYBE DO BY DUPLICATING CHARACTERS INSTEAD
   # MAKE STR OPTIONAL (SAVES A LITTLE TIME)
@@ -64,6 +63,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
   # ADD INPUT WEIGHT OPTION (WILL WANT TO WEIGHT FOR DATA SET NOT CHARACTERS AS THESE CAN CHANGE IN PROCESSING, E.G. HAVE EVERY CHARACTER BE SAME WEIGHT IN DATA SET)
   # ADD INVERSE OPTION OF SPECIES TO EXCLUDE (SPECIES TO INCLUDE)
+  # CHUNK AND WORK OUT HOW TO CALL TNT AND PARALLELISE
   
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
@@ -502,10 +502,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Prune characters made redundant by these collapses:
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
-
-# GOT TO HERE WITH REFACTOR
-
-###
+  
+  # GOT TO HERE WITH REFACTOR (BUT HAVE JUMPED AROUND A BUNCH, SO...)
 
   # Print current processing status:
   cat("Done\nBuilding taxonomy...")
@@ -1044,8 +1042,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # For empty data sets make sure matrix is zero-by-zero and weights have no lengths:
   MRPList <- lapply(MRPList, function(x) {MatrixSize <- nrow(x$Matrix) * ncol(x$Matrix); if(MatrixSize == 0) {x$Matrix <- matrix(nrow = 0, ncol = 0); x$Weights <- vector(mode = "numeric")}; x})
   
-  ###
-
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
   
@@ -1156,6 +1152,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   
   
+  
   ######
   
   # Print current processing status:
@@ -1164,7 +1161,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Equation 1 in Supplementary Information of Lloyd et al. (2016):
   publicationyearweights <- 10 * 2^(0.5 * (publicationyears - CurrentVeilYear))
   
-  # Get indepenece weights (using siblings data):
+  # Get independece weights (using siblings data):
   independenceweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), length))), 2, max)
   
   # Get N characters weight (to avoid ucnertain data sets swamping the signal):
