@@ -917,42 +917,14 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   }
   
-  # Find data sets with taxa to delete:
-  datasetswithtaxatodelete <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), intersect, y = TaxaToDelete), length)) > 0)
+  # Delete taxa from every matrix they occur in:
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {DeleteRows <- match(intersect(TaxaToDelete, rownames(x$Matrix)), rownames(x$Matrix)); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
   
-  # If there are such data sets:
-  if(length(datasetswithtaxatodelete) > 0) {
-    
-    # For each data set with taxa to delete (done in reverse order in case deletions are found):
-    for(i in rev(datasetswithtaxatodelete)) {
-      
-      # Collapse matrix to just valid OTUs:
-      MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[intersect(rownames(MRPList[[i]]$Matrix), NewValidOTUs), , drop = FALSE]
-      
-      # Get logical for how many characters are variable:
-      VariableCharacters <- unlist(lapply(lapply(lapply(apply(matrix(apply(MRPList[[i]]$Matrix, 2, paste, collapse = "")), 1, strsplit, split = ""), unlist), unique), length)) > 1
-      
-      # As long as there are variable characters:
-      if(any(VariableCharacters)) {
-        
-        # If there are less than three taxa left collapse to a zero-column matrix:
-        if(nrow(MRPList[[i]]$Matrix) < 3) MRPList[[i]]$Matrix <- MRPList[[i]]$Matrix[, -c(1:ncol(MRPList[[i]]$Matrix)), drop = FALSE]
-        
-        # If there are at least three taxa left (minimum for meaning) collapse to just meaningful:
-        if(nrow(MRPList[[i]]$Matrix) >= 3) MRPList[[i]]$Matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
-        
-      # If there are no variable characters:
-      } else {
-        
-        # Remove ith data set from MRP list (as has no meaningful characters):
-        MRPList <- MRPList[-i]
-        
-      }
-      
-    }
-    
-  }
+  # Prune redundant characters from matrices following taxon deletion(s):
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
+  ###
+
   # Print current processing status:
   cat("Done\nProducing taxonomy tree...")
   
