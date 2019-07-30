@@ -1005,67 +1005,59 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
   
-  # Get publication years for each data set:
-  publicationyears <- as.numeric(gsub("[:a-z:]", "", gsub("inpress", strsplit(as.character(Sys.Date()), "-")[[1]][1], unlist(lapply(lapply(strsplit(names(MRPList), "_"), rev), '[', 1)))))
+  # Add publication year to each data set (in presses are ascribed the current year):
+  MRPList <- lapply(MRPList, function(x) {x$PublicationYear <- gsub("[:A-Z:a-z:]|_", "", gsub("inpress", strsplit(as.character(Sys.Date()), "-")[[1]][1], x$FileName)); x})
   
-  # Get parent (data set) data:
-  parentsdata <- unlist(lapply(MRPList, '[[', "Parent"))
+  # Find any missing parents:
+  MissingParents <- setdiff(unique(unname(unlist(lapply(MRPList, function(x) x$Parent[nchar(x$Parent) > 0])))), names(MRPList))
   
-  # Get sibling (data set) data:
-  siblingsdata <- unlist(lapply(MRPList, '[[', "Sibling"))
+  # Find all parent data set names:
+  ParentDataSets <- sort(unique(unname(unlist(lapply(MRPList, function(x) x$Parent[nchar(x$Parent) > 0])))))
   
-  # Get multiple-offspring data sets:
-  multioffspringdatasets <- unique(sort(parentsdata[which(nchar(parentsdata) > 0)])[which(duplicated(sort(parentsdata[which(nchar(parentsdata) > 0)])))])
+  # Get child data sets for each parent:
+  ChildDataSets <- lapply(as.list(ParentDataSets), function(x) unname(unlist(mapply(function(x, y) y$FileName[y$Parent == x], x = x, y = MRPList))))
   
-  # If there are such data sets:
-  if(length(multioffspringdatasets) > 0) {
+  # Add names to child data sets:
+  names(ChildDataSets) <- ParentDataSets
+  
+  # Now include any grandchildren, greatgrandchildren etc.:
+  ChildDataSets <- lapply(ChildDataSets, function(x) sort(unique(c(x, unname(unlist(ChildDataSets[intersect(x, names(ChildDataSets))]))))))
+  
+  # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
+  MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); x$Parent <- names(which(unlist(lapply(ChildDataSets, function(y) length(intersect(y, x$FileName)))) > 0)); x})
+  
+  # Get any redundnat parent data sets (all taxa included in at least one child data set):
+  RedundantParents <- unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) {ActiveParent <- setdiff(x$Parent[nchar(x$Parent) > 0], MissingParents); if(length(ActiveParent) > 0) if(length(setdiff(rownames(MRPList[[ActiveParent]]$Matrix), rownames(x$Matrix))) == 0) x$Parent}))))
+  
+  # If redundant parents were found then collapsee these data sets back to empty matrix and weights::
+  if(length(RedundantParents) > 0) MRPList[RedundantParents] <- lapply(MRPList[RedundantParents], function(x) {x$Matrix <- matrix(ncol = 0, nrow = 0); x$Weights <- vector(mode = "numeric"); x})
+  
+  # Find any remaining active parent data sets:
+  ActiveParents <- names(which(unlist(lapply(MRPList[setdiff(ParentDataSets, MissingParents)], function(x) nrow(x$Matrix) * ncol(x$Matrix))) > 0))
+  
+  # If active parents remain:
+  if(length(ActiveParents) > 0) {
     
-    # Update siblings data accordingly:
-    for(i in multioffspringdatasets) siblingsdata[which(parentsdata == i)] <- paste(names(which(parentsdata == i)), collapse = "%%%%")
+    # Add children of active parent to siblings:
+    MRPList[ActiveParents] <- lapply(MRPList[ActiveParents], function(x) {SiblingVector <- unique(c(ChildDataSets[[x$FileName]], x$Sibling)); x$Sibling <- unique(SiblingVector[nchar(SiblingVector) > 0]); x})
     
-  }
-  
-  # Create pool of parents present amongst data sets (children of them must also be present by definition):
-  parentspresentinpool <- intersect(parentsdata, names(MRPList))
-  
-  # Create empty vector to store data sets to remove from pool:
-  datasetstoremove <- vector(mode = "character")
-  
-  # For each parent in pool:
-  for(i in parentspresentinpool) {
-    
-    # Case if parent made redundant:
-    if(any(unlist(lapply(lapply(lapply(lapply(MRPList[which(parentsdata == i)], '[[', 1), rownames), setdiff, x = rownames(MRPList[[i]]$Matrix)), length)) == 0)) {
-      
-      # Add data set to remove list:
-      datasetstoremove <- c(datasetstoremove, i)
-      
-    # Case if parent not redundant (becomes sibling):
-    } else {
-      
-      # Update siblings data with parent:
-      siblingsdata[sort(c(i, names(MRPList[which(parentsdata == i)])))] <- paste(sort(c(names(MRPList[which(parentsdata == i)]), unlist(strsplit(siblingsdata[sort(c(i, names(MRPList[which(parentsdata == i)])))], "%%%%")))), collapse = "%%%%")
-      
-    }
+    # Add parent as sibling of offspring:
+    MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, intersect(x$Parent, ActiveParents)); if(any(nchar(SiblingVector) > 0)) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- sort(unique(SiblingVector)); x})
     
   }
   
-  # Expunge data sets to remove from siblings lists:
-  siblingsdata <- unlist(lapply(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), setdiff, y = datasetstoremove), paste, collapse = "%%%%"))
+  # Find any empty data sets to remove:
+  RemovedSourceData <- names(which(unlist(lapply(MRPList, function(x) nrow(x$Matrix) * ncol(x$Matrix))) == 0))
   
-  # Remove now redundant data sets from siblings:
-  siblingsdata <- siblingsdata[-match(datasetstoremove, names(MRPList))]
+  # Remove datas ets from MRPList:
+  MRPList[RemovedSourceData] <- NULL
   
-  # Remove sibling relationships of size one (effectively pointless!):
-  if(length(intersect(which(nchar(siblingsdata) > 0), setdiff(c(1:length(siblingsdata)), grep("%%%%", siblingsdata)))) > 0) siblingsdata[intersect(which(nchar(siblingsdata) > 0), setdiff(c(1:length(siblingsdata)), grep("%%%%", siblingsdata)))] <- ""
+  # Remove any dead siblings:
+  MRPList <- lapply(MRPList, function(x) {x$Sibling <- intersect(x$Sibling, names(MRPList)); x})
   
-  # Remove now redundant data sets from publication years (if there are any):
-  if(length(datasetstoremove) > 0) publicationyears <- publicationyears[-match(datasetstoremove, names(MRPList))]
+  #######
   
-  # Remove now redundant data sets from MRP list (if there are any):
-  if(length(datasetstoremove) > 0) MRPList <- MRPList[-match(datasetstoremove, names(MRPList))]
-  
-  # ABOVE NEEDS TO NOT HAPPEN!
+  # Veil line that shit
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
@@ -1145,10 +1137,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list)
+  output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData)
   
   # Add names:
-  names(output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa")
+  names(output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData")
   
   # Print current processing status:
   cat("Done")
