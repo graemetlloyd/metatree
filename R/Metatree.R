@@ -97,7 +97,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
   
   # List of types of resolution that require changing reconciliation to DELETE:
-  deletes <- c("nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
+  DeletionCategories <- c("nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
   
   # Print current processing status:
   cat("Reading MRP data...")
@@ -428,58 +428,25 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     }
     
   }
-  
-  # GOT TO HERE WITH REFACTOR
 
   # Print current processing status:
   cat("Done\nDeleting taxa resolved as nomen dubium and the like...")
   
-  # Empty vector to store rows that correspond to some form of junior synonym:
-  DeleteRows <- DeleteRowsInterval <- c()
-  
-  # Find all junior synonym rows:
-  for(i in deletes) DeleteRows <- sort(c(DeleteRows, which(ResolvedTaxonNumbers[, "TaxonValidity"] == i)))
-  
   # Get input numbers that should be deleted:
-  numberstodelete <- ResolvedTaxonNumbers[DeleteRows, "InputNo"]
+  NumbersToDelete <- ResolvedTaxonNumbers[unlist(lapply(as.list(DeletionCategories), function(x) which(ResolvedTaxonNumbers[, "TaxonValidity"] == x))), "InputNo"]
   
-  # Create list of taxon numbers to check for data sets with DELETE resolutions:
-  taxonnumberslist <- lapply(lapply(lapply(lapply(lapply(lapply(lapply(lapply(MRPList[which(unlist(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), length)) > 0)], '[[', 1), rownames), strsplit, split = "%%%%"), unlist), matrix, ncol = 2, byrow = TRUE), '[', ,1), strsplit, split = "&"), unlist)
-  
-  # Create empty vector to store datasets with deletes (that can then be processed):
-  datasetswithdeletes <- vector(mode = "character")
-  
-  # For each delete number find data sets that have it and add them to the vector:
-  for(i in numberstodelete) datasetswithdeletes <- sort(unique(c(datasetswithdeletes, names(which(unlist(lapply(lapply(taxonnumberslist, '==', i), sum)) > 0)))))
-  
-  # For each dataset with at least one taxon to delete:
-  for(i in datasetswithdeletes) {
+  # As long as there are numbers to delete:
+  if(length(NumbersToDelete) > 0) {
     
-    # Isolate taxon numbers for current dataset:
-    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 1))
+    # Remove any taxa to delete:
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {TaxonNumbers <- do.call(rbind, strsplit(rownames(x$Matrix), split = "%%%%"))[, 1]; DeleteRows <- sort(match(NumbersToDelete, TaxonNumbers)); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
     
-    # Convert into list to deal with multi-number higher taxa:
-    taxonnumbers <- lapply(lapply(as.list(taxonnumbers), strsplit, split = "&"), unlist)
-    
-    # Create empty vector to store taxa to delete:
-    taxatodelete <- vector(mode = "numeric")
-    
-    # Find any taxa to delete present in the data set:
-    for(j in numberstodelete) taxatodelete <- sort(unique(c(taxatodelete, which(unlist(lapply(lapply(taxonnumbers, '==', j), any))))))
-    
-    # Find any multi-number higher taxa that are listed as deletes:
-    multinumberhighertaxatodelete <- taxatodelete[which(unlist(lapply(taxonnumbers[taxatodelete], length)) > 1)]
-    
-    # Stop if you find a multi-number higher taxon that is (at least partially) to be deleted):
-    if(length(multinumberhighertaxatodelete) > 0) stop(paste("Multi-number higher tax(a) listed to delete: ", paste(unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))[multinumberhighertaxatodelete], sep = ","), " (NB: check the status of these).", sep = ""))
-    
-    # Create MRP matrix:
-    MRPmatrix <- MakeMorphMatrix(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE], header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE])), ordering = rep("unord", ncol(MRPList[[i]]$Matrix[-taxatodelete, , drop = FALSE])), equalise.weights = FALSE)
-    
-    # Overwrite matrix with collapsed version following taxon deletions:
-    MRPList[[i]]$Matrix <- MRPCollapse(MRPmatrix)$Matrix_1$Matrix
+    # Prune matrices following deletion:
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
   }
+  
+  # GOT TO HERE WITH REFACTOR
   
   # Print current processing status:
   cat("Done\nReplacing junior synonyms with senior synonyms...")
@@ -1055,6 +1022,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   }
   
   ###
+  
+  # AT THS STAGE WANT TO PROPERLY COLLAPSE MRPLIST FILES WHERE MATRIX HAS LOST ROWS OR COLUMNS
 
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
