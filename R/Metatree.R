@@ -38,7 +38,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   TargetClade <- "Ichthyopterygia"
   InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
   ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  HigherTaxaToCollapse = c()
+  HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
   MissingSpecies = "exclude"
   Interval = NULL
   VeilLine = TRUE
@@ -49,11 +49,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # New Options (requires code to actually use them)
   #
-  # HigherTaxaToCollapse Vector can be empty.
   # VeilLine TRUE/FALSE (will be in output)
   # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default. Allow to be an input file too.
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
   
+  # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES TOO (AND CHECK THEY CAN EVEN MESH!)
   # CHECK PARENT IS A DATA SET AND NOT A REFERENCE, E.G., IF ENTER A REFERENCE AS PARENT THEN PARENT TURNS OUT TO HAVE TWO DATA SETS
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
   # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY)
@@ -64,7 +64,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
   
-  # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE?
+  # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
@@ -897,6 +897,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Find any remaining taxa that now need to be deleted (outgroups to target clade and empty higher taxa):
   TaxaToDelete <- setdiff(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)), NewValidOTUs)
   
+  # If applying an Interval then add taxa outside of it to the deletes list:
+  if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", ResolvedTaxonNumbersInterval[ResolvedTaxonNumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
+  
   # If there are species to exclude:
   if(length(SpeciesToExclude) > 0) {
     
@@ -913,11 +916,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     TaxaToDelete <- unique(c(TaxaToDelete, SpeciesToExclude))
   
   }
-  
-  ###
-  
-  # If applying an Interval then add taxa outside of it to the deletes list:
-  if(!all(is.null(Interval))) TaxaToDelete <- unique(c(TaxaToDelete, gsub(" ", "_", ResolvedTaxonNumbersInterval[ResolvedTaxonNumbersInterval[, "TaxonRank"] == "3", "TaxonName"])))
   
   # Find data sets with taxa to delete:
   datasetswithtaxatodelete <- which(unlist(lapply(lapply(lapply(lapply(MRPList, '[[', "Matrix"), rownames), intersect, y = TaxaToDelete), length)) > 0)
@@ -943,7 +941,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
         # If there are at least three taxa left (minimum for meaning) collapse to just meaningful:
         if(nrow(MRPList[[i]]$Matrix) >= 3) MRPList[[i]]$Matrix <- MRPCollapse(MakeMorphMatrix(MRPList[[i]]$Matrix, header = "", weights = rep(1, ncol(MRPList[[i]]$Matrix)), ordering = rep("unord", ncol(MRPList[[i]]$Matrix)), equalise.weights = FALSE))$Matrix_1$Matrix
         
-        # If there are no variable characters:
+      # If there are no variable characters:
       } else {
         
         # Remove ith data set from MRP list (as has no meaningful characters):
@@ -964,7 +962,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Get order of columns to collapse to form MRP
   columncollapseorder <- order(apply(TaxonomyMRPNewick, 2, sum))
   
-  # For each column ("clade") in order from samllest to largest:
+  # For each column ("clade") in order from smallest to largest:
   for(i in columncollapseorder) {
     
     # Get taxa present in current clade:
@@ -986,6 +984,75 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Ladderize taxonomy tree for neatness!:
   TaxonomyMRPTree <- ladderize(read.tree(text = TaxonomyMRPNewick))
+  
+  # If there are higher taxa to collapse:
+  if(length(HigherTaxaToCollapse) > 0) {
+    
+    # Print current processing status:
+    cat("Done\nCollapsing higher taxa...")
+    
+    # Find any higher taxa actually present in target clade:
+    HigherTaxaInTargetClade <- colnames(TaxonomyMRP)
+    
+    # Find any missing names (in collapse list but not in taxonomy):
+    MissingHigherTaxa <- setdiff(HigherTaxaToCollapse, HigherTaxaInTargetClade)
+    
+    # If any are found stop and warn user:
+    if(length(MissingHigherTaxa) > 0) stop(paste("The following HigherTaxaToCollapse were not actually found in the data: ", paste(MissingHigherTaxa, collapse = ", "), ". Check they are spelled correctly and are valid (according to the Paleobiology Database) and try again.", sep = ""))
+    
+    # Check the clades are all unique (not internested) and if not then stop and warn user:
+    if(any(duplicated(unlist(lapply(as.list(HigherTaxaToCollapse), function(x) rownames(TaxonomyMRP[TaxonomyMRP[, colnames(TaxonomyMRP) == x] == 1, ])))))) stop("HigherTaxaToCollapse contains clades that are internested. Remove the internested clades and try again.")
+    
+    # Build taxa to rename matrix:
+    TaxaToRenameMatrix <- do.call(rbind, lapply(as.list(HigherTaxaToCollapse), function(x) unname(cbind(x, rownames(TaxonomyMRP[TaxonomyMRP[, colnames(TaxonomyMRP) == x] == 1, ])))))
+    
+    # Build list of each clade's species compliment:
+    CladeContentsList <- lapply(as.list(TaxonomyMRPTree$node.label), function(x) {NodeNumber <- which(TaxonomyMRPTree$node.label == x) + Ntip(TaxonomyMRPTree); TaxonomyMRPTree$tip.label[FindDescendants(n = NodeNumber, tree = TaxonomyMRPTree)]})
+    
+    # Add names of clades:
+    names(CladeContentsList) <- TaxonomyMRPTree$node.label
+    
+    # Find any subsumed clades (to be removed from taxonomy MRP):
+    SubsumedClades <- unlist(lapply(as.list(HigherTaxaToCollapse), function(x) {CurrentClade <- which(names(CladeContentsList) == x); TempCladeContents <- CladeContentsList[-CurrentClade]; names(which(unlist(lapply(TempCladeContents, function(x) length(setdiff(x, CladeContentsList[[CurrentClade]])))) == 0))}))
+    
+    # Build block to add to taxonomy MRP out of first taxon inside each clade to collapse:
+    BlockToAddToTaxonomyMRP <- do.call(rbind, lapply(as.list(HigherTaxaToCollapse), function(x) TaxonomyMRP[TaxaToRenameMatrix[which(TaxaToRenameMatrix[, 1] == x)[1], 2], ]))
+    
+    # Add uppercase rownames to
+    rownames(BlockToAddToTaxonomyMRP) <- toupper(HigherTaxaToCollapse)
+    
+    # Add to taxonomy MRP:
+    TaxonomyMRP <- rbind(TaxonomyMRP, BlockToAddToTaxonomyMRP)
+    
+    # Collapse taxonomy MRP down by removing clades and the species from the collapsed clades:
+    TaxonomyMRP <- TaxonomyMRP[-unlist(lapply(as.list(TaxaToRenameMatrix[, 2]), function(x) which(rownames(TaxonomyMRP) == x))), -unlist(lapply(as.list(c(HigherTaxaToCollapse, SubsumedClades)), function(x) which(colnames(TaxonomyMRP) == x))), drop = FALSE]
+    
+    # Remove all but one collapsed taxa from each clade from the tree:
+    TaxonomyMRPTree <- drop.tip(TaxonomyMRPTree, TaxaToRenameMatrix[-unlist(lapply(as.list(HigherTaxaToCollapse), function(x) which(TaxaToRenameMatrix[, 1] == x)[1])), 2])
+    
+    # Ladderize taxonomy tree for neatness!:
+    TaxonomyMRPTree <- ladderize(TaxonomyMRPTree)
+    
+    # Build tips to replace matrix:
+    TipsToReplaceMatrix <- do.call(rbind, lapply(as.list(HigherTaxaToCollapse), function(x) TaxaToRenameMatrix[which(TaxaToRenameMatrix[, 1] == x)[1], ]))
+    
+    # Replace tip names in tree:
+    TaxonomyMRPTree$tip.label[unlist(lapply(apply(TipsToReplaceMatrix, 1, as.list), function(x) {x <- unlist(x); which(TaxonomyMRPTree$tip.label == x[2])}))] <- toupper(TipsToReplaceMatrix[, 1])
+    
+    # Replace names in MRP matrices:
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {CurrentRownames <- rownames(x$Matrix); NamesToReplace <- intersect(CurrentRownames, TaxaToRenameMatrix[, 2]); if(length(NamesToReplace) > 0) rownames(x$Matrix)[match(NamesToReplace, rownames(x$Matrix))] <- toupper(TaxaToRenameMatrix[match(NamesToReplace, TaxaToRenameMatrix[, 2]), 1]); x})
+    
+    # Collapse any duplicate taxa created by this substitution (very likely!):
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
+    
+    # Update new valid OTUs:
+    NewValidOTUs <- sort(rownames(TaxonomyMRP))
+    
+    # HAVE TO EDIT CONSTRAINT TREES TOO, INCLUDING DELETING TAXA!
+    
+  }
+  
+  ###
   
   # Print current processing status:
   cat("Done\nAdding NAs for indet. and sp. subclades to taxonomy MRP...")
@@ -1050,7 +1117,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       # Add data set to remove list:
       datasetstoremove <- c(datasetstoremove, i)
       
-      # Case if parent not redundant (becomes sibling):
+    # Case if parent not redundant (becomes sibling):
     } else {
       
       # Update siblings data with parent:
