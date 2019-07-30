@@ -1052,33 +1052,38 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  ###
-  
-  # Print current processing status:
-  cat("Done\nAdding NAs for indet. and sp. subclades to taxonomy MRP...")
-  
-  # Find indeterminates and sps:
-  indetsandsps <- NewValidOTUs[which((unlist(lapply(lapply(strsplit(NewValidOTUs, "_"), '==', "indet"), sum)) + unlist(lapply(lapply(strsplit(NewValidOTUs, "_"), '==', "sp"), sum))) > 0)]
-  
-  # If there are indeterminates and/or sps:
-  if(length(indetsandsps) > 0) {
+  # If specimen-level OTUs are included:
+  if(IncludeSpecimenLevelOTUs) {
     
-    # For each such taxon:
-    for(i in indetsandsps) {
+    # Print current processing status:
+    cat("Done\nAdding NAs for indet. and sp. subclades to taxonomy MRP...")
+    
+    # Find indeterminates and sps:
+    indetsandsps <- NewValidOTUs[which((unlist(lapply(lapply(strsplit(NewValidOTUs, "_"), '==', "indet"), sum)) + unlist(lapply(lapply(strsplit(NewValidOTUs, "_"), '==', "sp"), sum))) > 0)]
+    
+    # If there are indeterminates and/or sps:
+    if(length(indetsandsps) > 0) {
       
-      # Find higher taxon to which it belongs:
-      highertaxon <- colnames(TaxonomyMRP)[which(unlist(lapply(lapply(strsplit(colnames(TaxonomyMRP), "_et_"), '==', strsplit(i, "_")[[1]][1]), sum)) == 1)]
-      
-      # Find any sub (suprapseicifc taxa) for that higher taxon:
-      subtaxa <- colnames(TaxonomyMRP)[which(unlist(lapply(lapply(lapply(split(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE], rep(1:ncol(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE]), each = nrow(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE]))), sort), unique), length)) == 2)]
-      
-      # If these exist then set ith taxon as being NA with respect to belonging to the subtax(a):
-      if(length(subtaxa) > 1) TaxonomyMRP[i, subtaxa] <- NA
+      # For each such taxon:
+      for(i in indetsandsps) {
+        
+        # Find higher taxon to which it belongs:
+        highertaxon <- colnames(TaxonomyMRP)[which(unlist(lapply(lapply(strsplit(colnames(TaxonomyMRP), "_et_"), '==', strsplit(i, "_")[[1]][1]), sum)) == 1)]
+        
+        # Find any sub (suprapseicifc taxa) for that higher taxon:
+        subtaxa <- colnames(TaxonomyMRP)[which(unlist(lapply(lapply(lapply(split(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE], rep(1:ncol(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE]), each = nrow(TaxonomyMRP[names(which(TaxonomyMRP[, highertaxon] == 1)), , drop = FALSE]))), sort), unique), length)) == 2)]
+        
+        # If these exist then set ith taxon as being NA with respect to belonging to the subtax(a):
+        if(length(subtaxa) > 1) TaxonomyMRP[i, subtaxa] <- NA
+        
+      }
       
     }
     
   }
   
+  ###
+
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
   
