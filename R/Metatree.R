@@ -63,6 +63,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # MAKE STR OPTIONAL (SAVES A LITTLE TIME)
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
+  # ADD INPUT WEIGHT OPTION (WILL WANT TO WEIGHT FOR DATA SET NOT CHARACTERS AS THESE CAN CHANGE IN PROCESSING, E.G. HAVE EVERY CHARACTER BE SAME WEIGHT IN DATA SET)
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
   
@@ -261,7 +262,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nSearching for and collapsing pre-reconciliation duplicated taxa...")
   
   # Collapse any duplicate taxon names:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Print current processing status:
   cat("Done\nBuilding initial taxonomy matrix...")
@@ -450,19 +451,19 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nReplacing junior synonyms with senior synonyms...")
   
   # Rebuild junior synonyms into a vector of names:
-  JuniorSynonyms <- paste(JuniorSynonyms[, "InputNo"], gsub(" ", "_", JuniorSynonyms[, "TaxonName"]), sep = "%%%%")
+  JuniorSynonymsVector <- paste(JuniorSynonyms[, "InputNo"], gsub(" ", "_", JuniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
   # Rebuild senior synonyms into a vector of names:
-  SeniorSynonyms <- paste(unlist(lapply(apply(SeniorSynonyms[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, as.list), function(x) unname(gsub("txn:|var:", "", unlist(x)[!is.na(unlist(x))][1])))), gsub(" ", "_", SeniorSynonyms[, "TaxonName"]), sep = "%%%%")
+  SeniorSynonymsVector <- paste(unlist(lapply(apply(SeniorSynonyms[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, as.list), function(x) unname(gsub("txn:|var:", "", unlist(x)[!is.na(unlist(x))][1])))), gsub(" ", "_", SeniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
   # Build synonym matrix:
-  SynonymyMatrix <- cbind(JuniorSynonyms, SeniorSynonyms)
+  SynonymyMatrix <- cbind(JuniorSynonymsVector, SeniorSynonymsVector)
   
   # Replace junior synonyms with senior synonyms:
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {SynonymyRows <- sort(match(SynonymyMatrix[, 1], rownames(x$Matrix))); if(length(SynonymyRows) > 0) rownames(x$Matrix)[SynonymyRows] <- SynonymyMatrix[match(rownames(x$Matrix)[SynonymyRows], SynonymyMatrix[, 1]), 2]; x})
 
   # Collapse any duplicate taxa created by this substitution:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Prune characters made redundant by these collapses:
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
@@ -785,7 +786,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {UnderscoreAndCapitalCounts <- matrix(unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) c(sum(y == "_"), length(grep("[:A-Z:]", y))))), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Underscores", "Capitals"))); SubspeciesRows <- intersect(which(UnderscoreAndCapitalCounts[, "Underscores"] == 2), which(UnderscoreAndCapitalCounts[, "Capitals"] == 1)); if(length(SubspeciesRows) > 0) rownames(x$Matrix)[SubspeciesRows] <- unlist(lapply(strsplit(rownames(x$Matrix)[SubspeciesRows], split = "_"), function(z) paste(z[1:2], collapse = "_"))); x})
   
   # Collapse any duplicate taxon names:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found post higher-taxon substitution in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found post higher-taxon substitution in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Print current processing status:
   cat("Done\nFurther tidying of taxonomy...")
@@ -867,8 +868,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Prune redundant characters from matrices following taxon deletion(s):
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
-  ###
-
   # Print current processing status:
   cat("Done\nProducing taxonomy tree...")
   
@@ -959,7 +958,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {CurrentRownames <- rownames(x$Matrix); NamesToReplace <- intersect(CurrentRownames, TaxaToRenameMatrix[, 2]); if(length(NamesToReplace) > 0) rownames(x$Matrix)[match(NamesToReplace, rownames(x$Matrix))] <- toupper(TaxaToRenameMatrix[match(NamesToReplace, TaxaToRenameMatrix[, 2]), 1]); x})
     
     # Collapse any duplicate taxa created by this substitution (very likely!):
-    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
     # Update new valid OTUs:
     NewValidOTUs <- sort(rownames(TaxonomyMRP))
@@ -998,9 +997,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  ###
+  # For empty data sets make sure matrix is zero-by-zero and wigehts have no lengths:
+  MRPList <- lapply(MRPList, function(x) {MatrixSize <- nrow(x$Matrix) * ncol(x$Matrix); if(MatrixSize == 0) {x$Matrix <- matrix(nrow = 0, ncol = 0); x$Weights <- vector(mode = "numeric")}; x})
   
-  # AT THS STAGE WANT TO PROPERLY COLLAPSE MRPLIST FILES WHERE MATRIX HAS LOST ROWS OR COLUMNS
+  ###
 
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
@@ -1064,6 +1064,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Remove now redundant data sets from MRP list (if there are any):
   if(length(datasetstoremove) > 0) MRPList <- MRPList[-match(datasetstoremove, names(MRPList))]
+  
+  # ABOVE NEEDS TO NOT HAPPEN!
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
