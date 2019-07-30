@@ -15,8 +15,8 @@
 #' @param VeilLine A logical indiicating whther to remove older data sets that do not increase taxonomic coverage (TRUE; the default) or not (FALSE). See Lloyd et al. (2016).
 #' @param SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
 #' @param IncludeSpecimenLevelOTUs A logical indicating whther specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.
-#' @param BackboneConstraint A Newick string of a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
-#' @param MonophylyConstraint A Newick string of a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
+#' @param BackboneConstraint Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
+#' @param MonophylyConstraint Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
 #'
 #' @return TBC.
 #'
@@ -44,7 +44,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   VeilLine = TRUE
   SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
   IncludeSpecimenLevelOTUs = TRUE
-  BackboneConstraint = NULL
+  BackboneConstraint = "Moon_inpressa"
   MonophylyConstraint = NULL
   
   # New Options (requires code to actually use them)
@@ -63,6 +63,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
   # ADD INPUT WEIGHT OPTION (WILL WANT TO WEIGHT FOR DATA SET NOT CHARACTERS AS THESE CAN CHANGE IN PROCESSING, E.G. HAVE EVERY CHARACTER BE SAME WEIGHT IN DATA SET)
+  # ADD INVERSE OPTION OF SPECIES TO EXCLUDE (SPECIES TO INCLUDE)
+  
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
   
@@ -87,12 +89,40 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Check IncludeSpecimenLevelOTUs is a logical and stop and warn user if not:
   if(!is.logical(IncludeSpecimenLevelOTUs)) stop("IncludeSpecimenLevelOTUs must be a logical (TRUE or FALSE).")
   
-  # If not a NULL read backbone constraint (checks it is a valid Newick format):
-  if(!is.null(BackboneConstraint)) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
+  # If backbone constraint is set:
+  if(!is.null(BackboneConstraint)) {
+    
+    # Check is only a single value and stop and warn user if not:
+    if(length(BackboneConstraint) > 1) stop("BackboneConstraint must be a single value. (Cannot apply two backbone constraints simultaneously.)")
+    
+    # Check is a string and stop and warn user if not:
+    if(!is.character(BackboneConstraint)) stop("BackboneConstraint must be a text string. Reformat and try again.")
+    
+    # Try and work out if backbone is a Newick:
+    BackboneIsNewick <- length(grep("\\(|\\)", strsplit(BackboneConstraint, ",")[[1]])) > 0
+    
+    # If backbone is a Newick try and read it in to check for errors:
+    if(BackboneIsNewick) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
+    
+  }
   
-  # If not a NULL read monophyly constraint (checks it is a valid Newick format):
-  if(!is.null(MonophylyConstraint)) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
-  
+  # If monophyly onstraint is set:
+  if(!is.null(MonophylyConstraint)) {
+    
+    # Check is only a single value and stop and warn user if not:
+    if(length(MonophylyConstraint) > 1) stop("MonophylyConstraint must be a single value. (Cannot apply two monophyly constraints simultaneously.)")
+    
+    # Check is a string and stop and warn user if not:
+    if(!is.character(MonophylyConstraint)) stop("BackboneConstraint must be a text string. Reformat and try again.")
+    
+    # Try and work out if monophyly is a Newick:
+    MonophylyIsNewick <- length(grep("\\(|\\)", strsplit(MonophylyConstraint, ",")[[1]])) > 0
+    
+    # If monophyly is a Newick trya nd read it in to check for errors:
+    if(MonophylyIsNewick) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
+    
+  }
+ 
   # List of types of resolution that require finding a senior synonym:
   synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
   
@@ -107,6 +137,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # List MRP files (or just use inclusivedatalist if set):
   MRPFileList <- strsplit(ifelse(length(InclusiveDataList) > 0, paste(setdiff(sort(unique(InclusiveDataList)), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(gsub("mrp\\.nex", "", list.files()), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
+  
+  # If a backbone constraint is used and is a file check it is present in the source data and stop and warn user if not:
+  if(!is.null(BackboneConstraint) && !BackboneIsNewick) if(is.na(match(paste(BackboneConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Backbone constraint file not found in data. Check name and try again.")
+  
+  # If a monophyly constraint is used and is a file check it is present in the source data and stop and warn user if not:
+  if(!is.null(MonophylyConstraint) && !MonophylyIsNewick) if(is.na(match(paste(MonophylyConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Monophyly constraint file not found in data. Check name and try again.")
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
   MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", "", ""); names(y) <- c("Matrix", "Weights", "FileName", "Parent", "Sibling"); y})
@@ -1081,11 +1117,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # While not all taxa are included in current sample:
     while(length(CurrentTaxaIncluded) < StopPoint) {
       
+      # Increment one year back in time:
+      CurrentVeilYear <- CurrentVeilYear - 1
+
       # Update current taxa included:
       CurrentTaxaIncluded <- unique(unlist(lapply(MRPList[as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) >= CurrentVeilYear], function(x) rownames(x$Matrix))))
-      
-      # Increent one year back in time:
-      CurrentVeilYear <- CurrentVeilYear - 1
       
     }
     
@@ -1114,13 +1150,19 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
+  
+  
+  
+  
+  
+  
   ######
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
   
   # Equation 1 in Supplementary Information of Lloyd et al. (2016):
-  publicationyearweights <- 10 * 2^(0.5 * (publicationyears - min(publicationyears)))
+  publicationyearweights <- 10 * 2^(0.5 * (publicationyears - CurrentVeilYear))
   
   # Get indepenece weights (using siblings data):
   independenceweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), length))), 2, max)
