@@ -345,7 +345,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nChecking taxon validities...")
   
   # Check for any new kind of resolution (should be empty vector):
-  newresolutions <- setdiff(sort(unique(ResolvedTaxonNumbers[, "TaxonValidity"])), c(deletes, synonyms))
+  newresolutions <- setdiff(sort(unique(ResolvedTaxonNumbers[, "TaxonValidity"])), c(DeletionCategories, synonyms))
   
   # Stop if new resolutiosn found (need to add these to the resolution types above):
   if(length(newresolutions) > 0) stop(paste("New resolution type found!: ", newresolutions, sep = ""))
@@ -360,10 +360,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   for(i in synonyms) synonymrows <- sort(c(synonymrows, which(ResolvedTaxonNumbers[, "TaxonValidity"] == i)))
   
   # Set junior synonym matrix:
-  juniorsynonyms <- ResolvedTaxonNumbers[synonymrows, ]
+  JuniorSynonyms <- ResolvedTaxonNumbers[synonymrows, ]
   
   # Create empty matrix to store senior synoyms:
-  seniorsynonyms <- matrix(nrow = 0, ncol = 8, dimnames = list(c(), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")))
+  SeniorSynonyms <- matrix(nrow = 0, ncol = 8, dimnames = list(c(), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")))
   
   # Reconcile senior synonym with database:
   currenttaxa <- PaleobiologyDBTaxaQuerier(gsub("txn:", "", ResolvedTaxonNumbers[synonymrows, "AcceptedNumber"]))
@@ -386,13 +386,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   }
   
   # Make current taxa into senior synonyms list:
-  seniorsynonyms <- currenttaxa
+  SeniorSynonyms <- currenttaxa
   
   # If using an Interval:
   if(!all(is.null(Interval))) {
     
     # Update resolved taxon numbers to valid taxa only:
-    ResolvedTaxonNumbersInterval[which(!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms[match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"])[!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], juniorsynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
+    ResolvedTaxonNumbersInterval[which(!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- SeniorSynonyms[match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"])[!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
     
   }
   
@@ -446,54 +446,31 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  # GOT TO HERE WITH REFACTOR
-  
   # Print current processing status:
   cat("Done\nReplacing junior synonyms with senior synonyms...")
   
-  # Get input numbers that should be replaced:
-  numberstosynonymise <- juniorsynonyms[, "InputNo"]
+  # Rebuild junior synonyms into a vector of names:
+  JuniorSynonyms <- paste(JuniorSynonyms[, "InputNo"], gsub(" ", "_", JuniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
-  # Create empty vector to store datasets with deletes (that cna then be processed):
-  datasetswithjuniorsynonyms <- vector(mode = "character")
+  # Rebuild senior synonyms into a vector of names:
+  SeniorSynonyms <- paste(unlist(lapply(apply(SeniorSynonyms[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, as.list), function(x) unname(gsub("txn:|var:", "", unlist(x)[!is.na(unlist(x))][1])))), gsub(" ", "_", SeniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
-  # For each delete number find data sets that have it and add them to the vector:
-  for(i in numberstosynonymise) datasetswithjuniorsynonyms <- sort(unique(c(datasetswithjuniorsynonyms, names(which(unlist(lapply(lapply(taxonnumberslist, '==', i), sum)) > 0)))))
+  # Build synonym matrix:
+  SynonymyMatrix <- cbind(JuniorSynonyms, SeniorSynonyms)
   
-  # For each dataset with at least one taxon to delete:
-  for(i in datasetswithjuniorsynonyms) {
-    
-    # Isolate taxon numbers for current dataset:
-    taxonnumbers <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 1))
-    
-    # Convert into list to deal with multi-number higher taxa:
-    taxonnumbers <- lapply(lapply(as.list(taxonnumbers), strsplit, split = "&"), unlist)
-    
-    # Create empty vector to store taxa to synonymise:
-    taxatosynonymise <- vector(mode = "numeric")
-    
-    # Find any taxa to synonymise present in the data set:
-    for(j in numberstosynonymise) taxatosynonymise <- sort(unique(c(taxatosynonymise, which(unlist(lapply(lapply(taxonnumbers, '==', j), any))))))
-    
-    # Find any multi-number higher taxa to synonymise:
-    multinumberhighertaxontosynonymise <- unlist(lapply(strsplit(rownames(MRPList[[i]]$Matrix), "%%%%"), '[', 2))[taxatosynonymise[which(unlist(lapply(taxonnumbers[taxatosynonymise], length)) > 1)]]
-    
-    # Stop if you find a multi-number higher taxon that is (at least partially) to be deleted):
-    if(length(multinumberhighertaxontosynonymise) > 0) stop(paste("Multi-number higher tax(a) listed to synonymise: ", paste(multinumberhighertaxontosynonymise, sep = ","), " (NB: check the status of these).", sep = ""))
-    
-    # For each taxon to synonymise:
-    for(j in taxatosynonymise) {
-      
-      # Find corresponding row number in senior synonyms list:
-      seniorrownumber <- which(juniorsynonyms[, "InputNo"] == strsplit(rownames(MRPList[[i]]$Matrix)[j], "%%%%")[[1]][1])
-      
-      # Overwrite junior with senior synonym:
-      rownames(MRPList[[i]]$Matrix)[j] <- paste(gsub("txn:|var:", "", rev(sort(seniorsynonyms[seniorrownumber, c("OriginalTaxonNo", "ResolvedTaxonNo")]))[1]), gsub(" ", "_", seniorsynonyms[seniorrownumber, "TaxonName"]), sep = "%%%%")
-      
-    }
-    
-  }
+  # Replace junior synonyms with senior synonyms:
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {SynonymyRows <- sort(match(SynonymyMatrix[, 1], rownames(x$Matrix))); if(length(SynonymyRows) > 0) rownames(x$Matrix)[SynonymyRows] <- SynonymyMatrix[match(rownames(x$Matrix)[SynonymyRows], SynonymyMatrix[, 1]), 2]; x})
+
+  # Collapse any duplicate taxa created by this substitution:
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Weights; x})
   
+  # Prune characters made redundant by these collapses:
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+
+# GOT TO HERE WITH REFACTOR
+
+###
+
   # Print current processing status:
   cat("Done\nBuilding taxonomy...")
   
@@ -501,7 +478,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   ValidOTUNames <- unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames)))[grep("_", unique(unlist(lapply(lapply(MRPList, '[[', "Matrix"), rownames))))]
   
   # Replace junior with senior synonyms in resolved names matrix:
-  ResolvedTaxonNumbers[synonymrows, c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- seniorsynonyms
+  ResolvedTaxonNumbers[synonymrows, c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- SeniorSynonyms
   
   # Overwrite resolved number with resolved taxon number:
   ResolvedTaxonNumbers[, "ResolvedTaxonNo"] <- gsub("txn:|var:", "", unlist(lapply(lapply(apply(ResolvedTaxonNumbers[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, sort), rev), '[', 1)))
