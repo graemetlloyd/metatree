@@ -858,6 +858,15 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
     # Add species to exclude to taxa to delete:
     TaxaToDelete <- unique(c(TaxaToDelete, SpeciesToExclude))
+    
+    # Remove species to exclude from Taxonomy MRP:
+    TaxonomyMRP <- TaxonomyMRP[-match(SpeciesToExclude, rownames(TaxonomyMRP)), , drop = FALSE]
+    
+    # Find any columns to delete (duplicated, autapomorphic or constant):
+    ColumnsToDalete <- unique(c(which(duplicated(apply(TaxonomyMRP, 2, paste, collapse = ""))), unname(which(apply(TaxonomyMRP, 2, sum) < 2))))
+    
+    # If columns are to be deleted then delete them:
+    if(length(ColumnsToDalete) > 0) TaxonomyMRP <- TaxonomyMRP[, -ColumnsToDalete]
   
   }
   
@@ -898,7 +907,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Ladderize taxonomy tree for neatness!:
   TaxonomyMRPTree <- ladderize(read.tree(text = TaxonomyMRPNewick))
-  
+
   # If there are higher taxa to collapse:
   if(length(HigherTaxaToCollapse) > 0) {
     
@@ -996,7 +1005,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  # For empty data sets make sure matrix is zero-by-zero and wigehts have no lengths:
+  # For empty data sets make sure matrix is zero-by-zero and weights have no lengths:
   MRPList <- lapply(MRPList, function(x) {MatrixSize <- nrow(x$Matrix) * ncol(x$Matrix); if(MatrixSize == 0) {x$Matrix <- matrix(nrow = 0, ncol = 0); x$Weights <- vector(mode = "numeric")}; x})
   
   ###
@@ -1105,7 +1114,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  #######
+  ######
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
