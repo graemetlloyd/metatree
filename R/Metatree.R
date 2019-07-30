@@ -49,7 +49,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # New Options (requires code to actually use them)
   #
-  # VeilLine TRUE/FALSE (will be in output)
   # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default. Allow to be an input file too.
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
   
@@ -1047,17 +1046,66 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   }
   
   # Find any empty data sets to remove:
-  RemovedSourceData <- names(which(unlist(lapply(MRPList, function(x) nrow(x$Matrix) * ncol(x$Matrix))) == 0))
+  RemovedSourceData <- sort(names(which(unlist(lapply(MRPList, function(x) nrow(x$Matrix) * ncol(x$Matrix))) == 0)))
   
-  # Remove datas ets from MRPList:
+  # Remove data sets from MRPList:
   MRPList[RemovedSourceData] <- NULL
   
   # Remove any dead siblings:
   MRPList <- lapply(MRPList, function(x) {x$Sibling <- intersect(x$Sibling, names(MRPList)); x})
   
-  #######
+  # If usinga  veil line:
+  if(VeilLine) {
+    
+    # Print current processing status:
+    cat("Done\nApplying veil line...")
+    
+    # Start with currnet year as veil year:
+    CurrentVeilYear <- as.numeric(strsplit(as.character(Sys.Date()), "-")[[1]][1])
+    
+    # Set current taxa included as being from current veil year to present:
+    CurrentTaxaIncluded <- unique(unlist(lapply(MRPList[as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) >= CurrentVeilYear], function(x) rownames(x$Matrix))))
+    
+    # Make a stop point (where all taxa are sampled):
+    StopPoint <- length(unique(unlist(lapply(MRPList, function(x) rownames(x$Matrix)))))
+    
+    # While not all taxa are included in current sample:
+    while(length(CurrentTaxaIncluded) < StopPoint) {
+      
+      # Update current taxa included:
+      CurrentTaxaIncluded <- unique(unlist(lapply(MRPList[as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) >= CurrentVeilYear], function(x) rownames(x$Matrix))))
+      
+      # Increent one year back in time:
+      CurrentVeilYear <- CurrentVeilYear - 1
+      
+    }
+    
+    # Find any data sets to remove (from veil year or older):
+    DataSetsToRemove <- which(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) <= CurrentVeilYear)
+    
+    # If data sets to remove:
+    if(length(DataSetsToRemove) > 0) {
+      
+      # Add to removed surce data vector:
+      RemovedSourceData <- sort(c(RemovedSourceData, names(MRPList)[DataSetsToRemove]))
+      
+      # Remove from MRP list:
+      MRPList <- MRPList[-DataSetsToRemove]
+      
+      # Remove any new dead siblings:
+      MRPList <- lapply(MRPList, function(x) {x$Sibling <- intersect(x$Sibling, names(MRPList)); x})
+    
+    }
+
+  # If not using veil line:
+  } else {
+    
+    # Set current veil year as oldest data set:
+    CurrentVeilYear <- min(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))))
+    
+  }
   
-  # Veil line that shit
+  #######
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
@@ -1137,10 +1185,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData)
+  output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData, CurrentVeilYear)
   
   # Add names:
-  names(output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData")
+  names(output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData", "CurrentVeilYear")
   
   # Print current processing status:
   cat("Done")
