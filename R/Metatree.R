@@ -33,19 +33,19 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(), IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL) {
   
-  #MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
-  #XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
-  #TargetClade <- "Ichthyopterygia"
-  #InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
-  #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  #HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
-  #MissingSpecies = "exclude"
-  #Interval = NULL
-  #VeilLine = TRUE
-  #SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
-  #IncludeSpecimenLevelOTUs = TRUE
-  #BackboneConstraint = "Moon_inpressa"
-  #MonophylyConstraint = NULL
+  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
+  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
+  TargetClade <- "Ichthyopterygia"
+  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
+  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
+  MissingSpecies = "exclude"
+  Interval = c("Triassic", "Jurassic")
+  VeilLine = TRUE
+  SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
+  IncludeSpecimenLevelOTUs = TRUE
+  BackboneConstraint = "Moon_inpressa"
+  MonophylyConstraint = NULL
   
   # New Options (requires code to actually use them)
   #
@@ -64,7 +64,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # ADD INPUT WEIGHT OPTION (WILL WANT TO WEIGHT FOR DATA SET NOT CHARACTERS AS THESE CAN CHANGE IN PROCESSING, E.G. HAVE EVERY CHARACTER BE SAME WEIGHT IN DATA SET)
   # ADD INVERSE OPTION OF SPECIES TO EXCLUDE (SPECIES TO INCLUDE)
   # CHUNK AND WORK OUT HOW TO CALL TNT AND PARALLELISE
-  
+  # NEED GOOD WAY TO DEAL WITH WEIGHTING OF DATA SETS WITH LOTS OF CHARACTERS VERSSUS THOSE WITH FEW (NORMALISING BY N TIPS)
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
   
@@ -339,7 +339,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     ResolvedTaxonNumbersInterval <- ResolvedTaxonNumbers[is.na(ResolvedTaxonNumbersInterval[, "TaxonName"]), ]
     
     # Find any nomen dubia etc. to delete:
-    DeleteRows <- which(unlist(lapply(lapply(lapply(as.list(ResolvedTaxonNumbersInterval[, "TaxonValidity"]), match, x = deletes), sort), length)) > 0)
+    DeleteRows <- which(unlist(lapply(lapply(lapply(as.list(ResolvedTaxonNumbersInterval[, "TaxonValidity"]), match, x = DeletionCategories), sort), length)) > 0)
     
     # If there are deletes then remove them from the matrix:
     if(length(DeleteRows) > 0) ResolvedTaxonNumbersInterval <- ResolvedTaxonNumbersInterval[-DeleteRows, , drop = FALSE]
@@ -893,8 +893,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Add species to exclude to taxa to delete:
     TaxaToDelete <- unique(c(TaxaToDelete, SpeciesToExclude))
     
-    # Remove species to exclude from Taxonomy MRP:
-    TaxonomyMRP <- TaxonomyMRP[-match(SpeciesToExclude, rownames(TaxonomyMRP)), , drop = FALSE]
+    # Remove species to exclude from Taxonomy MRP (as lomg as they are still there):
+    if(length(intersect(SpeciesToExclude, rownames(TaxonomyMRP))) > 0) TaxonomyMRP <- TaxonomyMRP[-match(intersect(SpeciesToExclude, rownames(TaxonomyMRP)), rownames(TaxonomyMRP)), , drop = FALSE]
     
     # Find any columns to delete (duplicated, autapomorphic or constant):
     ColumnsToDalete <- unique(c(which(duplicated(apply(TaxonomyMRP, 2, paste, collapse = ""))), unname(which(apply(TaxonomyMRP, 2, sum) < 2))))
@@ -1164,7 +1164,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Get independece weights (using siblings data):
   independenceweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), length))), 2, max)
   
-  # Get N characters weight (to avoid ucnertain data sets swamping the signal):
+  # Get N characters weight (to avoid uncertain data sets swamping the signal):
   Ncharacterweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol))), 2, max)
   
   # Combine weights (just a product for now, but other options should be explored!:
