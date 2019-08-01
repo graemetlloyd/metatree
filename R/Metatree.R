@@ -104,11 +104,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   IncludeSpecimenLevelOTUs = TRUE
   BackboneConstraint = "Moon_inpressa"
   MonophylyConstraint = NULL
-  RelativeWeights = c(0, 10, 1, 1)
-  WeightCombination = "product"
-  
-  # WEIGHT COMBINING (PRODUCT VS SUM)
-  # WEIGHT WEIGHTING!
+  RelativeWeights = c(0, 100, 10, 1)
+  WeightCombination = "sum"
   
   # New Options (requires code to actually use them)
   #
@@ -300,7 +297,20 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # If a monophyly constraint is used and is a file check it is present in the source data and stop and warn user if not:
   if(!is.null(MonophylyConstraint) && !MonophylyIsNewick) if(is.na(match(paste(MonophylyConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Monophyly constraint file not found in data. Check name and try again.")
   
-  # Input checks for weight parameters numeric, at least one non-zero exactly four, if just default weights tell user to think!
+  # Check there are four relative weights values and stop and warn user if not:
+  if(length(RelativeWeights) != 4) stop("RelativeWeights must consist of exactly four values. Fix and try again.")
+  
+  # Check relative weights are numeric and stop and warn user if not:
+  if(!is.numeric(RelativeWeights)) stop("RelativeWeights must consist of numeric values. Fix and try again.")
+  
+  # Check there are no negative weights and at least one positive weight is being used and stop and wanr user if not:
+  if(sum(RelativeWeights) <= 0 || any(RelativeWeights < 0)) stop("RelativeWeights must include at least one positive value and negative values are not allowed. Fix and try again.")
+  
+  # Check only a single weight combination value is being used and stop and warn user if not:
+  if(length(WeightCombination) != 1) stop("WeightCombination mus consist of a single value.")
+  
+  # Check weight combintion is a valid option and stop and warn if not:
+  if(length(setdiff(WeightCombination, c("product", "sum"))) > 0) stop("WeightCombination must be one of \"product\" or \"sum\" only. Check spelling and try again.")
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
   MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", "", ""); names(y) <- c("Matrix", "Weights", "FileName", "Parent", "Sibling"); y})
@@ -1271,10 +1281,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  ######
-
-  # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK< BUT MIGHT NOT.
-  
   # Print current processing status:
   cat("Done\nCalculating weights...")
   
@@ -1303,6 +1309,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Rescale weights (10 to 1000) and round results to rwo decimal places (best TNT can cope with):
   MRPList <- lapply(MRPList, function(x) {x$Weights <- round((x$Weights * MultiplicationFactor) + AdditionFactor, 2); x})
+
+######
+
+# DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
 
   # Print current processing status:
   cat("Done\nBuilding MRP matrix...")
