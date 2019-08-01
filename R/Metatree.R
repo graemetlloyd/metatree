@@ -1,22 +1,72 @@
 #' Builds metatree from source data
 #'
-#' Builds metatree from source data
+#' @descrioption
 #'
-#' Use approach laid out in Lloyd et al. (2008; 2016).
+#' Builds a metatree data set from a set of source data.
 #'
 #' @param MRPDirectory The directory in which the MRP files are to be read from.
 #' @param XMLDirectory The directory in which the XML files are to be read from.
 #' @param TargetClade The name of the target clade of the metatree (e.g., "Dinosauria").
 #' @param InclusiveDataList A vector of the data sest to include in the metatree. Can be left empty to just read all files in \code{MRPDirectory} abd \code{XMLDirectory}.
 #' @param ExclusiveDataList A vector of any data sets to exclude from the metatree. Can be left empty if all data sets in \code{MRPDirectory} abd \code{XMLDirectory} are valid. (Intended to exclude things like oogenera or footprint analyses, other supertree data sets etc.)
-#' @param HigherTaxaToCollapse Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group).
+#' @param HigherTaxaToCollapse Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group). NB: It is very important that these are safely monophyletic or the results can be compromised if not.
+#' @param SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
 #' @param MissingSpecies What to do with species assigned to the target clade, but not present in the source data. Options are: "exclude" (excludes these missing species), "genus" (include those species in a genus-level polytomy if the genus is sampled in the source data), and "all"
 #' @param Interval If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBChildFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).
 #' @param VeilLine A logical indiicating whther to remove older data sets that do not increase taxonomic coverage (TRUE; the default) or not (FALSE). See Lloyd et al. (2016).
-#' @param SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
 #' @param IncludeSpecimenLevelOTUs A logical indicating whther specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.
 #' @param BackboneConstraint Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
 #' @param MonophylyConstraint Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
+#' @param RelativeWeights A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.
+#' @param WeightCombination How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.
+#'
+#' @details
+#'
+#' \bold{Introduction}
+#'
+#' Broadly speaking this function is an implementation and extension of the approach to generating composite phylogeneic trees laid out in Lloyd et al. (2016), which itself builds on Lloyd et al. (2008), namely the "metatree" approach. Metatrees primarily differ from formal supertrees in that, instead of published trees (figures in source publications), the input data are the original character-taxon matrices and/or sequence alignments. This is superior to supertrees if you want to: 1) standardise the way input data are analysed, 2) choose the optimality criterion instead of being forced to use whatever the original study used, 3) include non-focal species that may have been removed from published figures (improving taxon overlap), and 4) more properly incorporate phylogenetic uncertainty rather than being restricted to the use of consensus topologies.
+#'
+#' \bold{Formatting input data}
+#'
+#' The implementation here assumes this data set reanalysis has already been performed, and the results have been encoded in NEXUS (Maddison et al. 1997) format using Matrix Representation with Parsimony (MRP; Baum 1992; Ragan 1992).
+#.
+#. XML foramtting
+#'
+#' \bold{Input directories}
+#'
+#' What these are and default of using all files, matching names etc.
+#'
+#' \bold{Data set inclusion and exclusion}
+#'
+#' Inclusive and exclusive lists.
+#'
+#' \bold{Taxonomic options}
+#'
+#' Collapsing higher taxa and species to remove. Levels of inclusivity (all, exclude, genus).
+#'
+#' \bold{Specifying a sampling interval}
+#'
+#' Time and why desirable (stem-groups). See also collapsing higher taxa. Issue with specimen-level OTUs.
+#'
+#' \bold{Use of veil lines}
+#'
+#' Alongside a priori exclusion of data sets can also use a veil line. Advantages: reduces final data set size, avoids older signal completely (although can also be dealt with with weights (see below).
+#'
+#' \bold{Specimen-level OTUs}
+#'
+#' As this is aimed at fossil data a common issue is use pf specimen-level OTUs in source data sets that (currently) lack a formal species designation. Issues with time and harder to check validity (may have since been named).
+#'
+#' \bold{Applying constraint(s)}
+#'
+#' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+#'
+#' \bold{Weighting source data}
+#'
+#' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+#'
+#' \bold{Outputs}
+#'
+#' Text.
 #'
 #' @return TBC.
 #'
@@ -24,14 +74,22 @@
 #'
 #' @references
 #'
-#' Lloyd et al. (@016)
+#' Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogenetic inference, and the desirability of combining gene trees. Taxon, 41, 3-10.
+#'
+#' Lloyd, G. T., Davis, K. E., Pisani, D., Tarver, J. E., Ruta, M., Sakamoto, M., Hone, D. W. E., Jennings, R. & Benton, M. J., 2008. Dinosaurs and the Cretaceous Terrestrial Revolution. Proceedings of the Royal Society B, 275, 2483-2490.
+#'
+#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#'
+#' Maddison, D. R., Swofford, D. L. and Maddison, W. P., 1997. NEXUS: an extensible file format for systematic information. Systematic Biology, 46, 590-621.
+#'
+#' Ragan, M., 1992. Phylogenetic inference based on matrix representation of trees. Molecular Phylogenetics and Evolution, 1, 113-126.
 #'
 #' @examples
 #'
 #' # Nothing yet.
 #'
 #' @export Metatree
-Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(), IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL) {
+Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum") {
   
   MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
   XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
@@ -46,6 +104,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   IncludeSpecimenLevelOTUs = TRUE
   BackboneConstraint = "Moon_inpressa"
   MonophylyConstraint = NULL
+  RelativeWeights = c(0, 10, 1, 1)
+  WeightCombination = "product"
+  
+  # WEIGHT COMBINING (PRODUCT VS SUM)
+  # WEIGHT WEIGHTING!
   
   # New Options (requires code to actually use them)
   #
@@ -57,19 +120,112 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY)
   # NEED SOME TEST THAT HELPS CHECK ROOT IS SENSIBLE (CAN DO WHEN MATCH TAXONOMY TO DATA SETS FOR CHUNKING)
   # NEED SOME TEST THAT HELPS DETERMINE IF MULTIPLE OCCURRENCES OF SAME TAXON AFTER RECONCILIATION IS CORRECT OR AN ERROR
-  # ADD MORE COMPLEX WEIGHTS BY USING ADDITIONAL CHARACTER STATES! (EACH DATASET TOTAL WEIGHT DETERMINED BY YEAR AND DEPENDENCE THEN SUBDIVIDED ACROSS CHARACTER?) - BUT THIS SEEMS TO SLOW THINGS DRAMATICALLY MAYBE DO BY DUPLICATING CHARACTERS INSTEAD
   # MAKE STR OPTIONAL (SAVES A LITTLE TIME)
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
-  # ADD INPUT WEIGHT OPTION (WILL WANT TO WEIGHT FOR DATA SET NOT CHARACTERS AS THESE CAN CHANGE IN PROCESSING, E.G. HAVE EVERY CHARACTER BE SAME WEIGHT IN DATA SET)
   # ADD INVERSE OPTION OF SPECIES TO EXCLUDE (SPECIES TO INCLUDE)
   # CHUNK AND WORK OUT HOW TO CALL TNT AND PARALLELISE
-  # NEED GOOD WAY TO DEAL WITH WEIGHTING OF DATA SETS WITH LOTS OF CHARACTERS VERSSUS THOSE WITH FEW (NORMALISING BY N TIPS)
+  # ALLOW PURIVS CODING? (MIGHT BE TRICKY TO IMPLEMENT AFTER THE FACT?)
+  # OPTION FOR HISTORICAL SUPERTREES SOMEHOW
   
   # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
+  
+  # Subfunction to make multi-taxon reconciliations unique OTUs:
+  SeparateMultiTaxonReconciliations <- function(ListBlock) {
+    
+    # Find comma rows (multiple taxa in initial reconciliation):
+    commarows <- grep(",", rownames(ListBlock$Matrix))
+    
+    # If there is at least one multiple-taxon reconciliation:
+    if(length(commarows) > 0) {
+      
+      # For each multiple-taxon reconciliation in reverse order (to avoid later rows not matching):
+      for(j in rev(commarows)) {
+        
+        # Get multiple names of reconciliation:
+        multiplenames <- strsplit(rownames(ListBlock$Matrix)[j], "%%%%")[[1]]
+        
+        # Get multiple-taxon numbers:
+        multitaxonnumbers <- strsplit(multiplenames[1], ";")[[1]]
+        
+        # Get multiple-taxon names:
+        multitaxonnames <- strsplit(multiplenames[2], ",")[[1]]
+        
+        # Check data integrity with respect to multiple-taxon values:
+        if(length(multitaxonnumbers) != length(multitaxonnames)) stop(paste("Problem with multiple-taxon reconciliation(s) in ", ListBlock$FileName, " (check commas and semi-colons are correct; i.e., of same length).", sep = ""))
+        
+        # Add new rows at base of matrix:
+        ListBlock$Matrix <- rbind(ListBlock$Matrix, matrix(rep(ListBlock$Matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
+        
+        # Remove now redundant row from matrix:
+        ListBlock$Matrix <- ListBlock$Matrix[-j, , drop = FALSE]
+        
+      }
+      
+    }
+    
+    # Return updated list block:
+    return(ListBlock)
+    
+  }
+  
+  # Subfunction to find contradicting MRP characters between a string (single character) and a matrix (multiple characters):
+  MRPCharacterContradiction <- function(MRPCharacterString, MRPCharacterMatrix) {
+    
+    # Check MRP string has names and stop and warn user if not:
+    if(is.null(names(MRPCharacterString))) stop("MRPCharacterString must have names. Add and try agaian.")
+    
+    # Check MRP matrix has names and stop and warn user if not:
+    if(is.null(rownames(MRPCharacterMatrix))) stop("MRPCharacterMatrix must have row names. Add and try agaian.")
+    
+    # Check MRP string and matrix match in size and stop and warn user if not:
+    if(length(MRPCharacterString) != nrow(MRPCharacterMatrix)) stop("MRPCharacterString must have the same length as the number of rows of MRPCharacterMatrix. Check data and try again.")
+    
+    # Check names of MRP string and matrix match and stop and warn user if not:
+    if(!all(sort(names(MRPCharacterString)) == sort(rownames(MRPCharacterMatrix)))) stop("MRPCharacterString names must match row names of MRPCharacterMatrix. Check names and try again.")
+    
+    # Check only zeroes and ones are coded and stop and warn user if not:
+    if(length(setdiff(unique(c(MRPCharacterString, MRPCharacterMatrix)), c("0", "1"))) > 0) stop("Both MRPCharacterString and MRPCharacterMatrix must consiste exclusively of the characters \"0\" and \"1\". Check data and try again.")
+    
+    # Check MRP string contains both zeroe and ones and stop and warn user if not:
+    if(length(unique(MRPCharacterString)) < 2) stop("MRPCharacterString must contain both zeroes and ones.")
+    
+    # Check every MRP matrix column contains both zeroe and ones and stop and warn user if not:
+    if(length(unique(as.vector(MRPCharacterMatrix))) < 2) stop("MRPCharacterString must contain both zeroes and ones.")
+    
+    # Find names corresponding to scores of "0" in the MRP string:
+    StringZeroNames <- names(which(MRPCharacterString == "0"))
+    
+    # Find names corresponding to scores of "1" in the MRP string:
+    StringOneNames <- names(which(MRPCharacterString == "1"))
+    
+    # Find any matrix columns that contradict the string character (both "0" and "1" coded for zero and one matches in MRP string):
+    ContradictionColumns <- which(apply(MRPCharacterMatrix, 2, function(x) length(unique(x[StringZeroNames])) == 2 && length(unique(x[StringOneNames])) == 2))
+    
+    # Return contradicting columns:
+    return(ContradictionColumns)
+    
+  }
+  
+  # Subfunction to produce intra matrix weights:
+  MRPIntraMatrixWeights <- function(MRPMatrix) {
+    
+    # Get a list of characters that contradict with each character in turn:
+    ContradictionList <- lapply(apply(MRPMatrix, 2, as.list), function(x) MRPCharacterContradiction(unlist(x), MRPMatrix))
+    
+    # Add every character to its' own list:
+    ContradictionList <- mapply(function(x, y) c(x, y), x = as.list(1:ncol(MRPMatrix)), y = ContradictionList)
+    
+    # Build vector of intra matrix weights:
+    IntraMatrixWeights <- 1 / unlist(lapply(ContradictionList, function(x) length(unique(unlist(ContradictionList[x])))))
+    
+    # Return intra matrix weights:
+    return(IntraMatrixWeights)
+    
+  }
 
   # Check MRPDirectory is formatted correctly adn stop and warn user if not:
   if(!all(is.character(MRPDirectory)) || length(MRPDirectory) != 1) stop("MRPDirectory must be a single character string indicating the path to the folder containing the MRP files.")
@@ -143,6 +299,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # If a monophyly constraint is used and is a file check it is present in the source data and stop and warn user if not:
   if(!is.null(MonophylyConstraint) && !MonophylyIsNewick) if(is.na(match(paste(MonophylyConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Monophyly constraint file not found in data. Check name and try again.")
+  
+  # Input checks for weight parameters numeric, at least one non-zero exactly four, if just default weights tell user to think!
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
   MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", "", ""); names(y) <- c("Matrix", "Weights", "FileName", "Parent", "Sibling"); y})
@@ -230,45 +388,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Print current processing status:
   cat("Done\nFinding initial multiple-taxon reconciliations...")
-  
-  # Subfunction to make multi-taxon reconciliations unique OTUs:
-  SeparateMultiTaxonReconciliations <- function(ListBlock) {
-  
-    # Find comma rows (multiple taxa in initial reconciliation):
-    commarows <- grep(",", rownames(ListBlock$Matrix))
-    
-    # If there is at least one multiple-taxon reconciliation:
-    if(length(commarows) > 0) {
-      
-      # For each multiple-taxon reconciliation in reverse order (to avoid later rows not matching):
-      for(j in rev(commarows)) {
-        
-        # Get multiple names of reconciliation:
-        multiplenames <- strsplit(rownames(ListBlock$Matrix)[j], "%%%%")[[1]]
-        
-        # Get multiple-taxon numbers:
-        multitaxonnumbers <- strsplit(multiplenames[1], ";")[[1]]
-        
-        # Get multiple-taxon names:
-        multitaxonnames <- strsplit(multiplenames[2], ",")[[1]]
-        
-        # Check data integrity with respect to multiple-taxon values:
-        if(length(multitaxonnumbers) != length(multitaxonnames)) stop(paste("Problem with multiple-taxon reconciliation(s) in ", ListBlock$FileName, " (check commas and semi-colons are correct; i.e., of same length).", sep = ""))
-        
-        # Add new rows at base of matrix:
-        ListBlock$Matrix <- rbind(ListBlock$Matrix, matrix(rep(ListBlock$Matrix[j, ], length(multitaxonnumbers)), nrow = length(multitaxonnumbers), byrow = TRUE, dimnames = list(paste(multitaxonnumbers, multitaxonnames, sep = "%%%%"), c())))
-        
-        # Remove now redundant row from matrix:
-        ListBlock$Matrix <- ListBlock$Matrix[-j, , drop = FALSE]
-        
-      }
-      
-    }
-    
-    # Return updated list block:
-    return(ListBlock)
-    
-  }
   
   # Separate out multi-taxon reconcilations:
   MRPList <- lapply(MRPList, SeparateMultiTaxonReconciliations)
@@ -975,7 +1094,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Build block to add to taxonomy MRP out of first taxon inside each clade to collapse:
     BlockToAddToTaxonomyMRP <- do.call(rbind, lapply(as.list(HigherTaxaToCollapse), function(x) TaxonomyMRP[TaxaToRenameMatrix[which(TaxaToRenameMatrix[, 1] == x)[1], 2], ]))
     
-    # Add uppercase rownames to
+    # Add uppercase rownames to new block:
     rownames(BlockToAddToTaxonomyMRP) <- toupper(HigherTaxaToCollapse)
     
     # Add to taxonomy MRP:
@@ -1001,6 +1120,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
     # Collapse any duplicate taxa created by this substitution (very likely!):
     MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+    
+    # Prune constant characters and collapse duplicated characters:
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
     # Update new valid OTUs:
     NewValidOTUs <- sort(rownames(TaxonomyMRP))
@@ -1045,8 +1167,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Print current processing status:
   cat("Done\nGetting weighting data (publication year and dependencies)...")
   
+  # Set current year (used multiple times later):
+  CurrentYear <- strsplit(as.character(Sys.Date()), "-")[[1]][1]
+  
   # Add publication year to each data set (in presses are ascribed the current year):
-  MRPList <- lapply(MRPList, function(x) {x$PublicationYear <- gsub("[:A-Z:a-z:]|_", "", gsub("inpress", strsplit(as.character(Sys.Date()), "-")[[1]][1], x$FileName)); x})
+  MRPList <- lapply(MRPList, function(x) {x$PublicationYear <- gsub("[:A-Z:a-z:]|_", "", gsub("inpress", CurrentYear, x$FileName)); x})
   
   # Find any missing parents:
   MissingParents <- setdiff(unique(unname(unlist(lapply(MRPList, function(x) x$Parent[nchar(x$Parent) > 0])))), names(MRPList))
@@ -1101,10 +1226,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Print current processing status:
     cat("Done\nApplying veil line...")
     
-    # Start with currnet year as veil year:
-    CurrentVeilYear <- as.numeric(strsplit(as.character(Sys.Date()), "-")[[1]][1])
+    # Start with current year as veil year:
+    CurrentVeilYear <- as.numeric(CurrentYear)
     
-    # Set current taxa included as being from current veil year to present:
+    # Set current taxa included as being from current veil year (to present):
     CurrentTaxaIncluded <- unique(unlist(lapply(MRPList[as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) >= CurrentVeilYear], function(x) rownames(x$Matrix))))
     
     # Make a stop point (where all taxa are sampled):
@@ -1121,8 +1246,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       
     }
     
-    # Find any data sets to remove (from veil year or older):
-    DataSetsToRemove <- which(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) <= CurrentVeilYear)
+    # Find any data sets to remove (older than veil year):
+    DataSetsToRemove <- which(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear))) < CurrentVeilYear)
     
     # If data sets to remove:
     if(length(DataSetsToRemove) > 0) {
@@ -1146,39 +1271,39 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
   }
   
-  
-  
-  
-  
-  
-  
-  
   ######
+
+  # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK< BUT MIGHT NOT.
   
   # Print current processing status:
   cat("Done\nCalculating weights...")
   
-  # Equation 1 in Supplementary Information of Lloyd et al. (2016):
-  publicationyearweights <- 10 * 2^(0.5 * (publicationyears - CurrentVeilYear))
+  # Reformat weights to be input weights, publication year weights (equation 1 in Supplementary Information of Lloyd et al. 2016),
+  # data set dependence weights (1 / (N siblings + 1)), and clade contradiction weights (1 / frequency of contradictory clades).
+  # All weights are set on a zero to one scale initially and then multiplied by RelativeWeights:
+  MRPList <- lapply(MRPList, function(x) {InputWeights <- x$Weights; x$Weights <- NULL; x$InputWeights <- RelativeWeights[1] * InputWeights; x$PubicationYearWeights <- RelativeWeights[2] * (rep(((2 ^ (0.5 * (as.numeric(x$PublicationYear) - CurrentVeilYear + 1))) - 1) / ((2 ^ (0.5 * (as.numeric(CurrentYear) - CurrentVeilYear + 1))) - 1), length(InputWeights))); x$DataSetDependenceWeights <- RelativeWeights[3] * rep(1 / (length(x$Sibling) + 1), length(InputWeights)); x$CladeContradictionWeights <- RelativeWeights[4] * MRPIntraMatrixWeights(x$Matrix); x})
   
-  # Get independece weights (using siblings data):
-  independenceweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(lapply(siblingsdata, strsplit, split = "%%%%"), unlist), length))), 2, max)
+  # If using sum o combine weights collapse weights to just their sum:
+  if(WeightCombination == "sum") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PubicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, sum); x$InputWeights <- NULL; x$PubicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights; x})
   
-  # Get N characters weight (to avoid uncertain data sets swamping the signal):
-  Ncharacterweights <- 1 / apply(rbind(rep(1, length(MRPList)), unlist(lapply(lapply(MRPList, '[[', "Matrix"), ncol))), 2, max)
+  # If using product to combine weights collapse weights to just their product (excluding zeroes):
+  if(WeightCombination == "product") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PubicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, function(y) {z <- as.character(y); z[z=="0"] <- NA; prod(as.numeric(z), na.rm = TRUE)}); x$InputWeights <- NULL; x$PubicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights; x})
   
-  # Combine weights (just a product for now, but other options should be explored!:
-  publicationweights <- publicationyearweights * independenceweights * Ncharacterweights
+  # Get current maximum weight:
+  MaximumWeight <- max(unlist(lapply(MRPList, function(x) x$Weights)))
   
-  # Make range of weights span 990 (difference between 10 and 1000):
-  publicationweights <- (1 / (diff(range(publicationweights)) / 990)) * publicationweights
+  # Get current minimum weight:
+  MinimumWeight <- min(unlist(lapply(MRPList, function(x) x$Weights)))
   
-  # Make minimum weight 10 (and by extension maximum weight 1000):
-  publicationweights <- (10 - min(publicationweights)) + publicationweights
+  # Calculate the multiplication factor for weight rescaling (10 to 1000):
+  MultiplicationFactor <- 1 / ((MaximumWeight - MinimumWeight) / 990)
   
-  # Restrict weights to 2dp:
-  publicationweights <- round(publicationweights, 2)
+  # Calculate the addition factor for weight rescaling (10 to 1000):
+  AdditionFactor <- 10 - (MinimumWeight * MultiplicationFactor)
   
+  # Rescale weights (10 to 1000) and round results to rwo decimal places (best TNT can cope with):
+  MRPList <- lapply(MRPList, function(x) {x$Weights <- round((x$Weights * MultiplicationFactor) + AdditionFactor, 2); x})
+
   # Print current processing status:
   cat("Done\nBuilding MRP matrix...")
   
