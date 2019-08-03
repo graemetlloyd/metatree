@@ -361,6 +361,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Check IncludeSpecimenLevelOTUs is a logical and stop and warn user if not:
   if(!is.logical(IncludeSpecimenLevelOTUs)) stop("IncludeSpecimenLevelOTUs must be a logical (TRUE or FALSE).")
   
+  # Check that there is a maximum of one constraint tree being used and stop and warn user if so.
+  # Technically it ought to be possible to do this, but it leaves open some potentially horrendous disasters:
+  if(!is.null(BackboneConstraint) && !is.null(MonophylyConstraint)) stop("Cannot apply a backbone constraint and a monophyly constraint simulatenously. If this was not a mistake we suggest manually editing an input file MRP matrix to perform the desired task.")
+  
   # If backbone constraint is set:
   if(!is.null(BackboneConstraint)) {
     
