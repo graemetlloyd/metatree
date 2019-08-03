@@ -67,7 +67,7 @@
 #'
 #' \bold{Taxonomy-phylogeny contradictions}
 #'
-#' Partlya  test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
+#' Partly a test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
 #'
 #' \bold{Outputs}
 #'
@@ -97,12 +97,30 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
   
+  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp" # MRP file directory
+  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml" # XML file directory
+  TargetClade <- "Cetacea"
+  InclusiveDataList <- c("Aguirre-Fernandez_etal_2009a", "Aguirre-Fernandez_et_Fordyce_2014a", "Albright_etal_inpressa", "Arnold_etal_2005a", "Benoit_etal_2011a", "Bianucci_2013a", "Bianucci_et_Gingerich_2011a", "Bianucci_et_Landini_2006a", "Bianucci_etal_2007a", "Bianucci_etal_2010a", "Bianucci_etal_2013a", "Bianucci_etal_2016a", "Bianucci_etal_2018aa", "Bianucci_etal_2018ab", "Bisconti_2008a", "Bisconti_2010a", "Bisconti_et_Bosselaers_2016a", "Bisconti_etal_2013a", "Bisconti_etal_2019a", "Bisconti_inpressa", "Boersma_et_Pyenson_2015a", "Boersma_et_Pyenson_2016a", "Boersma_etal_2017a", "Boessenecker_et_Fordyce_2015a", "Boessenecker_et_Fordyce_2017a", "Boessenecker_et_Fordyce_inpressa", "Boessenecker_etal_2017a", "Bosselaers_et_Post_2010a", "Bouetel_et_de_Muizon_2006a", "Buono_et_Cozzuol_2013a", "Buono_etal_2017a", "Churchill_etal_2012a", "Churchill_etal_2016a", "Collareta_etal_2017a", "Colpaert_etal_inpressa", "Demere_etal_2008a", "Dooley_etal_2004a", "Ekdale_etal_2011a", "El_Adli_etal_2014a", "Fajardo-Mellor_etal_2006a", "Fitzgerald_2010a", "Fordyce_1994a", "Fordyce_et_Marx_2013a", "Fordyce_et_Marx_2016a", "Fordyce_et_Marx_2018a", "Geisler_2001a", "Geisler_et_Luo_1996a", "Geisler_et_Sanders_2003a", "Geisler_et_Theodor_2009a", "Geisler_et_Uhen_2003a", "Geisler_et_Uhen_2005a", "Geisler_etal_2005a", "Geisler_etal_2011a", "Geisler_etal_2012a", "Geisler_etal_2014a", "Geisler_etal_2017a", "Gibson_etal_inpressa", "Godfrey_etal_2016a", "Godfrey_etal_2017a", "Goldin_2018a", "Goldin_et_Startsev_2014a", "Goldin_et_Startsev_2017a", "Goldin_et_Steeman_2015a", "Goldin_et_Zvonok_2013a", "Goldin_etal_2014a", "Goldin_etal_inpressa", "Hernandez_Cisneros_2018a", "Heyning_1997a", "Kimura_et_Hasegawa_2010a", "Lambert_2008a", "Lambert_2008b", "Lambert_et_Louwye_2016a", "Lambert_etal_2008a", "Lambert_etal_2009a", "Lambert_etal_2010a", "Lambert_etal_2013a", "Lambert_etal_2014a", "Lambert_etal_2015a", "Lambert_etal_2017a", "Lambert_etal_2017b", "Lambert_etal_inpressa", "Lambert_etal_inpressb", "Lambert_etal_inpressc", "Lambert_etal_inpressda", "Lambert_etal_inpressdb", "Luo_et_Marsh_1996a", "Martinez-Caceres_etal_2017a", "Marx_2011a", "Marx_et_Fordyce_2015a", "Marx_et_Fordyce_2016a", "Marx_etal_2015a", "Marx_etal_2016a", "Marx_etal_2017a", "Messenger_et_McGuire_1998a", "Mijan_etal_inpressa", "Muizon_etal_2019a", "Murakami_etal_2012a", "Murakami_etal_2012b", "Murakami_etal_2014a", "Murakami_etal_2014b", "Murakami_etal_inpressa", "Nelson_et_Uhen_inpressa", "OLeary_et_Gatesy_2008a", "Paolucci_etal_inpressa", "Peredo_et_Pyenson_2018a", "Peredo_et_Uhen_2016a", "Peredo_etal_inpressa", "Post_etal_2017a", "Pyenson_etal_2015a", "Racicot_etal_2019aa", "Racicot_etal_2019ab", "Ramassamy_2016a", "Sanders_et_Geisler_inpressa", "Solis-Anorve_etal_2019a", "Spaulding_etal_2009a", "Steeman_2007a", "Tanaka_et_Fordyce_2014a", "Tanaka_et_Fordyce_2015a", "Tanaka_et_Fordyce_2016a", "Tanaka_et_Fordyce_inpressa", "Tanaka_et_Watanabe_inpressa", "Tanaka_etal_2018a", "Theodor_et_Foss_2005a", "Thewissen_etal_2001a", "Thewissen_etal_2007a", "Tsai_et_Fordyce_2018a", "Tsai_et_Fordyce_inpressa", "Tsai_et_Fordyce_inpressb", "Uhen_1999a", "Uhen_2004a", "Uhen_2014a", "Uhen_et_Gingerich_2001a", "Velez-Juarbe_etal_2015a", "Velez-Juarbe_inpressa", "Viglino_etal_2019a", "Viglino_etal_inpressa", "Wichura_etal_inpressa")
+  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  HigherTaxaToCollapse = c()
+  SpeciesToExclude = c()
+  MissingSpecies = "exclude"
+  Interval = NULL
+  VeilLine = TRUE
+  IncludeSpecimenLevelOTUs = TRUE
+  BackboneConstraint = NULL
+  MonophylyConstraint = NULL
+  RelativeWeights = c(0, 100, 10, 1)
+  WeightCombination = "sum"
+  ReportContradictionsToScreen = TRUE
+  
+  
   # New Options (requires code to actually use them)
   #
   # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default. Allow to be an input file too.
   # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
   
-  ######
+  ###
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
@@ -525,13 +543,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList <- lapply(MRPList, function(x) {DeleteRows <- which(unlist(lapply(strsplit(rownames(x$Matrix), split = "%%%%"), function(y) y[2])) == "DELETE"); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
   
   # Prune matrices following deletion:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
 
   # Print current processing status:
   cat("Done\nSearching for and collapsing pre-reconciliation duplicated taxa...")
   
   # Collapse any duplicate taxon names:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- setdiff(unlist(lapply(strsplit(rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))], split = "%%%%"), '[', 2)), "DELETE"); if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Print current processing status:
   cat("Done\nBuilding initial taxonomy matrix...")
@@ -712,7 +730,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {TaxonNumbers <- do.call(rbind, strsplit(rownames(x$Matrix), split = "%%%%"))[, 1]; DeleteRows <- sort(match(NumbersToDelete, TaxonNumbers)); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
     
     # Prune matrices following deletion:
-    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
   }
   
@@ -732,10 +750,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {SynonymyRows <- sort(match(SynonymyMatrix[, 1], rownames(x$Matrix))); if(length(SynonymyRows) > 0) rownames(x$Matrix)[SynonymyRows] <- SynonymyMatrix[match(rownames(x$Matrix)[SynonymyRows], SynonymyMatrix[, 1]), 2]; x})
 
   # Collapse any duplicate taxa created by this substitution:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Prune characters made redundant by these collapses:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # GOT TO HERE WITH REFACTOR (BUT HAVE JUMPED AROUND A BUNCH, SO...)
 
@@ -1053,7 +1071,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {UnderscoreAndCapitalCounts <- matrix(unlist(lapply(strsplit(rownames(x$Matrix), split = ""), function(y) c(sum(y == "_"), length(grep("[:A-Z:]", y))))), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Underscores", "Capitals"))); SubspeciesRows <- intersect(which(UnderscoreAndCapitalCounts[, "Underscores"] == 2), which(UnderscoreAndCapitalCounts[, "Capitals"] == 1)); if(length(SubspeciesRows) > 0) rownames(x$Matrix)[SubspeciesRows] <- unlist(lapply(strsplit(rownames(x$Matrix)[SubspeciesRows], split = "_"), function(z) paste(z[1:2], collapse = "_"))); x})
   
   # Collapse any duplicate taxon names:
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found post higher-taxon substitution in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; if(length(DuplicateNames) > 0) cat(paste("\nDuplicate resolved OTU name(s) found post higher-taxon substitution in ", x$FileName, ": ", paste(DuplicateNames, collapse = ", "), ". Check this is correct.", sep = "")); y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Print current processing status:
   cat("Done\nFurther tidying of taxonomy...")
@@ -1142,7 +1160,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {DeleteRows <- match(intersect(TaxaToDelete, rownames(x$Matrix)), rownames(x$Matrix)); if(length(DeleteRows) > 0) x$Matrix <- x$Matrix[-DeleteRows, , drop = FALSE]; x})
   
   # Prune redundant characters from matrices following taxon deletion(s):
-  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+  MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
   
   # Print current processing status:
   cat("Done\nProducing taxonomy tree...")
@@ -1234,10 +1252,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {CurrentRownames <- rownames(x$Matrix); NamesToReplace <- intersect(CurrentRownames, TaxaToRenameMatrix[, 2]); if(length(NamesToReplace) > 0) rownames(x$Matrix)[match(NamesToReplace, rownames(x$Matrix))] <- toupper(TaxaToRenameMatrix[match(NamesToReplace, TaxaToRenameMatrix[, 2]), 1]); x})
     
     # Collapse any duplicate taxa created by this substitution (very likely!):
-    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE); if(any(duplicated(rownames(y$Matrix_1$Matrix)))) {DuplicateNames <- rownames(y$Matrix_1$Matrix)[duplicated(rownames(y$Matrix_1$Matrix))]; y <- CollapseDuplicateTaxonMRP(y)}; x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
     # Prune constant characters and collapse duplicated characters:
-    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
+    MRPList[ActiveMRP(MRPList)] <- lapply(MRPList[ActiveMRP(MRPList)], function(x) {y <- PisaniMRPPrune(Claddis::MakeMorphMatrix(x$Matrix, Weights = x$Weights, ignore.duplicate.taxa = TRUE)); x$Matrix <- y$Matrix_1$Matrix; x$Weights <- y$Matrix_1$Weights; x})
     
     # Update new valid OTUs:
     NewValidOTUs <- sort(rownames(TaxonomyMRP))
@@ -1452,7 +1470,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPList <- lapply(MRPList, function(x) {MissingTaxa <- setdiff(rownames(TaxonomyMRP), rownames(x$Matrix)); if(length(MissingTaxa) > 0) x$Matrix <- rbind(x$Matrix, matrix(nrow = length(MissingTaxa), ncol = ncol(x$Matrix), dimnames = list(MissingTaxa, c()))); x$Matrix <- x$Matrix[rownames(TaxonomyMRP), , drop = FALSE]; x})
   
   # Build full MRP matrix:
-  FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = cbind(do.call(cbind, lapply(MRPList, function(x) x$Matrix)), TaxonomyMRP), weights = c(unname(unlist(lapply(MRPList, function(x) x$Weights))), rep(1, ncol(TaxonomyMRP))))
+  FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = cbind(do.call(cbind, lapply(MRPList, function(x) x$Matrix)), TaxonomyMRP), Weights = c(unname(unlist(lapply(MRPList, function(x) x$Weights))), rep(1, ncol(TaxonomyMRP))))
   
   # Add all zero outgroup to matrix:
   FullMRPMatrix$Matrix_1$Matrix <- rbind(matrix("0", nrow = 1, ncol = ncol(FullMRPMatrix$Matrix_1$Matrix), dimnames = list("allzero", c())), FullMRPMatrix$Matrix_1$Matrix)
