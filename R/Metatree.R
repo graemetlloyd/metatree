@@ -1465,13 +1465,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nPerforming Safe Taxonomic Reduction...")
   
   # Perform STR on full matrix:
-  STRdata <- SafeTaxonomicReduction(FullMRPMatrix)
+  STRData <- SafeTaxonomicReduction(FullMRPMatrix)
   
   # Create additional STR matrix from full matrix:
-  STRMRPMatrix <- FullMRPMatrix
-  
-  # If STR removed taxa then create reduced matrix ready for output:
-  if(nrow(STRdata$str.list) > 0) STRMRPMatrix$Matrix_1$Matrix <- STRdata$reduced.matrix$Matrix_1$Matrix
+  STRMRPMatrix <- STRData$reduced.matrix
   
   # Print current processing status:
   cat("Done\nCompiling and returning output...")
