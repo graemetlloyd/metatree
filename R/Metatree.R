@@ -105,7 +105,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   ######
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
-  # Weights are also super slow (IntraMatrixWieghts really?). Can this be sped up somehow? E.g., way STR is.
+  # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
 
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES TOO (AND CHECK THEY CAN EVEN MESH!)
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
@@ -116,12 +116,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # OPTIONS TO ADD IN FUTURE:
   #
-  # 1. Way to do historical metatrees.
-  # 2. Purvis coding instead of Baum and Ragan.
+  # 1. Way to do historical metatrees (should be easy as just prune out starting data sets then run as normal - except setting current year to historical year).
+  # 2. Allow Purvis coding instead of Baum and Ragan. (Involves dealing with NA issues that would be caused currently.)
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
-  # 6. Make operable as web site calls. (Needs proper XMLs to be avilable.)
+  # 6. Make operable as web site calls. (Needs proper XMLs to be available.)
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
