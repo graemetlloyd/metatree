@@ -148,6 +148,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
+  # 6. Make operable as web site calls. (Needs proper XMLs to be avilable.)
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
@@ -393,7 +394,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     if(MonophylyIsNewick) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
     
   }
- 
+  
+  # Check VeilLine is a logical and stop and warn user if not:
+  if(!is.logical(ReportContradictionsToScreen)) stop("ReportContradictionsToScreen must be a logical (TRUE or FALSE).")
+  
   # List of types of resolution that require finding a senior synonym:
   synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
   
@@ -1483,7 +1487,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  Output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData, CurrentVeilYear)
+  Output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRData$str.list, RemovedSourceData, CurrentVeilYear)
   
   # Add names:
   names(Output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData", "CurrentVeilYear")
