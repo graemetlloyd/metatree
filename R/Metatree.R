@@ -97,22 +97,22 @@
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
   
   # Test data:
-  #MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
-  #XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
-  #TargetClade <- "Ichthyopterygia"
-  #InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
-  #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  #HigherTaxaToCollapse = c() #c("Cymbospondylidae", "Grippiidae")
-  #MissingSpecies = "exclude"
-  #Interval = NULL #c("Triassic", "Jurassic")
-  #VeilLine = TRUE
-  #SpeciesToExclude = c() #c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
-  #IncludeSpecimenLevelOTUs = TRUE
-  #BackboneConstraint = "Moon_inpressa"
-  #MonophylyConstraint = NULL
-  #RelativeWeights = c(0, 100, 10, 1)
-  #WeightCombination = "sum"
-  #ReportContradictionsToScreen = TRUE
+  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
+  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
+  TargetClade <- "Ichthyopterygia"
+  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
+  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  HigherTaxaToCollapse = c() #c("Cymbospondylidae", "Grippiidae")
+  MissingSpecies = "exclude"
+  Interval = NULL #c("Triassic", "Jurassic")
+  VeilLine = TRUE
+  SpeciesToExclude = c() #c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
+  IncludeSpecimenLevelOTUs = TRUE
+  BackboneConstraint = "Moon_inpressa"
+  MonophylyConstraint = NULL
+  RelativeWeights = c(0, 100, 10, 1)
+  WeightCombination = "sum"
+  ReportContradictionsToScreen = FALSE
   
   # New Options (requires code to actually use them)
   #
@@ -1452,41 +1452,15 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Print current processing status:
   cat("Done\nBuilding MRP matrix...")
   
-  # Create empty full MRP matrix:
-  FullMRPMatrix <- matrix(nrow = length(NewValidOTUs), ncol = 0, dimnames = list(NewValidOTUs, c()))
+  # Add in missing taxa as NAs to every
+  MRPList <- lapply(MRPList, function(x) {MissingTaxa <- setdiff(rownames(TaxonomyMRP), rownames(x$Matrix)); if(length(MissingTaxa) > 0) x$Matrix <- rbind(x$Matrix, matrix(nrow = length(MissingTaxa), ncol = ncol(x$Matrix), dimnames = list(MissingTaxa, c()))); x$Matrix <- x$Matrix[rownames(TaxonomyMRP), , drop = FALSE]; x})
   
-  # Create empty character weights vector:
-  characterweights <- vector(mode = "numeric")
+  # Build full MRP matrix:
+  FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = cbind(do.call(cbind, lapply(MRPList, function(x) x$Matrix)), TaxonomyMRP), weights = c(unname(unlist(lapply(MRPList, function(x) x$Weights))), rep(1, ncol(TaxonomyMRP))))
   
-  # For each data set:
-  for(i in 1:length(MRPList)) {
-    
-    # Find taxa not present in full matrix:
-    taxanotinmatrix <- setdiff(NewValidOTUs, rownames(MRPList[[i]]$Matrix))
-    
-    # Add data set block (including missing taxa as NAs) into full matrix:
-    FullMRPMatrix <- cbind(FullMRPMatrix, rbind(MRPList[[i]]$Matrix, matrix(NA, nrow = length(taxanotinmatrix), ncol = ncol(MRPList[[i]]$Matrix), dimnames = list(taxanotinmatrix, rep(names(MRPList)[i], ncol(MRPList[[i]]$Matrix)))))[rownames(FullMRPMatrix), ])
-    
-    # Add character weights using publication weights:
-    characterweights <- c(characterweights, rep(publicationweights[i], ncol(MRPList[[i]]$Matrix)))
-    
-  }
-  
-  # Add taxonomy into matrix:
-  FullMRPMatrix <- cbind(FullMRPMatrix, TaxonomyMRP[rownames(FullMRPMatrix), ])
-  
-  # Add taxonomy weights:
-  characterweights <- c(characterweights, rep(1, ncol(TaxonomyMRP)))
-  
-  # Add all zero outgroup:
-  FullMRPMatrix <- rbind(rep("0", ncol(FullMRPMatrix)), FullMRPMatrix)
-  
-  # Add all zero outgroup taxon name:
-  rownames(FullMRPMatrix)[1] <- "allzero"
-  
-  # Convert into Claddis formatted matrix:
-  FullMRPMatrix <- MakeMorphMatrix(FullMRPMatrix, header = "", weights = characterweights, ordering = rep("ord", ncol(FullMRPMatrix)), equalise.weights = FALSE)
-  
+  # Add all zero outgroup to matrix:
+  FullMRPMatrix$Matrix_1$Matrix <- rbind(matrix("0", nrow = 1, ncol = ncol(FullMRPMatrix$Matrix_1$Matrix), dimnames = list("allzero", c())), FullMRPMatrix$Matrix_1$Matrix)
+
   # Print current processing status:
   cat("Done\nPerforming Safe Taxonomic Reduction...")
   
