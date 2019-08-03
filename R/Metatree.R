@@ -92,33 +92,7 @@
 #' @examples
 #'
 #' # Local test for Ichthyopterygia:
-#' Metatree(MRPDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp",
-#'   XMLDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml",
-#'   TargetClade = "Ichthyopterygia",
-#'   InclusiveDataList = sort(c(GetFilesForClade("matricht.html"),
-#'   "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb",
-#'   "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a",
-#'   "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a",
-#'   "Rieppel_et_deBraga_1996a", "Young_2003a")),
-#'   ExclusiveDataList = c("Averianov_inpressa", "Bravo_et_Gaete_2015a",
-#'   "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab",
-#'   "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae",
-#'   "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab",
-#'   "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a",
-#'   "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa",
-#'   "Frederickson_et_Tumarkin-Deratzian_2014ab",
-#'   "Frederickson_et_Tumarkin-Deratzian_2014ac",
-#'   "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a",
-#'   "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a",
-#'   "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a",
-#'   "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa",
-#'   "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba",
-#'   "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a",
-#'   "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a",
-#'   "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a",
-#'   "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab",
-#'   "Zelenitsky_et_Therrien_2008a"), MissingSpecies = "exclude",
-#'   BackboneConstraint = "Moon_inpressa", RelativeWeights = c(0, 100, 10, 1))
+#' Metatree(MRPDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp", XMLDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml", TargetClade = "Ichthyopterygia", InclusiveDataList = sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a")), ExclusiveDataList = c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a"), MissingSpecies = "exclude", BackboneConstraint = "Moon_inpressa", RelativeWeights = c(0, 100, 10, 1))
 #'
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
@@ -131,7 +105,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   ######
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
-  # Input weights will have to be rescaled to zero to one somehow in case they are actually used differentially (not all one)
   # Weights are also super slow (IntraMatrixWieghts really?). Can this be sped up somehow? E.g., way STR is.
 
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES TOO (AND CHECK THEY CAN EVEN MESH!)
@@ -144,7 +117,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # OPTIONS TO ADD IN FUTURE:
   #
   # 1. Way to do historical metatrees.
-  # 2. Purvis coding instead of Baum and ragan.
+  # 2. Purvis coding instead of Baum and Ragan.
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
@@ -443,6 +416,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Set names of MRP files:
   names(MRPList) <- gsub("mrp.nex", "", MRPFileList)
+  
+  # Find maximum input weight:
+  MaximumInputWeight <- max(unlist(lapply(MRPList, function(x) x$Weights)))
+  
+  # Resacle all input weights zero to one by dividing through by maximum input weight:
+  MRPList <- lapply(MRPList, function(x) {x$Weights <- x$Weights / MaximumInputWeight; x})
   
   # Print current processing status:
   cat("Done\nReading XML data...")
