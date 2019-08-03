@@ -1474,15 +1474,15 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData, CurrentVeilYear)
+  Output <- list(FullMRPMatrix, STRMRPMatrix, TaxonomyMRPTree, STRdata$str.list, RemovedSourceData, CurrentVeilYear)
   
   # Add names:
-  names(output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData", "CurrentVeilYear")
+  names(Output) <- c("FullMRPMatrix", "STRMRPMatrix", "TaxonomyTree", "SafelyRemovedTaxa", "RemovedSourceData", "CurrentVeilYear")
   
   # Print current processing status:
   cat("Done")
   
   # Return output:
-  return(output)
+  return(Output)
   
 }
