@@ -19,6 +19,7 @@
 #' @param MonophylyConstraint Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
 #' @param RelativeWeights A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.
 #' @param WeightCombination How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.
+#' @param ReportContradictionsToScreen Logical indicating whether or not to print any taxonomy-phylogeny contradictions to the screen.
 #'
 #' @details
 #'
@@ -64,6 +65,10 @@
 #'
 #' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
 #'
+#' \bold{Taxonomy-phylogeny contradictions}
+#'
+#' Partlya  test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
+#'
 #' \bold{Outputs}
 #'
 #' Text.
@@ -89,23 +94,25 @@
 #' # Nothing yet.
 #'
 #' @export Metatree
-Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum") {
+Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
   
-  MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
-  XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
-  TargetClade <- "Ichthyopterygia"
-  InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
-  ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-  HigherTaxaToCollapse = c("Cymbospondylidae", "Grippiidae")
-  MissingSpecies = "exclude"
-  Interval = c("Triassic", "Jurassic")
-  VeilLine = TRUE
-  SpeciesToExclude = c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
-  IncludeSpecimenLevelOTUs = TRUE
-  BackboneConstraint = "Moon_inpressa"
-  MonophylyConstraint = NULL
-  RelativeWeights = c(0, 100, 10, 1)
-  WeightCombination = "sum"
+  # Test data:
+  #MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp"
+  #XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml"
+  #TargetClade <- "Ichthyopterygia"
+  #InclusiveDataList <- sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a"))
+  #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+  #HigherTaxaToCollapse = c() #c("Cymbospondylidae", "Grippiidae")
+  #MissingSpecies = "exclude"
+  #Interval = NULL #c("Triassic", "Jurassic")
+  #VeilLine = TRUE
+  #SpeciesToExclude = c() #c("Californosaurus_perrini", "Toretocnemus_californicus", "Toretocnemus_zitteli", "Hudsonelpidia_brevirostris")
+  #IncludeSpecimenLevelOTUs = TRUE
+  #BackboneConstraint = "Moon_inpressa"
+  #MonophylyConstraint = NULL
+  #RelativeWeights = c(0, 100, 10, 1)
+  #WeightCombination = "sum"
+  #ReportContradictionsToScreen = TRUE
   
   # New Options (requires code to actually use them)
   #
@@ -114,18 +121,18 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES TOO (AND CHECK THEY CAN EVEN MESH!)
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
-  # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY)
-  # NEED SOME TEST THAT HELPS CHECK ROOT IS SENSIBLE (CAN DO WHEN MATCH TAXONOMY TO DATA SETS FOR CHUNKING)
+  # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY); I.E., A SAFER CHECK THAT RECON_NAME MATCHES DATABASE NAME FOR RECON_NO
   # NEED SOME TEST THAT HELPS DETERMINE IF MULTIPLE OCCURRENCES OF SAME TAXON AFTER RECONCILIATION IS CORRECT OR AN ERROR
-  # MAKE STR OPTIONAL (SAVES A LITTLE TIME)
   # CHECK THERE ARE MULTIPLE TAXA PRE-RECONCILIATION
   # CHECK INDETS DO NOT GIVE MULTIPLE MATCHES
-  # ADD INVERSE OPTION OF SPECIES TO EXCLUDE (SPECIES TO INCLUDE)
-  # CHUNK AND WORK OUT HOW TO CALL TNT AND PARALLELISE
-  # ALLOW PURIVS CODING? (MIGHT BE TRICKY TO IMPLEMENT AFTER THE FACT?)
-  # OPTION FOR HISTORICAL SUPERTREES SOMEHOW
   
-  # HOW TO DELETE DATA SETS THAT STILL CONTRIBUTE TO DEPENDENCE? (DELETE MATRIX BUT DO NOT REMOVE FROM MRP LIST)
+  # OPTIONS TO ADD IN FUTURE:
+  #
+  # 1. Way to do historical metatrees.
+  # 2. Purvis coding instead of Baum and ragan.
+  # 3. Proper chunking and maybe even terminal/TNT calls.
+  # 4. Species to include option as alternative to species to exclude.
+  # 5. Make Safe Taxonomic Reduction optional.
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
@@ -185,7 +192,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     if(!all(sort(names(MRPCharacterString)) == sort(rownames(MRPCharacterMatrix)))) stop("MRPCharacterString names must match row names of MRPCharacterMatrix. Check names and try again.")
     
     # Check only zeroes and ones are coded and stop and warn user if not:
-    if(length(setdiff(unique(c(MRPCharacterString, MRPCharacterMatrix)), c("0", "1"))) > 0) stop("Both MRPCharacterString and MRPCharacterMatrix must consiste exclusively of the characters \"0\" and \"1\". Check data and try again.")
+    if(length(setdiff(unique(c(MRPCharacterString, MRPCharacterMatrix)), c("0", "1"))) > 0) stop("Both MRPCharacterString and MRPCharacterMatrix must consist exclusively of the characters \"0\" and \"1\". Check data and try again.")
     
     # Check MRP string contains both zeroe and ones and stop and warn user if not:
     if(length(unique(MRPCharacterString)) < 2) stop("MRPCharacterString must contain both zeroes and ones.")
@@ -221,6 +228,102 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     
     # Return intra matrix weights:
     return(IntraMatrixWeights)
+    
+  }
+  
+  # Subfunction to collapse vector of string to single formatted string:
+  WriteListAsString <- function(ListOfItems, OxfordComma = TRUE) {
+    
+    # If not using Oxford comma set final bridge as not having one:
+    if(!OxfordComma) FinalBridge <- " and "
+    
+    # If using Oxford comma set final bridge as having one:
+    if(OxfordComma) FinalBridge <- ", and "
+    
+    # If list is a single item make that the output:
+    if(length(ListOfItems) == 1) Output <- ListOfItems
+    
+    # If list is two items join with a simple and:
+    if(length(ListOfItems) == 2) Output <- paste(ListOfItems, collapse = " and ")
+    
+    # If three or more items format as list with Oxford Comma option included:
+    if(length(ListOfItems) > 2) Output <- paste(paste(ListOfItems[1:(length(ListOfItems) - 2)], collapse = ", "), paste(ListOfItems[(length(ListOfItems) - 1):length(ListOfItems)], collapse = FinalBridge), sep = ", ")
+    
+    # Return output:
+    return(Output)
+    
+  }
+  
+  # Subfunction to find taxonomy-phylogeny contradictions and turn them into warning messages:
+  ListContradictions <- function(TaxonomyMRP, MRPMatrix, ContradictionTaxa, DataSetName) {
+    
+    # Subfunction to build warning messages:
+    BuildWarningMessages <- function(BoundMatrix, ContradictionTaxon, DataSetName) {
+      
+      # Create four blocks for matching:
+      ZeroZero <- ZeroOne <- OneZero <- OneOne <- BoundMatrix
+      
+      # Fill blocks with zeroes:
+      ZeroOne[, 1] <- OneZero[, 2] <- ZeroZero[1:length(ZeroZero)] <- "0"
+      
+      # Fill blocks with ones:
+      ZeroOne[, 2] <- OneZero[, 1] <- OneOne[1:length(OneOne)] <- "1"
+      
+      # Build empty list of names:
+      NamesList <- list()
+      
+      # Store names where scores are zero and zero:
+      NamesList[["ZeroZeroNames"]] <- names(which(apply(BoundMatrix == ZeroZero, 1, all)))
+      
+      # Store names where scores are zero and one:
+      NamesList[["ZeroOneNames"]] <- names(which(apply(BoundMatrix == ZeroOne, 1, all)))
+      
+      # Store names where scores are one and zero:
+      NamesList[["OneZeroNames"]] <- names(which(apply(BoundMatrix == OneZero, 1, all)))
+      
+      # Store names where scores are one and one:
+      NamesList[["OneOneNames"]] <- names(which(apply(BoundMatrix == OneOne, 1, all)))
+      
+      # Prune down to just the minimum list lengths (the likley problem candidate(s)):
+      NamesList <- NamesList[unlist(lapply(NamesList, length)) == min(unlist(lapply(NamesList, length)))]
+      
+      # Collapse each item of the list to a singel string:
+      NamesList <- lapply(NamesList, WriteListAsString)
+      
+      # Find datasets with second case (apparent taxa outside clade that should be inside):
+      CaseOne <- match(c("ZeroZeroNames", "OneZeroNames"), names(NamesList))
+      
+      # Find datasets with second case (apparent taxa inside clade that should be outside):
+      CaseTwo <- match(c("ZeroOneNames", "OneOneNames"), names(NamesList))
+      
+      # Remove NAs from first case matches:
+      CaseOne <- CaseOne[!is.na(CaseOne)]
+      
+      # Remove NAs from second case matches:
+      CaseTwo <- CaseTwo[!is.na(CaseTwo)]
+      
+      # If first case exists then reformat string with message to user:
+      if(length(CaseOne) > 0) NamesList[CaseOne] <- lapply(NamesList[CaseOne], function(x) paste("In ", DataSetName, " the following taxa were found outside ", ContradictionTaxon, " when taxonomy suggests they should be inside: ", x, ". Check data set and/or taxonomy that this is correct.\n", sep = ""))
+      
+      # If second case exists then reformat string with message to user:
+      if(length(CaseTwo) > 0) NamesList[CaseTwo] <- lapply(NamesList[CaseTwo], function(x) paste("In ", DataSetName, " the following taxa were found inside ", ContradictionTaxon, " when taxonomy suggests they should be outside: ", x, ". Check data set and/or taxonomy that this is correct.\n", sep = ""))
+      
+      # Reformat names list as a vector for output:
+      Output <- unname(unlist(NamesList))
+      
+      # If multiple values then reformat into a single value:
+      if(length(Output) > 1) Output <- paste("In ", DataSetName, " one of the following is true:\n", paste(paste(paste(1:length(Output), ". T", sep = ""), gsub(paste("In ", DataSetName, " t| Check data set and/or taxonomy that this is correct.\n", sep = ""), "", Output), rep("\n", length(Output)), sep = ""), collapse = ""), "Check data set and/or taxonomy that this is correct.\n", sep = "")
+      
+      # Return output:
+      return(Output)
+      
+    }
+    
+    # Build output into unique values (as can get duplicates):
+    Output <- unique(unlist(lapply(as.list(ContradictionTaxa), function(x) lapply(as.list(MRPCharacterContradiction(TaxonomyMRP[, x], MRPMatrix)), function(y) {BoundMatrix <- cbind(TaxonomyMRP[rownames(MRPMatrix), x], MRPMatrix[, y]); BuildWarningMessages(BoundMatrix, x, DataSetName)}))))
+    
+    # Return output:
+    return(Output)
     
   }
 
@@ -1289,11 +1392,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # All weights are set on a zero to one scale initially and then multiplied by RelativeWeights:
   MRPList <- lapply(MRPList, function(x) {InputWeights <- x$Weights; x$Weights <- NULL; x$InputWeights <- RelativeWeights[1] * InputWeights; x$PubicationYearWeights <- RelativeWeights[2] * (rep(((2 ^ (0.5 * (as.numeric(x$PublicationYear) - CurrentVeilYear + 1))) - 1) / ((2 ^ (0.5 * (as.numeric(CurrentYear) - CurrentVeilYear + 1))) - 1), length(InputWeights))); x$DataSetDependenceWeights <- RelativeWeights[3] * rep(1 / (length(x$Sibling) + 1), length(InputWeights)); x$CladeContradictionWeights <- RelativeWeights[4] * MRPIntraMatrixWeights(x$Matrix); x})
   
-  # If using sum o combine weights collapse weights to just their sum:
+  # If using sum to combine weights collapse weights to just their sum:
   if(WeightCombination == "sum") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PubicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, sum); x$InputWeights <- NULL; x$PubicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
   
   # If using product to combine weights collapse weights to just their product (excluding zeroes) and remove other weights from list:
-  if(WeightCombination == "product") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PubicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, function(y) {z <- as.character(y); z[z=="0"] <- NA; prod(as.numeric(z), na.rm = TRUE)}); x$InputWeights <- NULL; x$PubicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
+  if(WeightCombination == "product") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PubicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, function(y) {z <- as.character(y); z[z == "0"] <- NA; prod(as.numeric(z), na.rm = TRUE)}); x$InputWeights <- NULL; x$PubicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
   
   # Get current maximum weight:
   MaximumWeight <- max(unlist(lapply(MRPList, function(x) x$Weights)))
@@ -1309,10 +1412,42 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # Rescale weights (10 to 1000) and round results to two decimal places (best TNT can cope with):
   MRPList <- lapply(MRPList, function(x) {x$Weights <- round((x$Weights * MultiplicationFactor) + AdditionFactor, 2); x})
-
-######
-
-# DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
+  
+  ######
+  
+  # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
+  # Input weights will have to be rescaled to zero to one somehow in case they are actually used differentially (not all one)
+  # Weights are also super slow (IntraMatrixWieghts really?). Can this be sped up somehow? E.g., way STR is.
+  
+  # Print current processing status:
+  cat("Done\nChecking for phylogeny-taxonomy contradictions...")
+  
+  # Do first pass to find any contradictions between taxonomy MRP and the fully reconciled source matrix:
+  MRPList <- lapply(MRPList, function(x) {TaxonomyMRPStrings <- TaxonomyMRP[rownames(x$Matrix), ]; TaxonomyMRPStrings[is.na(TaxonomyMRPStrings)] <- "0"; TaxonomyMRPStrings <- TaxonomyMRPStrings[, apply(TaxonomyMRPStrings, 2, function(y) length(unique(y))) == 2]; x$TaxonomyContradictions <- names(which(unlist(lapply(apply(TaxonomyMRPStrings, 2, list), function(z) length(MRPCharacterContradiction(unlist(z), x$Matrix))) > 0))); x$TaxonomyContradictionProportion <- length(x$TaxonomyContradictions) / ncol(TaxonomyMRPStrings); x})
+  
+  # Store monophyletic taxa (those not contradicted by any phylogenetic characters - useful for chunking larger data if found)
+  MonophyleticTaxa <- setdiff(colnames(TaxonomyMRP), unique(unlist(lapply(MRPList, function(x) x$TaxonomyContradictions))))
+  
+  # If reporting contradiction issues to the screen:
+  if(ReportContradictionsToScreen) {
+    
+    # Find any data sets with taxonomy-phylogeny contradictions:
+    ContradictionIssueDataSets <- names(unlist(lapply(MRPList, function(x) length(x$TaxonomyContradictions))) > 0)
+    
+    # If there are data sets with contradictions:
+    if(length(ContradictionIssueDataSets) > 0) {
+      
+      # Build vector of contradiction warnings:
+      ContradictionWarnings <- unname(unlist(lapply(MRPList[ContradictionIssueDataSets], function(x) {TaxonomyMRPSubset <- TaxonomyMRP[rownames(x$Matrix), x$TaxonomyContradictions, drop = FALSE]; if(any(is.na(TaxonomyMRPSubset))) TaxonomyMRPSubset[is.na(TaxonomyMRPSubset)] <- "0"; ListContradictions(TaxonomyMRP = TaxonomyMRPSubset, MRPMatrix = x$Matrix, ContradictionTaxa = x$TaxonomyContradictions, DataSetName = x$FileName)})))
+      
+      # Print warnings to screen:
+      cat(ContradictionWarnings)
+      
+      # NEED TO BREAK THIS DOWN FURTHER AS CLEARLY SOME REDUNDANCY! (E.G. GROUPING HIGHER TAXA WITH SAME ISSUE, OR DATA SETS WITH SAME ISSUE)
+      
+    }
+    
+  }
 
   # Print current processing status:
   cat("Done\nBuilding MRP matrix...")

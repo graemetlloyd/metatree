@@ -6,10 +6,11 @@
 \usage{
 Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
   InclusiveDataList = c(), ExclusiveDataList = c(),
-  HigherTaxaToCollapse = c(), MissingSpecies = "exclude",
-  Interval = NULL, VeilLine = TRUE, SpeciesToExclude = c(),
+  HigherTaxaToCollapse = c(), SpeciesToExclude = c(),
+  MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE,
   IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL,
-  MonophylyConstraint = NULL)
+  MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1),
+  WeightCombination = "sum", ReportContradictionsToScreen = FALSE)
 }
 \arguments{
 \item{MRPDirectory}{The directory in which the MRP files are to be read from.}
@@ -22,7 +23,9 @@ Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
 
 \item{ExclusiveDataList}{A vector of any data sets to exclude from the metatree. Can be left empty if all data sets in \code{MRPDirectory} abd \code{XMLDirectory} are valid. (Intended to exclude things like oogenera or footprint analyses, other supertree data sets etc.)}
 
-\item{HigherTaxaToCollapse}{Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group).}
+\item{HigherTaxaToCollapse}{Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group). NB: It is very important that these are safely monophyletic or the results can be compromised if not.}
+
+\item{SpeciesToExclude}{Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.}
 
 \item{MissingSpecies}{What to do with species assigned to the target clade, but not present in the source data. Options are: "exclude" (excludes these missing species), "genus" (include those species in a genus-level polytomy if the genus is sampled in the source data), and "all"}
 
@@ -30,13 +33,17 @@ Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
 
 \item{VeilLine}{A logical indiicating whther to remove older data sets that do not increase taxonomic coverage (TRUE; the default) or not (FALSE). See Lloyd et al. (2016).}
 
-\item{SpeciesToExclude}{Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.}
-
 \item{IncludeSpecimenLevelOTUs}{A logical indicating whther specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.}
 
 \item{BackboneConstraint}{Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 
 \item{MonophylyConstraint}{Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
+
+\item{RelativeWeights}{A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.}
+
+\item{WeightCombination}{How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.}
+
+\item{ReportContradictionsToScreen}{Logical indicating whether or not to print any taxonomy-phylogeny contradictions to the screen.}
 }
 \value{
 TBC.
@@ -45,7 +52,53 @@ TBC.
 Builds metatree from source data
 }
 \details{
-Use approach laid out in Lloyd et al. (2008; 2016).
+\bold{Introduction}
+
+Broadly speaking this function is an implementation and extension of the approach to generating composite phylogeneic trees laid out in Lloyd et al. (2016), which itself builds on Lloyd et al. (2008), namely the "metatree" approach. Metatrees primarily differ from formal supertrees in that, instead of published trees (figures in source publications), the input data are the original character-taxon matrices and/or sequence alignments. This is superior to supertrees if you want to: 1) standardise the way input data are analysed, 2) choose the optimality criterion instead of being forced to use whatever the original study used, 3) include non-focal species that may have been removed from published figures (improving taxon overlap), and 4) more properly incorporate phylogenetic uncertainty rather than being restricted to the use of consensus topologies.
+
+\bold{Formatting input data}
+
+The implementation here assumes this data set reanalysis has already been performed, and the results have been encoded in NEXUS (Maddison et al. 1997) format using Matrix Representation with Parsimony (MRP; Baum 1992; Ragan 1992).
+
+\bold{Input directories}
+
+What these are and default of using all files, matching names etc.
+
+\bold{Data set inclusion and exclusion}
+
+Inclusive and exclusive lists.
+
+\bold{Taxonomic options}
+
+Collapsing higher taxa and species to remove. Levels of inclusivity (all, exclude, genus).
+
+\bold{Specifying a sampling interval}
+
+Time and why desirable (stem-groups). See also collapsing higher taxa. Issue with specimen-level OTUs.
+
+\bold{Use of veil lines}
+
+Alongside a priori exclusion of data sets can also use a veil line. Advantages: reduces final data set size, avoids older signal completely (although can also be dealt with with weights (see below).
+
+\bold{Specimen-level OTUs}
+
+As this is aimed at fossil data a common issue is use pf specimen-level OTUs in source data sets that (currently) lack a formal species designation. Issues with time and harder to check validity (may have since been named).
+
+\bold{Applying constraint(s)}
+
+Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+
+\bold{Weighting source data}
+
+Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+
+\bold{Taxonomy-phylogeny contradictions}
+
+Partlya  test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
+
+\bold{Outputs}
+
+Text.
 }
 \examples{
 
@@ -53,7 +106,15 @@ Use approach laid out in Lloyd et al. (2008; 2016).
 
 }
 \references{
-Lloyd et al. (@016)
+Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogenetic inference, and the desirability of combining gene trees. Taxon, 41, 3-10.
+
+Lloyd, G. T., Davis, K. E., Pisani, D., Tarver, J. E., Ruta, M., Sakamoto, M., Hone, D. W. E., Jennings, R. & Benton, M. J., 2008. Dinosaurs and the Cretaceous Terrestrial Revolution. Proceedings of the Royal Society B, 275, 2483-2490.
+
+Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+
+Maddison, D. R., Swofford, D. L. and Maddison, W. P., 1997. NEXUS: an extensible file format for systematic information. Systematic Biology, 46, 590-621.
+
+Ragan, M., 1992. Phylogenetic inference based on matrix representation of trees. Molecular Phylogenetics and Evolution, 1, 113-126.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
