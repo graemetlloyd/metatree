@@ -451,7 +451,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(length(MRPXMLunion) > 0) stop(paste("Datasets do not match (MRP and XML)!:", MRPXMLunion, collapse = " "))
   
   # Read in all XML files and store in a list (reformatting subgenera as GenusSubgenus along the way):
-  XMLList <- lapply(as.list(XMLFileList)[1:2], function(x) {y <- ReadMetatreeXML(x); y$SourceTree$Taxa$TagContents[, "recon_name"] <- gsub("_\\(|\\)", "", y$SourceTree$Taxa$TagContents[, "recon_name"]); y})
+  XMLList <- lapply(as.list(XMLFileList), function(x) {y <- ReadMetatreeXML(x); y$SourceTree$Taxa$TagContents[, "recon_name"] <- gsub("_\\(|\\)", "", y$SourceTree$Taxa$TagContents[, "recon_name"]); y})
   
   # Add names to XML list:
   names(XMLList) <- gsub(".xml", "", XMLFileList)
