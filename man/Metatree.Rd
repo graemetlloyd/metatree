@@ -33,7 +33,7 @@ Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
 
 \item{VeilLine}{A logical indiicating whther to remove older data sets that do not increase taxonomic coverage (TRUE; the default) or not (FALSE). See Lloyd et al. (2016).}
 
-\item{IncludeSpecimenLevelOTUs}{A logical indicating whther specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.}
+\item{IncludeSpecimenLevelOTUs}{A logical indicating whether specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.}
 
 \item{BackboneConstraint}{Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 
@@ -94,7 +94,7 @@ Two ways to do this. MRP is better as original data can be passed through pipeli
 
 \bold{Taxonomy-phylogeny contradictions}
 
-Partlya  test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
+Partly a test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
 
 \bold{Outputs}
 
