@@ -15,8 +15,8 @@
 #' @param Interval If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBChildFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).
 #' @param VeilLine A logical indiicating whther to remove older data sets that do not increase taxonomic coverage (TRUE; the default) or not (FALSE). See Lloyd et al. (2016).
 #' @param IncludeSpecimenLevelOTUs A logical indicating whether specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.
-#' @param BackboneConstraint Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
-#' @param MonophylyConstraint Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
+#' @param BackboneConstraint The file name of one of the source data sets to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
+#' @param MonophylyConstraint The file name of one of the source data sets to represent a monophyly constraint (will enforce topology in final metatree and forces taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.
 #' @param RelativeWeights A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.
 #' @param WeightCombination How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.
 #' @param ReportContradictionsToScreen Logical indicating whether or not to print any taxonomy-phylogeny contradictions to the screen.
@@ -339,10 +339,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # Check IncludeSpecimenLevelOTUs is a logical and stop and warn user if not:
   if(!is.logical(IncludeSpecimenLevelOTUs)) stop("IncludeSpecimenLevelOTUs must be a logical (TRUE or FALSE).")
   
+  # Set defualt of constraint in use to FALSE:
   ConstraintInUse <- FALSE
   
   # Check that there is a maximum of one constraint tree being used and stop and warn user if so.
-  # Technically it ought to be possible to do this, but it leaves open some potentially horrendous disasters:
+  # Technically it ought to be possible to do this, but it leaves open some potentially horrendous disasters best avoided for now:
   if(!is.null(BackboneConstraint) && !is.null(MonophylyConstraint)) stop("Cannot currently apply a backbone constraint and a monophyly constraint simultaneously.")
   
   # If backbone constraint is set:
@@ -357,12 +358,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Check is a string and stop and warn user if not:
     if(!is.character(BackboneConstraint)) stop("BackboneConstraint must be a text string. Reformat and try again.")
     
-    # Try and work out if backbone is a Newick:
-    BackboneIsNewick <- length(grep("\\(|\\)", strsplit(BackboneConstraint, ",")[[1]])) > 0
+    # Set constraint data set to backbone constraint:
+    ConstraintDataSet <- BackboneConstraint
     
-    # If backbone is a Newick try and read it in to check for errors:
-    if(BackboneIsNewick) BackboneConstraintTree <- ape::read.tree(text = BackboneConstraint)
-    
+    # Set constraint type to backbone:
+    ConstraintType <- "backbone"
+
   }
   
   # If monophyly onstraint is set:
@@ -377,11 +378,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Check is a string and stop and warn user if not:
     if(!is.character(MonophylyConstraint)) stop("MonophylyConstraint must be a text string. Reformat and try again.")
     
-    # Try and work out if monophyly is a Newick:
-    MonophylyIsNewick <- length(grep("\\(|\\)", strsplit(MonophylyConstraint, ",")[[1]])) > 0
+    # Set constraint data set to monophyly constraint:
+    ConstraintDataSet <- MonophylyConstraint
     
-    # If monophyly is a Newick trya nd read it in to check for errors:
-    if(MonophylyIsNewick) MonophylyConstraintTree <- ape::read.tree(text = MonophylyConstraint)
+    # Set constraint type to monophyly:
+    ConstraintType <- "monophyly"
     
   }
   
@@ -1255,8 +1256,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Update new valid OTUs:
     NewValidOTUs <- sort(rownames(TaxonomyMRP))
     
-    # HAVE TO EDIT CONSTRAINT TREES TOO, INCLUDING DELETING TAXA!
-    
   }
   
   # If specimen-level OTUs are included:
@@ -1455,6 +1454,26 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
       # NEED TO BREAK THIS DOWN FURTHER AS CLEARLY SOME REDUNDANCY! (E.G. GROUPING HIGHER TAXA WITH SAME ISSUE, OR DATA SETS WITH SAME ISSUE)
       
     }
+    
+  }
+  
+  # If using a constraint:
+  if(ConstraintInUse) {
+    
+    # Print current processing status:
+    cat("Done\nApply constraint tree...")
+    
+    # If a monophyly constraint add all other taxa outside the constraint:
+    if(ConstraintType == "monophyly") MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix <- rbind(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix, matrix("0", ncol = ncol(MRPList[[grep("Constraint", names(MRPList))]]$Matrix), nrow = length(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix))), dimnames = list(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix)), c())))
+    
+    # Get combined weight of all non-constraint data (need to know to correctly weight the constraint data):
+    NonConstraintWeightsTotal <- sum(unname(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) x$Weights))))
+    
+    # Embiggen MRP matrix so that weights are high enough to ensure contstraint gets implemented:
+    MRPList[[ConstraintDataSet]]$Matrix <- metatree::EmbiggenMatrix(Claddis::MakeMorphMatrix(MRPList[[ConstraintDataSet]]$Matrix, Weights = MRPList[[ConstraintDataSet]]$Weights), N = ceiling(NonConstraintWeightsTotal / 1000))$Matrix_1$Matrix
+    
+    # Ensure current constraint weights are set at maximum possible value (1000):
+    MRPList[[ConstraintDataSet]]$Weights <- rep(1000, ncol(MRPList[[ConstraintDataSet]]$Matrix))
     
   }
 

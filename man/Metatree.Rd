@@ -35,9 +35,9 @@ Metatree(MRPDirectory, XMLDirectory, TargetClade = "",
 
 \item{IncludeSpecimenLevelOTUs}{A logical indicating whether specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree.}
 
-\item{BackboneConstraint}{Either a file name of one of the source data sets or a Newick string to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
+\item{BackboneConstraint}{The file name of one of the source data sets to represent a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 
-\item{MonophylyConstraint}{Either a file name of one of the source data sets or a Newick string to represent a monophyly constraint (will enforce topology in final metatree and force taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
+\item{MonophylyConstraint}{The file name of one of the source data sets to represent a monophyly constraint (will enforce topology in final metatree and forces taxa not in topology to fall outside the constraint). This is not required and the default (NULL) will mean no constraint is applied.}
 
 \item{RelativeWeights}{A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.}
 
