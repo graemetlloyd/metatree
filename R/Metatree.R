@@ -398,10 +398,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPFileList <- strsplit(ifelse(length(InclusiveDataList) > 0, paste(setdiff(sort(unique(InclusiveDataList)), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%"), paste(setdiff(gsub("mrp\\.nex", "", list.files()), sort(unique(ExclusiveDataList))), "mrp.nex", sep = "", collapse = "%%")), "%%")[[1]]
   
   # If a backbone constraint is used and is a file check it is present in the source data and stop and warn user if not:
-  if(!is.null(BackboneConstraint) && !BackboneIsNewick) if(is.na(match(paste(BackboneConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Backbone constraint file not found in data. Check name and try again.")
+  if(!is.null(BackboneConstraint)) if(is.na(match(paste(BackboneConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Backbone constraint file not found in data. Check name and try again.")
   
   # If a monophyly constraint is used and is a file check it is present in the source data and stop and warn user if not:
-  if(!is.null(MonophylyConstraint) && !MonophylyIsNewick) if(is.na(match(paste(MonophylyConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Monophyly constraint file not found in data. Check name and try again.")
+  if(!is.null(MonophylyConstraint)) if(is.na(match(paste(MonophylyConstraint, "mrp.nex", sep = ""), MRPFileList))) stop("Monophyly constraint file not found in data. Check name and try again.")
   
   # Check there are four relative weights values and stop and warn user if not:
   if(length(RelativeWeights) != 4) stop("RelativeWeights must consist of exactly four values. Fix and try again.")
