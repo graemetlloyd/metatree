@@ -27,7 +27,7 @@ Tree2MRP <- function(Trees) {
     # Check tip names match across all trees!
     
     # If a single tree convert to a list so rest of code works:
-    if(class(Trees) == "phylo") Trees <- as.list(Trees)
+    if(class(Trees) == "phylo") Trees <- list(Trees)
     
     # Get all unique MRP vectors across all trees:
     MRPVectors <- unique(unlist(lapply(Trees, function(x) lapply(as.list((ape::Ntip(x) + 1):(ape::Ntip(x) + ape::Nnode(x))), function(y) {InClade <- x$tip.label[strap::FindDescendants(y, x)]; MRPVector <- rep(0, ape::Ntip(x)); names(MRPVector) <- x$tip.label; MRPVector[InClade] <- 1; paste(MRPVector[sort(names(MRPVector))], collapse = "")}))))
