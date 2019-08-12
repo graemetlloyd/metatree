@@ -106,7 +106,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
-
+  
+  # DEFO NEED TO IMPROVE NAME CHECKER AFTER RECON COS THAT IS WHERE MOST OF THE LATER ISSUES ARE (E.G. GENUS NAME NUMBER USED FOR SPECIES)
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES (AND CHECK THEY CAN EVEN MESH!)
   # CHECK FOR SPECIES THAT BELONG TO A GENUS DIFFERENT TO THE ONE IN THEIR NAME!
   # NEED TO CATCH ISSUE WHERE GENUS NUMBER IS USED FOR A SPECIES (HARD TO CHECK SO FAR DUE TO INDETERMINATES CONTINGENCY); I.E., A SAFER CHECK THAT RECON_NAME MATCHES DATABASE NAME FOR RECON_NO
@@ -173,10 +174,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   MRPCharacterContradiction <- function(MRPCharacterString, MRPCharacterMatrix) {
     
     # Check MRP string has names and stop and warn user if not:
-    if(is.null(names(MRPCharacterString))) stop("MRPCharacterString must have names. Add and try agaian.")
+    if(is.null(names(MRPCharacterString))) stop("MRPCharacterString must have names. Add and try again.")
     
     # Check MRP matrix has names and stop and warn user if not:
-    if(is.null(rownames(MRPCharacterMatrix))) stop("MRPCharacterMatrix must have row names. Add and try agaian.")
+    if(is.null(rownames(MRPCharacterMatrix))) stop("MRPCharacterMatrix must have row names. Add and try again.")
     
     # Check MRP string and matrix match in size and stop and warn user if not:
     if(length(MRPCharacterString) != nrow(MRPCharacterMatrix)) stop("MRPCharacterString must have the same length as the number of rows of MRPCharacterMatrix. Check data and try again.")
@@ -374,7 +375,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     if(length(MonophylyConstraint) > 1) stop("MonophylyConstraint must be a single value. (Cannot apply two monophyly constraints simultaneously.)")
     
     # Check is a string and stop and warn user if not:
-    if(!is.character(MonophylyConstraint)) stop("BackboneConstraint must be a text string. Reformat and try again.")
+    if(!is.character(MonophylyConstraint)) stop("MonophylyConstraint must be a text string. Reformat and try again.")
     
     # Try and work out if monophyly is a Newick:
     MonophylyIsNewick <- length(grep("\\(|\\)", strsplit(MonophylyConstraint, ",")[[1]])) > 0
@@ -418,7 +419,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(sum(RelativeWeights) <= 0 || any(RelativeWeights < 0)) stop("RelativeWeights must include at least one positive value and negative values are not allowed. Fix and try again.")
   
   # Check only a single weight combination value is being used and stop and warn user if not:
-  if(length(WeightCombination) != 1) stop("WeightCombination mus consist of a single value.")
+  if(length(WeightCombination) != 1) stop("WeightCombination must consist of a single value.")
   
   # Check weight combintion is a valid option and stop and warn if not:
   if(length(setdiff(WeightCombination, c("product", "sum"))) > 0) stop("WeightCombination must be one of \"product\" or \"sum\" only. Check spelling and try again.")
@@ -850,7 +851,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   }
   
   # Get initial parent child relationships based on OTUs:
-  parentchildrelationships <- paste(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[match(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to ")
+  ParentChildRelationships <- paste(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[match(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to ")
   
   # If including specimen level OTUs:
   if(IncludeSpecimenLevelOTUs) {
@@ -859,12 +860,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     indetsandsps <- sort(c(which(unlist(lapply(lapply(lapply(lapply(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 2), strsplit, split = "_"), unlist), '==', "indet"), any))), which(unlist(lapply(lapply(lapply(lapply(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 2), strsplit, split = "_"), unlist), '==', "sp"), any)))))
     
     # If such taxa exist then update parent child relationships accordingly:
-    if(length(indetsandsps) > 0) parentchildrelationships[indetsandsps] <- paste(unlist(lapply(strsplit(ValidOTUNames[indetsandsps], "%%%%"), '[', 1)), unlist(lapply(strsplit(ValidOTUNames[indetsandsps], "%%%%"), '[', 1)), sep = " belongs to ")
+    if(length(indetsandsps) > 0) ParentChildRelationships[indetsandsps] <- paste(unlist(lapply(strsplit(ValidOTUNames[indetsandsps], "%%%%"), '[', 1)), unlist(lapply(strsplit(ValidOTUNames[indetsandsps], "%%%%"), '[', 1)), sep = " belongs to ")
     
   }
   
   # Get list of new children (for which parents are needed) - excludes "Life" which has no parent:
-  newchildren <- setdiff(unlist(lapply(strsplit(parentchildrelationships, " belongs to "), '[', 2)), "28595")
+  newchildren <- setdiff(unlist(lapply(strsplit(ParentChildRelationships, " belongs to "), '[', 2)), "28595")
   
   # As long as there are still children in need of parents:
   while(length(newchildren) > 0) {
@@ -887,7 +888,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     }
     
     # Add new parent child relationships to list:
-    parentchildrelationships <- c(parentchildrelationships, paste(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ResolvedTaxonNo"], ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to "))
+    ParentChildRelationships <- c(ParentChildRelationships, paste(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ResolvedTaxonNo"], ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to "))
     
     # Update new children:
     newchildren <- setdiff(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], "28595")
@@ -898,7 +899,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(all(!ResolvedTaxonNumbers[, "ResolvedTaxonNo"] == "28595")) ResolvedTaxonNumbers <- rbind(ResolvedTaxonNumbers, c("28595", "Life", "25", NA))
   
   # Convert parent-child relationships into a matrix (columns for child and parent):
-  parentchildmatrix <- matrix(unlist(strsplit(parentchildrelationships, split = " belongs to ")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Child", "Parent")))
+  parentchildmatrix <- matrix(unlist(strsplit(ParentChildRelationships, split = " belongs to ")), ncol = 2, byrow = TRUE, dimnames = list(c(), c("Child", "Parent")))
   
   # Update parent-child matrix with child names:
   parentchildmatrix[, "Child"] <- ResolvedTaxonNumbers[match(parentchildmatrix[, "Child"], ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "TaxonName"]
@@ -1512,10 +1513,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
 #WeightCombination = "sum"
 #ReportContradictionsToScreen = FALSE
 
-#MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp" # MRP file directory
-#XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml" # XML file directory
-#TargetClade <- "Tetrapoda"
-#InclusiveDataList <- sort(unique(c(GetFilesForClade(c("matrsarc.html", "matramph.html")), "Gauthier_etal_1988b", "Lu_etal_2016c", "deBraga_et_Rieppel_1997a", "Giles_etal_2015a", "Davis_etal_2012a")))
+#MRPDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/MRP" # MRP file directory
+#XMLDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/XML" # XML file directory
+#TargetClade <- "Primates"
+#InclusiveDataList <- c()
 #ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
 #HigherTaxaToCollapse = c()
 #SpeciesToExclude = c()
@@ -1529,21 +1530,4 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
 #WeightCombination = "sum"
 #ReportContradictionsToScreen = FALSE
 
-MRPDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/MRP" # MRP file directory
-XMLDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/XML" # XML file directory
-TargetClade <- "Primates"
-InclusiveDataList <- c()
-ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-HigherTaxaToCollapse = c()
-SpeciesToExclude = c()
-MissingSpecies = "exclude"
-Interval = NULL
-VeilLine = TRUE
-IncludeSpecimenLevelOTUs = TRUE
-BackboneConstraint = NULL
-MonophylyConstraint = NULL
-RelativeWeights = c(0, 100, 10, 1)
-WeightCombination = "sum"
-ReportContradictionsToScreen = FALSE
-
-Primates <- Metatree(MRPDirectory = MRPDirectory, XMLDirectory = XMLDirectory, TargetClade = TargetClade, InclusiveDataList = c(), ExclusiveDataList = ExclusiveDataList, HigherTaxaToCollapse = HigherTaxaToCollapse, SpeciesToExclude = SpeciesToExclude, MissingSpecies = MissingSpecies, Interval = Interval, VeilLine = VeilLine, IncludeSpecimenLevelOTUs = IncludeSpecimenLevelOTUs, BackboneConstraint = BackboneConstraint, MonophylyConstraint = MonophylyConstraint, RelativeWeights = RelativeWeights, WeightCombination = WeightCombination, ReportContradictionsToScreen = ReportContradictionsToScreen)
+#Primates <- Metatree(MRPDirectory = MRPDirectory, XMLDirectory = XMLDirectory, TargetClade = TargetClade, InclusiveDataList = c(), ExclusiveDataList = ExclusiveDataList, HigherTaxaToCollapse = HigherTaxaToCollapse, SpeciesToExclude = SpeciesToExclude, MissingSpecies = MissingSpecies, Interval = Interval, VeilLine = VeilLine, IncludeSpecimenLevelOTUs = IncludeSpecimenLevelOTUs, BackboneConstraint = BackboneConstraint, MonophylyConstraint = MonophylyConstraint, RelativeWeights = RelativeWeights, WeightCombination = WeightCombination, ReportContradictionsToScreen = ReportContradictionsToScreen)
