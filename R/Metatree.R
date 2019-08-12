@@ -97,13 +97,6 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
   
-  # New Options (requires code to actually use them)
-  #
-  # BackboneConstraint Newick string of backbone constraint (allows taxa not in topology). NULL as default. Allow to be an input file too.
-  # MonophylyConstraint Newick string of monophyly constraint (excludes taxa not in topology). NULL as default. Allow to be an input file too.
-  
-  ###
-  
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
   
