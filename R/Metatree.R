@@ -1454,7 +1454,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   if(ConstraintInUse) {
     
     # Print current processing status:
-    cat("Done\nApply constraint tree...")
+    cat("Done\nApplying constraint tree...")
     
     # If a monophyly constraint add all other taxa outside the constraint:
     if(ConstraintType == "monophyly") MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix <- rbind(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix, matrix("0", ncol = ncol(MRPList[[grep("Constraint", names(MRPList))]]$Matrix), nrow = length(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix))), dimnames = list(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix)), c())))
