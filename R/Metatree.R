@@ -1524,22 +1524,3 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
 #RelativeWeights = c(0, 100, 10, 1)
 #WeightCombination = "sum"
 #ReportContradictionsToScreen = FALSE
-
-#MRPDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/MRP" # MRP file directory
-#XMLDirectory <- "~/Dropbox/Mammal_Supertree/Primates/GraemeVersion/XML" # XML file directory
-#TargetClade <- "Primates"
-#InclusiveDataList <- c()
-#ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-#HigherTaxaToCollapse = c()
-#SpeciesToExclude = c()
-#MissingSpecies = "exclude"
-#Interval = NULL
-#VeilLine = TRUE
-#IncludeSpecimenLevelOTUs = TRUE
-#BackboneConstraint = NULL
-#MonophylyConstraint = NULL
-#RelativeWeights = c(0, 100, 10, 1)
-#WeightCombination = "sum"
-#ReportContradictionsToScreen = FALSE
-
-#Primates <- Metatree(MRPDirectory = MRPDirectory, XMLDirectory = XMLDirectory, TargetClade = TargetClade, InclusiveDataList = c(), ExclusiveDataList = ExclusiveDataList, HigherTaxaToCollapse = HigherTaxaToCollapse, SpeciesToExclude = SpeciesToExclude, MissingSpecies = MissingSpecies, Interval = Interval, VeilLine = VeilLine, IncludeSpecimenLevelOTUs = IncludeSpecimenLevelOTUs, BackboneConstraint = BackboneConstraint, MonophylyConstraint = MonophylyConstraint, RelativeWeights = RelativeWeights, WeightCombination = WeightCombination, ReportContradictionsToScreen = ReportContradictionsToScreen)
