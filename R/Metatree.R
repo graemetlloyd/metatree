@@ -313,6 +313,29 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     return(Output)
     
   }
+  
+  # Subfunction to "stretch" a vector of numbers so they fall on the Min-Max range:
+  NumberStretcher <- function(X, Min, Max) {
+    
+    # Check minimum is smaller than maximum value:
+    if(Min >= Max) stop("Minimum values exceeds maximum value.")
+    
+    # Get maximum value:
+    MaxVal <- max(X)
+    
+    # Get minimum value:
+    MinVal <- min(X)
+    
+    # Build multiplication factor:
+    MultiplicationFactor <- 1 / ((MaxVal - MinVal) / (Max - Min))
+    
+    # Build addition factor:
+    AdditionFactor <- 10 - (MinVal * MultiplicationFactor)
+    
+    # Return values streched over the min-max range:
+    return((X * MultiplicationFactor) + AdditionFactor)
+    
+  }
 
   # Check MRPDirectory is formatted correctly adn stop and warn user if not:
   if(!all(is.character(MRPDirectory)) || length(MRPDirectory) != 1) stop("MRPDirectory must be a single character string indicating the path to the folder containing the MRP files.")
@@ -1456,13 +1479,39 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
     # Print current processing status:
     cat("Done\nApplying constraint tree...")
     
-    # If a monophyly constraint add all other taxa outside the constraint:
+    # If a monophyly constraint add all other taxa outside the constraint (makes NAs zeroes):
     if(ConstraintType == "monophyly") MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix <- rbind(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix, matrix("0", ncol = ncol(MRPList[[grep("Constraint", names(MRPList))]]$Matrix), nrow = length(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix))), dimnames = list(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix)), c())))
     
     # Get combined weight of all non-constraint data (need to know to correctly weight the constraint data):
     NonConstraintWeightsTotal <- sum(unname(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) x$Weights))))
     
-    # Embiggen MRP matrix so that weights are high enough to ensure contstraint gets implemented:
+    # Update weights of constraint tree to maximum (allowing for weights to fall in the 999-1000 range if they represent conflicting clades):
+    MRPList[[ConstraintDataSet]]$Weights <- round(MRPIntraMatrixWeights(MRPList[[ConstraintDataSet]]$Matrix) + 999, 2)
+    
+    # Get order of magnitude of current character count of constraint tree (need to check this won't be too big):
+    OrderOfMagnitudeOfCurrentCharacterCountOfConstraint <- nchar(as.character(ceiling(NonConstraintWeightsTotal / 1000) * ncol(MRPList[[ConstraintDataSet]]$Matrix)))
+    
+    # If this order exceeds 10^6 (too big for memory):
+    if(OrderOfMagnitudeOfCurrentCharacterCountOfConstraint > 6) {
+      
+      # Get order of magnitude to reduce weights by:
+      OrderOfMagnitudeToReduceWeightsBy <- (OrderOfMagnitudeOfCurrentCharacterCountOfConstraint - 6) * 10
+      
+      # Calculate the multiplication factor for weight rescaling (10 to 1000):
+      MultiplicationFactor <- 1 / (990 / ((1000 / OrderOfMagnitudeToReduceWeightsBy) - 10))
+      
+      # Calculate the addition factor for weight rescaling (10 to 1000):
+      AdditionFactor <- 10 - (10 * MultiplicationFactor)
+      
+      # Rescale weights (10 to 1000) and round results to two decimal places (best TNT can cope with):
+      MRPList[-grep(ConstraintDataSet, names(MRPList))] <- lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) {x$Weights <- round((x$Weights * MultiplicationFactor) + AdditionFactor, 2); x})
+      
+      # Update NonConstraintWeightsTotal:
+      NonConstraintWeightsTotal <- sum(unname(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) x$Weights))))
+      
+    }
+    
+    # Embiggen MRP matrix so that weights are high enough to ensure constraint gets implemented:
     MRPList[[ConstraintDataSet]]$Matrix <- metatree::EmbiggenMatrix(Claddis::MakeMorphMatrix(MRPList[[ConstraintDataSet]]$Matrix, Weights = MRPList[[ConstraintDataSet]]$Weights), N = ceiling(NonConstraintWeightsTotal / 1000))$Matrix_1$Matrix
     
     # Ensure current constraint weights are set at maximum possible value (1000):
