@@ -13,6 +13,7 @@ Imports:
     gdata,
     stats
 Description: Generates meta-analytical phylogenies.
+Encoding: UTF-8
 License: GPL (>=2)
 LazyData: yes
 ByteCompile: yes
