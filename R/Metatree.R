@@ -1,14 +1,14 @@
 #' Builds metatree from source data
 #'
-#' @descrioption
+#' @description
 #'
 #' Builds a metatree data set from a set of source data.
 #'
 #' @param MRPDirectory The directory in which the MRP files are to be read from.
 #' @param XMLDirectory The directory in which the XML files are to be read from.
-#' @param TargetClade The name of the target clade of the metatree (e.g., "Dinosauria").
 #' @param InclusiveDataList A vector of the data sest to include in the metatree. Can be left empty to just read all files in \code{MRPDirectory} abd \code{XMLDirectory}.
 #' @param ExclusiveDataList A vector of any data sets to exclude from the metatree. Can be left empty if all data sets in \code{MRPDirectory} abd \code{XMLDirectory} are valid. (Intended to exclude things like oogenera or footprint analyses, other supertree data sets etc.)
+#' @param TargetClade The name of the target clade of the metatree (e.g., "Dinosauria").
 #' @param HigherTaxaToCollapse Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group). NB: It is very important that these are safely monophyletic or the results can be compromised if not.
 #' @param SpeciesToExclude Vector of any species to be excluded from the final metatree. E.g., Eshanosaurus, Ricardoestesia.
 #' @param MissingSpecies What to do with species assigned to the target clade, but not present in the source data. Options are: "exclude" (excludes these missing species), "genus" (include those species in a genus-level polytomy if the genus is sampled in the source data), and "all"
@@ -23,53 +23,81 @@
 #'
 #' @details
 #'
-#' \bold{Introduction}
+#' \bold{INTRODUCTION}
 #'
-#' Broadly speaking this function is an implementation and extension of the approach to generating composite phylogeneic trees laid out in Lloyd et al. (2016), which itself builds on Lloyd et al. (2008), namely the "metatree" approach. Metatrees primarily differ from formal supertrees in that, instead of published trees (figures in source publications), the input data are the original character-taxon matrices and/or sequence alignments. This is superior to supertrees if you want to: 1) standardise the way input data are analysed, 2) choose the optimality criterion instead of being forced to use whatever the original study used, 3) include non-focal species that may have been removed from published figures (improving taxon overlap), and 4) more properly incorporate phylogenetic uncertainty rather than being restricted to the use of consensus topologies.
+#' Broadly speaking this function is an implementation and extension of the approach to generating composite phylogeneic trees laid out in Lloyd et al. (2016), which itself builds on Lloyd et al. (2008), namely the "metatree" approach. Metatrees are most comparable to formal supertrees but differ in that instead of published trees, figures in source publications, the input data are the original character-taxon matrices and/or sequence alignments. Thus metatrees can be considered superior to formal supertrees if you want to: 1) standardise the way input data are analysed, 2) choose the optimality criterion applied to inference instead of being forced to use whatever the original study used, 3) include non-focal species that may have been removed from published figures (improving taxon overlap), and 4) more properly incorporate phylogenetic uncertainty rather than being restricted to the use of consensus topologies.
+#'
+#' \bold{INPUT OPTIONS}
 #'
 #' \bold{Formatting input data}
 #'
-#' The implementation here assumes this data set reanalysis has already been performed, and the results have been encoded in NEXUS (Maddison et al. 1997) format using Matrix Representation with Parsimony (MRP; Baum 1992; Ragan 1992).
-#.
-#. XML foramtting
+#' The implementation here assumes this data set reanalysis has already been performed, and the results have been encoded in NEXUS (Maddison et al. 1997) format using Matrix Representation with Parsimony (MRP; Baum 1992; Ragan 1992). Lloyd et al. (2016) further suggested that such MRP should represent every biparition present across a sample of trees (all most parsimonious trees, all trees in a posterior sample). Each MRP file should also have a corresponding metadata file in a specific format expressed as XML. For examples of this format it is recommended that you refer to the data sets available at \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com}.
+#'
+#' These files contain two pieces of critical information used by the function: 1) how the Operational Taxonomic Units (OTUs) of the source data set should be reconciled to real taxa, and 2) how the source data are related to each other. At present the former operates exclusively using the Paleobiology Database, which is considered as the taxonomic authority. (NB: This means currently the metatree approach is better suited to extinct-only of total-group inference, but extant taxa are included there.) For each OTU both the formal name (as spelled in the database, spaces should be replaced with underscores) and its' associated database number should be provided. For example, the OTU name "Trex" would be reconciled to "Tyrannosaurus_rex" and the number "54833". These numbers can be found by looking up individual taxa in the database and referring to the URL (e.g., \href{https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=54833}{54833}).
 #'
 #' \bold{Input directories}
 #'
-#' What these are and default of using all files, matching names etc.
+#' Once these files are prepared for use they should be placed in \emph{separate} directories (one for MRP files and one for XML files) and the paths to these folders are the primary inputs to the function. Note that aside from the file extension (.nex, .xml) filenames must match perfectly between corresponding MRP and XML files. For example, Eppes_etal_2005a.nex in the MRP directory must have a corresponding Eppes_etal_2005a.xml file in the XML directory.
 #'
 #' \bold{Data set inclusion and exclusion}
 #'
-#' Inclusive and exclusive lists.
+#' By default the function will use all MRP and XML files found in the two directories, but the user may also wish to supply a limited list of data sets instead. For only data to include the user should use \code{InclusiveDataList} and a vector of strings corresponding to the file names (without extension). For example, \code{InclusiveDataList = c("Eppes_etal_2005a", "White_et_Pinkman_2008a")}. \code{ExclusiveDataList} works the saem way but in reverse and might be preferable if the data sets to exclude are fewer than to include.
+#'
+#' \bold{Target clade}
+#'
+#' As generally speaking not all taxa found in the source trees will want to be included in the final analysis it is necessary to supply a target clade for the function to use. Again, this depends on the Paleobiology Database and so this must be a valid taxon there and spelled correctly (e.g., "Dinosauria"). In practice any species not assigned to this taxon will be excluded from the final tree. In theory if you wanted to include all taxa you could supply the top of the taxonomic hierarchy, i.e., "Life".
 #'
 #' \bold{Taxonomic options}
 #'
-#' Collapsing higher taxa and species to remove. Levels of inclusivity (all, exclude, genus).
+#' It may be that a more specific complement of taxa is desired and there are multiple ways to achieve this. By default the function will only include species present in the sample (species-level reconciliations amongst the source data sets). This can be reduced or expanding depending on what is required.
+#'
+#' More species can be excluded by using the \code{MissingSpecies} option. Here the default is "species" (inclusivity as described above), but additional taxa can be included if you use "genus" (all species in the Paleobiology Database assigned to a sampled genus are also included, emerging in a polytomy from that genus) or "all" (all species assigned to the target clade are included, again emerging from polytomies for each corresponding supraspecific taxon nested inside the target clade). These options represent a trade-off between taxonomic coverage and precision. If in doubt it is recommended that the user stick to teh default here as more inclusive options are also likely to include problematic taxa excluded from source data sets for good reasons.
+#'
+#' Species can be excluded in multiple ways. A simple means is by using the \code{SpeciesToExclude} option where the user may supply a vector of names to exclude from the final analysis. For example, \code{SpeciesToExclude = c("Tyrannosaurus_rex", "Triceratops_horridus")}. Again, underscores should spearte gebus and species and names must match the Paleobiology Database version. However, in practice it may be that the desired species to exclude really represent a clade (supraspecific taxon) and hence it would make more sense to provide a single name isntead of many. This can be done with the \code{HigherTaxaToCollapse} option. Note that this will not remove the taxa completely but replace them with a single OTU that will appear in ALL CAPS in the final tree. For example, if the desired target clade is Dinosauria exclusive of crown-birds you could use \code{HigherTaxaToCollapse = c("Neornithes")}, which will replace all crown-bird OTUs with the single taxon "NEORNITHES". Note that this option should only be used if the user is certain that the higher taxon is monophyletic otherwise the results may be compromised.
 #'
 #' \bold{Specifying a sampling interval}
 #'
-#' Time and why desirable (stem-groups). See also collapsing higher taxa. Issue with specimen-level OTUs.
+#' Another way of more specifically sampling taxa might be temporal. For example, if the desired tree is Cretaceous dinosaurs only. This can be specified using the \code{Interval} option. This works by using the \link{PaleobiologyDBChildFinder} function to identify valid species assigned to the specified interval. Here both a highest and a lowest interval must be specified, so for our Cretaceous example these would be the same, i.e., \code{Interval = c("Cretaceous", "Cretaceous"}. Note that currently the function only accepts geologic periods and not finer subdivisions. This option should also be used with caution as not all taxa in the database have temporal information. Additionally specimen-level OTUs (see below) cannot be excluded this way.
 #'
 #' \bold{Use of veil lines}
 #'
-#' Alongside a priori exclusion of data sets can also use a veil line. Advantages: reduces final data set size, avoids older signal completely (although can also be dealt with with weights (see below).
+#' A common criticism of formal supertrees is that they treat all source data sets equally, regardless of age or quality. However, this is actually an issue of poor implementation rather than a limitation of the approach - good meta-analysis can (and should) differentially weight source data (see discussion on weights below). Another way to deal with this issue is to apply some form of "veil line" where a specified year is used data sets older than that year excluded from the analysis. However, there are good reasons to not do this a priori. For example, choosing a year would ideally be based on some explicit quantiative criteri(a). Additionally, excluding older data sets a priori might lead to critical dependency inforamtion also being excluded (see below).
+#'
+#' Here the veil line criterion of Lloyd et al. (2016) is applied by default (\code{VeilLine = TRUE}). This assumes that the desired optimality criterion is taxonomic coverage and hence searches for the year corresponding to the last year between then and the present that all possible taxa can be included. To put this another way for each valid OTU it finds the most recent source data set in which it was included. The oldest of these (the taxon least recently included in a phylogenetic analysis) will set the veil line.
+#'
+#' Any data set older than this will not appear in the final analysis. However, any information included in such data sets pertaining to non-dependence is retained. In practice the major advantage here is to reduce the amount of data in the final output, but also to exclude older, potentially less accurate data.
 #'
 #' \bold{Specimen-level OTUs}
 #'
-#' As this is aimed at fossil data a common issue is use pf specimen-level OTUs in source data sets that (currently) lack a formal species designation. Issues with time and harder to check validity (may have since been named).
+#' By default the function assumes the desired taxonomic-level of OTUs is the species level. Aside from not being implemented here, use of higher-levels such as the genus are strongly cautioned against as they can incorporate all kinds of problems into the analysis (e.g., many genera, extinct and extant, are paraphyletic). However, in practice many source data sets of fossil taxa will include OTUs without a valid species name. For example, the dinosaur fossil nicknamed "Dave" known from specimen NGMC91 (\href{https://en.wikipedia.org/wiki/Sinornithosaurus}{Wikipedia page}), which has been included in numerous phylogenetic analyses of theropod dinosaurs. Such specimen-level OTUs can still be included in the analysis by assigning them to the lowest-level taxon to which they can be safely assigned (e.g., genus, family etc.) and then including their specimen number in the name to ensure they are unique. For example, Lloyd et al. (2016) included two specimen-level OTUs assigned to the family Alvarezsauridae and given the names Alvarezsauridae_indet_MPC_100_99and120 and Alvarezsauridae_indet_YPM_1049 to designate them as separate OTUs.
+#'
+#' In general such specimen-level OTUs are considered to be valuable to many forms of analysis that might be applied to the resulting metatree. For example, time-scaling (they may be the oldest or youngest members of their larger clade) or biogeography (they may represent some form of spatial extreme, e.g., the only member of the clade known from a specifc region). However, they can complicate issues as well. For example, they are not recorded as "proper" taxa in the Paleobiolgy Database hence their validity must be determined by the user. Especially vexatious here is that the fate of many of these specimens is to be given valid names and hence without vigilant checking by the user the same OTU may be inadvertently included twice, first as a specimen-level OTU before it was named and then as a valid name. Thus the option to exclude such taxa (\code{IncludeSpecimenLevelOTUs = FALSE} is offered here. Note that if these do not exist amongst the source data the issue is irrelevant.
 #'
 #' \bold{Applying constraint(s)}
 #'
-#' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+#' As with any form of phylogenetic inference it may be desirable to specify some form of constraint to restrict the resulting topolog(ies). For example, a molecular scaffold may be desired or multiple data sets might be generated that reflect competing hypotheses of relationships.
+#'
+#' In most phylogenetic software a constraint tree is specified as a single tree, but here the constraint must be included in the source data. In other words, it must be expressed as an MRP file and XML file just like any other data set. (To build an MRP file from a tree the user should consult the \link{Tree2MRP} function.) This is to limit the many problems that can come from separately specifying a tree, such as ensuring the taxa match up properly. However, it offers additional benefits too. In particular, the MRP encoding means the constraint can represent not just a single tree but a set of trees (e.g., a posterior sample from a Bayesian analysis of molecular data). Thus the result can be limited to a specific set of biparitions without having to specify a single (consensus) tree that would allow relationships not found in the original sample.
+#'
+#' Only a single data set can be specified as a constraint, but two options may be used, one of either: \code{BackboneConstraint} or \code{MonophylyConstraint}. These represent a constraint tree that either allows taxa not included in the constraint to fit anywhere else (backbone) or forcing them to be excluded (monophyly). Note that if the constraint tree includes all teh sampled OTUs then this option is irrelevant.
 #'
 #' \bold{Weighting source data}
 #'
-#' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones.
+#' Two ways to do this. MRP is better as original data can be passed through pipeline plus MRP allows more complex forms of constraint than regular topology-level ones. Four kinds. Combos.
 #'
 #' \bold{Taxonomy-phylogeny contradictions}
 #'
-#' Partly a test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
+#' NOT ACTUALLY OUTPUT YET? Partly a test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy.
 #'
-#' \bold{Outputs}
+#' \bold{WHAT THE FUNCTION DOES}
+#'
+#' \bold{Stuff}
+#'
+#' STEPS.
+#'
+#' \bold{OUTPUTS}
+#'
+#' \bold{Text}
 #'
 #' Text.
 #'
@@ -79,15 +107,15 @@
 #'
 #' @references
 #'
-#' Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogenetic inference, and the desirability of combining gene trees. Taxon, 41, 3-10.
+#' Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogenetic inference, and the desirability of combining gene trees. \emph{Taxon}, \bold{41}, 3-10.
 #'
-#' Lloyd, G. T., Davis, K. E., Pisani, D., Tarver, J. E., Ruta, M., Sakamoto, M., Hone, D. W. E., Jennings, R. & Benton, M. J., 2008. Dinosaurs and the Cretaceous Terrestrial Revolution. Proceedings of the Royal Society B, 275, 2483-2490.
+#' Lloyd, G. T., Davis, K. E., Pisani, D., Tarver, J. E., Ruta, M., Sakamoto, M., Hone, D. W. E., Jennings, R. & Benton, M. J., 2008. Dinosaurs and the Cretaceous Terrestrial Revolution. \emph{Proceedings of the Royal Society B}, \bold{275}, 2483-2490.
 #'
-#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. \emph{Biology Letters}, bold{12}, 20160609.
 #'
-#' Maddison, D. R., Swofford, D. L. and Maddison, W. P., 1997. NEXUS: an extensible file format for systematic information. Systematic Biology, 46, 590-621.
+#' Maddison, D. R., Swofford, D. L. and Maddison, W. P., 1997. NEXUS: an extensible file format for systematic information. \emph{Systematic Biology}, \bold{46}, 590-621.
 #'
-#' Ragan, M., 1992. Phylogenetic inference based on matrix representation of trees. Molecular Phylogenetics and Evolution, 1, 113-126.
+#' Ragan, M., 1992. Phylogenetic inference based on matrix representation of trees. \emph{Molecular Phylogenetics and Evolution}, \bold{1}, 113-126.
 #'
 #' @examples
 #'
@@ -95,7 +123,7 @@
 #' #Metatree(MRPDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp", XMLDirectory = "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml", TargetClade = "Ichthyopterygia", InclusiveDataList = sort(c(GetFilesForClade("matricht.html"), "Bickelmann_etal_2009a", "Caldwell_1996a", "Chen_etal_2014ba", "Chen_etal_2014bb", "deBraga_et_Rieppel_1997a", "Gauthier_etal_1988b", "Laurin_et_Reisz_1995a", "Muller_2004a", "Reisz_etal_2011a", "Rieppel_et_Reisz_1999a", "Rieppel_et_deBraga_1996a", "Young_2003a")), ExclusiveDataList = c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a"), MissingSpecies = "exclude", BackboneConstraint = "Moon_inpressa", RelativeWeights = c(0, 100, 10, 1))
 #'
 #' @export Metatree
-Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveDataList = c(), ExclusiveDataList = c(), HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
+Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), ExclusiveDataList = c(), TargetClade = "", HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
@@ -111,6 +139,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, TargetClade = "", InclusiveData
   # THINK ABOUT BETTER WASY TO HANDLE WEIGHTS AS CHARACTERS GET PRUNED/MERGED/DUPLICATED ETC.
   # CHECK INTERACTION BETWEEN COLLAPSED HIGHER TAXA AND EMPTY HIGHER TAXA THAT CURENTLY GET DELETED
   # ADD INCLUDED DATA SETS TO OUTPUT ALONGSIDE REMOVED!
+  # EXTANT TAXA INCLUDE/EXCLUDE OPTION?
+  # OTU LEVEL, E.G. A GENUS OPTION? FOR OUTPUT THAT IS
   
   # OPTIONS TO ADD IN FUTURE:
   #
