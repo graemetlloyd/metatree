@@ -4,11 +4,11 @@
 #'
 #' Collapses an MRP matrix with duplicate taxa until all taxa are unique.
 #'
-#' @param MRPMatrix An MRP matrix in the format improted by \code{Claddis::ReadMorphNexus}.
+#' @param MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMorphNexus}.
 #'
 #' @details
 #'
-#' Duplicate taxon names are problematic for downstream anslysis. Generally speaking users should ensure all OTU names are unique. However, in some cases it might make more sense to collapse the matrix until all taxa are unique. Typically this will involve reducing the row count (unique taxa means fewer taxa), but increasing the character count (duplicate taxaon means more unique codings)..
+#' Duplicate taxon names are problematic for downstream analysis. Generally speaking users should ensure all OTU names are unique. However, in some cases it might make more sense to collapse the matrix until all taxa are unique. Typically this will involve reducing the row count (unique taxa means fewer taxa), but increasing the character count (duplicate taxon means more unique codings).
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
