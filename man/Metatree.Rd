@@ -179,7 +179,7 @@ A major failing of many formal supertree approaches is to weight all input data 
   \item Weighting by input values
   \item Weighting by year of publication
   \item Weighting by non-independence
-  \item Weighting by within-data set
+  \item Weighting by data set size
 }
 
 Weighting by input values means applying the weights read in from the original MRP files. If none are found these are considered to be one for every character. In practice such weights could represent, for example, the posterior probability (relative frequency amongst a posterior sample) of each biparition (MRP character). Alternatively they could simply represent some custom weighting scheme favoured by the user. A word of caution with using such weights, however. As the function works taxa can be altered (duplicated, pruned etc.) by the taxonomic reconciliation steps and hence characters can be deleted and thus the weighting potentially (partially) corrupted. The exact effect of this will depend on specific circumstances, but is something the user should be aware of.
@@ -190,11 +190,23 @@ Weighting by year of publication seems logical on a basic level: we assume that 
 
 Where W_i is the weight of the ith data set, \eqn{x_i} is the year of publiction of the ith dataset, and \eqn{t_0} os the year of publication of the oldest included data set. In practice this describes a scenario where the weight assigned doubles in value every two years, e.g., a data set from 2000 would be weighted 1/32 the value of a dataset from 2010.
 
-Weighting by non-independence is a means of acknowledgeing the fact that morphological data sets in particular tend not to be independent estimates of phylogeny, but rather frequently reuse previously published data sets often with little modification. Redundcany as well as downwigheting.
+Weighting by non-independence is a means of acknowledging the fact that morphological data sets in particular tend not to be independent hypotheses of phylogeny, but rather frequently reuse previously published data sets often with little modification. Redundancy as well as downwigheting.
 
-Four kinds. Combos. All resacedl zero to one prior to relstaive weights. tnt limits. Zero weights mean exclusion.
+Weighting by data set size is complex. Generally speaking source data sets with more OTUs will lead to more MRP characters and hence greater influence over the resulting super- or metatree. This in of itself is not strictly a problem that requires intervention as more comprehensive data sets are generally of higher value, increasing both taxonomic overlap and total information. However, the metatree approach complicates this issue as it can take \emph{samples} of trees as input and hence MRP characters can grow not just with the number of OTUs but with the amount of phylogenetic uncertainty in the source data set. Here intervention is required as otherwise uncertain data sets will have undue influence, especially as variation \emph{within} subclades will effectively reinforce the existence of that subclade in the first place (the concern that prompted Purvis' MRP modification; Purvis 1995). This issue is dealt with here by searching for characters within data sets that conflict and downweighting these such that they sum to one (the weight assigned to characters that do not conflict). If there is no conflict (all characters are congruent) then they will all be weighted one.
+
+Each of the four different weightings will initially be weighted on a zero to one scale, although in practice nothing will be weighted zero as this effectively excludes it from the analysis. However, this does not mean all different types of weighting will, or should, be applied in the final analysis. For example, if a priori weights are preferred then the other three types will presumably want to be ignored. Similarly, even if including two or more types of weighting it may be that the user will prefer to rely on one more than others. Both what to include and what to favour can be captured with the \code{RelativeWeights} option, which is simply a vector of four numbers corresponding to the four types of weight listed above and in that order. Thus to only include a priori weights everything else would be set to zero (\code{RelativeWeights = c(1, 0, 0, 0)}). Note that here the default (\code{RelativeWeights = c(1, 1, 1, 1)}) is not necessarily the recommended version.
+
+If using two or more weights another consideration is how these should be combined in order to produce a single weight for each character. Lloyd et al. (2016) used the product, but here the sum is also offered as an option. This choice is made using the \code{WeightCombination} variable, with the sum as the default. Importantly if using the product and setting some relative weights to zero does not mean the result will be a zero (instead the zero values are excluded).
+
+Final weights may still differ from what the user expects, however, and this is because of two factors: 1) consideration of taxonomic information in inferring relationships and 2) weight limits set by TNT (Goloboff and Catalano 2016).
+
+Following Lloyd et al. (2016) the metatree approach includes an additional "hidden" source tree based on the current Paleobiology Database taxonomic hierarchy. This is to provide some minimal information on where taxa go in the resulting tree, apply the missing species option (described above) and potentially break ties where no other information is available. However, unlike other approaches this is \emph{not} a constraint and more generally phylogenetic source data is allowed to overrule taxonomy. This is achieved by setting the weight of all taxonomic MRP characters to one and \emph{starting} all phylogenetic characters as a weight of 10 (i.e., minimally an order of magnitude higher than the taxonomic characters).
+
+As the resulting MRP matrix is meant for parsimony analysis the most obvious destination software is TNT, which is optimised for fast searching of large data sets. However, TNT can only except input weights between 0.5 and 1000 and at a maximum precision of two decimal places (0.50-1000.00 totla range). Thus weights between 10 and whatever the maximum value is are rescaled to fall on to a 10.00 to 1000.00 scale (maintaining the lower weights for taxonomy). (Lloyd et al. 2016 explored a means to extend this by using more states for each MRP character, effectively increasing the weight of an individual character from 0.50 to 31000.00. However, in practice using more character states causes a dramatic slowdown in performance in TNT and so that option is not implemented here.)
 
 \emph{Taxonomy-phylogeny contradictions}
+
+Stuff.
 
 NOT ACTUALLY OUTPUT YET? Partly a test that correct outgroups were used, but also way to potentially inform required updates to Paleobiology Database taxonomy. Outputs to screen. Future operations.
 
@@ -208,7 +220,7 @@ Text.
 
 STEPS.
 
-\bold{OUTPUTS}
+\bold{Output}
 
 \bold{Text}
 
@@ -242,6 +254,8 @@ Text.
 }
 \references{
 Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogenetic inference, and the desirability of combining gene trees. \emph{Taxon}, \bold{41}, 3-10.
+
+Goloboff, P. A. and Catalano, S. A., 2016. TNT version 1.5, including a full implementation of phylogenetic morphometrics. \emph{Cladistics}, \bold{32}, 221-238.
 
 Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodivers Data Journal}, \bold{2}, e1053.
 
