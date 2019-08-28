@@ -48,7 +48,6 @@ TNTMRP2NEXUSMRP <- function(filename) {
     ordering <- rep("unord", length(char.block[1, ]))
     max.vals <- rep(1, length(char.block[1, ]))
     min.vals <- rep(0, length(char.block[1, ]))
-    result <- list(header, char.block, ordering, weights, max.vals, min.vals)
-    names(result) <- c("header", "matrix", "ordering", "weights", "max.vals", "min.vals")
+    result <- list(header = header, matrix = char.block, ordering = ordering, weights = weights, max.vals = max.vals, min.vals = min.vals)
     return(result)
 }
