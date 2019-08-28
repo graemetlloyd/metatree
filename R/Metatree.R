@@ -262,8 +262,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # CHECK INTERACTION BETWEEN COLLAPSED HIGHER TAXA AND EMPTY HIGHER TAXA THAT CURENTLY GET DELETED
   # ADD INCLUDED DATA SETS TO OUTPUT ALONGSIDE REMOVED!
   # EXTANT TAXA INCLUDE/EXCLUDE OPTION?
-  # OTU LEVEL, E.G. A GENUS OPTION? FOR OUTPUT THAT IS
+  # OTU LEVEL, E.G. A GENUS OPTION? FOR OUTPUT THAT IS. MESSY THOUGH. WHAT ABOUT SPECIMENS?
   # MAKE TAXONOTREE OPTIONAL?
+  # RECORD WHY EXCLUDED DATA SETS WERE EXCLUDED (CAN ALLOW FASTER WORKING IN FUTURE BY ELIMINATING TOTALLY REDUNDANT DATA SETS
+  # OUTPUT MONOPHYLETIC TAXA (ALLOWS FASTER SUBSETTING OF DATA LATER)
   
   # OPTIONS TO ADD IN FUTURE:
   #
@@ -272,7 +274,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
-  # 6. Make operable as web site callsas well as/instead of local directory calls. (Needs proper XMLs to be available.)
+  # 6. Make operable as web site calls as well as/instead of local directory calls. (Needs proper XMLs to be available.)
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
