@@ -33,10 +33,7 @@ ListPosition2ListCoordinates <- function(Position, ListDimensions) {
   ListPosition <- which(ListIndices[[ListNumber]] == Position)
   
   # Build output:
-  Output <- list(ListNumber, ListPosition)
-  
-  # Add naems to output:
-  names(Output) <- c("ListNumber", "ListPosition")
+  Output <- list(ListNumber = ListNumber, ListPosition = ListPosition)
   
   # Return output:
   return(Output)
