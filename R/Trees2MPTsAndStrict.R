@@ -40,11 +40,8 @@ Trees2MPTsAndStrict <- function(filename) {
   mpts <- X[1:(length(X) - 1)]
     
   # Make output variable
-  result <- list(mpts, strict)
+  result <- list(mpts = mpts, strict = strict)
     
-  # Add names
-  names(result) <- c("mpts", "strict")
-
   # Return
   return(result)
   
