@@ -49,7 +49,7 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
     DuplicateRows <- which(rownames(MRPMatrix$Matrix_1$Matrix) == DuplicatedTaxon)
     
     # Isolate block corresponding to duplicated taxa:
-    DuplicatedBlock <- MRPMatrix$Matrix_1$Matrix[DuplicateRows, ]
+    DuplicatedBlock <- MRPMatrix$Matrix_1$Matrix[DuplicateRows, , drop = FALSE]
     
     # Get unique characters to use:
     CharactersToUse <- unlist(mapply(function(x, y) rep(x, y), x = as.list(1:ncol(DuplicatedBlock)), y = as.list(apply(DuplicatedBlock, 2, function(x) length(unique(x))))))
