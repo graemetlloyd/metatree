@@ -1550,7 +1550,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     # If data sets to remove:
     if(length(DataSetsToRemove) > 0) {
       
-      # Add to removed surce data vector:
+      # Add to removed source data vector:
       RemovedSourceData <- sort(c(RemovedSourceData, names(MRPList)[DataSetsToRemove]))
       
       # Remove from MRP list:
