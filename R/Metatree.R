@@ -197,7 +197,15 @@
 #'
 #' Text.
 #'
-#' @return TBC.
+#' @return
+#'
+#' \item{FullMRPMatrix}{The full MRP matrix in the same format imported by \link[Claddis::ReadMorphNexus]{ReadMorphNexus}. This can be written out to a file in either NEXUS or TNT format using \link[Claddis::WriteMorphNexus]{WriteMorphNexus} or \link[Claddis::WriteMorphTNT]{WriteMorphTNT}.}
+#' \item{STRMRPMatrix}{The safe taxonomic reduction MRP matrix in the same format imported by \link[Claddis::ReadMorphNexus]{ReadMorphNexus}. This can be written out to a file in either NEXUS or TNT format using \link[Claddis::WriteMorphNexus]{WriteMorphNexus} or \link[Claddis::WriteMorphTNT]{WriteMorphTNT}. This is the matrix recommended for analysis as it will be smaller and faster than the full version and taxa can still be reinserted later using \link[Claddis::SafeTaxonomicReinsertion]{SafeTaxonomicReinsertion}.}
+#' \item{TaxonomyTree}{The taxonomic hierarchy of the included taxa presented as an ape "phylo" object, with supraspeciifc taxa as node labels.}
+#' \item{MonophyleticTaxa}{A vector of taxa who can be considered monophyletic (no phylogenetic data in the sample contradicts the existence of these clades). The intended use of this is to identify smaller subsets of the data that can be analysed separately to "chunk" the metatree process into smaller, faster parts.}
+#' \item{SafelyRemovedTaxa}{The results of the safe taxonomic reduction. This is the \code{$str.list} part of the output of \link[Claddis::SafeTaxonomicReduction]{SafeTaxonomicReduction} and can be used to reinsert taxa later with the \link[Claddis::SafeTaxonomicReinsertion]{SafeTaxonomicReinsertion} function.}
+#' \item{RemovedSourceData}{A vector of source data removed throughout the Metatree function. Note that currently the function does not distinguish between the reasons for this (e.g., too many invalid taxa, too few taxa, redundant through non-independence, removed through the veil year process etc.). Importantly it is not therefore safe to remove these data sets from the input as they may still be contributing to the non-independence information.}
+#' \item{VeilYear}{The veil year applied (i.e., only data sets this age or younger are included in the output).}
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
@@ -263,9 +271,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # ADD INCLUDED DATA SETS TO OUTPUT ALONGSIDE REMOVED!
   # EXTANT TAXA INCLUDE/EXCLUDE OPTION?
   # OTU LEVEL, E.G. A GENUS OPTION? FOR OUTPUT THAT IS. MESSY THOUGH. WHAT ABOUT SPECIMENS?
-  # MAKE TAXONOTREE OPTIONAL?
+  # MAKE TAXONOTREE OPTIONAL? I.E., AS AN INCLUDED PART OF THE DATA.
   # RECORD WHY EXCLUDED DATA SETS WERE EXCLUDED (CAN ALLOW FASTER WORKING IN FUTURE BY ELIMINATING TOTALLY REDUNDANT DATA SETS
-  # OUTPUT MONOPHYLETIC TAXA (ALLOWS FASTER SUBSETTING OF DATA LATER)
   
   # OPTIONS TO ADD IN FUTURE:
   #
@@ -1604,7 +1611,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Do first pass to find any contradictions between taxonomy MRP and the fully reconciled source matrix:
   MRPList <- lapply(MRPList, function(x) {TaxonomyMRPStrings <- TaxonomyMRP[rownames(x$Matrix), ]; TaxonomyMRPStrings[is.na(TaxonomyMRPStrings)] <- "0"; TaxonomyMRPStrings <- TaxonomyMRPStrings[, apply(TaxonomyMRPStrings, 2, function(y) length(unique(y))) == 2]; x$TaxonomyContradictions <- names(which(unlist(lapply(apply(TaxonomyMRPStrings, 2, list), function(z) length(MRPCharacterContradiction(unlist(z), x$Matrix))) > 0))); x$TaxonomyContradictionProportion <- length(x$TaxonomyContradictions) / ncol(TaxonomyMRPStrings); x})
   
-  # Store monophyletic taxa (those not contradicted by any phylogenetic characters - useful for chunking larger data if found)
+  # Store monophyletic taxa (those not contradicted by any phylogenetic characters - useful for chunking larger data if found):
   MonophyleticTaxa <- setdiff(colnames(TaxonomyMRP), unique(unlist(lapply(MRPList, function(x) x$TaxonomyContradictions))))
   
   # If reporting contradiction issues to the screen:
@@ -1699,7 +1706,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  Output <- list(FullMRPMatrix = FullMRPMatrix, STRMRPMatrix = STRMRPMatrix, TaxonomyTree = TaxonomyMRPTree, SafelyRemovedTaxa = STRData$str.list, RemovedSourceData = RemovedSourceData, CurrentVeilYear = CurrentVeilYear)
+  Output <- list(FullMRPMatrix = FullMRPMatrix, STRMRPMatrix = STRMRPMatrix, TaxonomyTree = TaxonomyMRPTree, MonophyleticTaxa = MonophyleticTaxa, SafelyRemovedTaxa = STRData$str.list, RemovedSourceData = RemovedSourceData, VeilYear = CurrentVeilYear)
   
   # Print current processing status:
   cat("Done")
