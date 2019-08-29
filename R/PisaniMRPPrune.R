@@ -37,8 +37,11 @@ PisaniMRPPrune <- function(MRPMatrix) {
   # Get any constant characters:
   ConstantCharacters <- which(apply(MRPMatrix$Matrix_1$Matrix, 2, function(x) length(unique(x))) < 2)
   
+  # Get any autapomorphic characters:
+  AutapomorphicCharacters <- which(apply(MRPMatrix$Matrix_1$Matrix, 2, function(x) sum(as.numeric(x))) == 1)
+  
   # Join to make characters to prune:
-  CharactersToPrune <- sort(unique(c(DuplicatedCharacters, ConstantCharacters)))
+  CharactersToPrune <- sort(unique(c(DuplicatedCharacters, ConstantCharacters, AutapomorphicCharacters)))
   
   # Special case of all characters being pruned:
   if(length(CharactersToPrune) == ncol(MRPMatrix$Matrix_1$Matrix)) {
