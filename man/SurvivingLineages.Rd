@@ -23,7 +23,7 @@ Finds unique surviving lineages of an extinction given a tree and vector of bina
 set.seed(17)
 
 # Generate a random 10 tip tree:
-Tree <- rtree(10)
+Tree <- ape::rtree(10)
 
 # Create random vector of survivors (!) and victims (0):
 SurvivorVictim <- sample(c(0, 1), size = 10, replace = TRUE)
@@ -35,11 +35,11 @@ names(SurvivorVictim) <- Tree$tip.label
 SurvivingLineages(Tree, SurvivorVictim)
 
 # Visually confirm results:
-plot(tree)
-tiplabels(SurvivorVictim)
+plot(Tree)
+ape::tiplabels(SurvivorVictim)
 
 # Generate multiple trees with same tip names:
-Trees <- rmtree(10, 10)
+Trees <- ape::rmtree(10, 10)
 
 # Calculate just total number of survivors on each tree:
 unlist(lapply(Trees, function(x) length(SurvivingLineages(x, SurvivorVictim = SurvivorVictim))))
