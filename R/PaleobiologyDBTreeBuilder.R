@@ -57,16 +57,16 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   # SINGLE TAXON INPUT MEANS FIND ALL TAXA ASSIGNED TO IT MULTIPLE MEANS USE THEM AS INPUT?
   # FOR MULTIPLE CLADE LABELS OFFER OPTION TO ONLY USE LEAST INCLUSIVE (LOWEST LEVEL) ONE (OR JUST DO THIS)
   
-  taxon_nos = NULL
-  taxon_names = "Dinosauria"
-  original = TRUE
-  interval = c("Triassic", "Triassic")
-  extant = "include"
-  stopfororphans = TRUE
-  validonly = TRUE
-  returnrank = "3"
-  breaker = 100
-  plot.tree = FALSE
+  #taxon_nos = NULL
+  #taxon_names = "Dinosauria"
+  #original = TRUE
+  #interval = c("Triassic", "Triassic")
+  #extant = "include"
+  #stopfororphans = TRUE
+  #validonly = TRUE
+  #returnrank = "3"
+  #breaker = 100
+  #plot.tree = FALSE
   
   
   # Check at least one of numbers or names has been set:
