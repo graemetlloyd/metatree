@@ -49,7 +49,7 @@
 #'   "Brontosaurus excelsus"), plot.tree = TRUE)
 #'
 #' @export PaleobiologyDBTreeBuilder
-PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", stopfororphans = TRUE, validonly = TRUE, returnrank = "3", breaker = 100, plot.tree = FALSE, TimeScale = FALSE) {
+PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, original = FALSE, interval = NULL, extant = "include", stopfororphans = TRUE, validonly = TRUE, returnrank = "3", breaker = 100, plot.tree = FALSE, TimeScale = FALSE) {
 
   # FOR FUTURE ADD TIMESCALING!
   
