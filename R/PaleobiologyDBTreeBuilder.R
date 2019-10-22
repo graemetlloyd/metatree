@@ -67,7 +67,7 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   #returnrank = "3"
   #breaker = 100
   #plot.tree = FALSE
-  
+  #TimeScale = FALSE
   
   # Check at least one of numbers or names has been set:
   if(is.null(taxon_nos) && is.null(taxon_names)) stop("Must define at least one taxon name or taxon number")
@@ -134,6 +134,9 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
     
   }
   
+  # If obsolete variants are found then replace these with current versions:
+  if(any(TaxonMatrix[, "TaxonValidity"] == "obsolete variant of")) TaxonMatrix[which(TaxonMatrix[, "TaxonValidity"] == "obsolete variant of"), c("ResolvedTaxonNo", "TaxonName")] <- TaxonMatrix[which(TaxonMatrix[, "TaxonValidity"] == "obsolete variant of"), c("AcceptedNumber", "AcceptedName")]
+  
   # Clean out txn:/var: parts of taxon numbers:
   TaxonMatrix[, c("OriginalTaxonNo", "ResolvedTaxonNo", "ParentTaxonNo")] <- gsub("txn:|var:", "", TaxonMatrix[, c("OriginalTaxonNo", "ResolvedTaxonNo", "ParentTaxonNo")])
   TipMatrix[, c("OriginalTaxonNo", "ResolvedTaxonNo", "ParentTaxonNo")] <- gsub("txn:|var:", "", TipMatrix[, c("OriginalTaxonNo", "ResolvedTaxonNo", "ParentTaxonNo")])
@@ -144,7 +147,7 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   # Remove NA lines:
   ParentChildMatrix <- ParentChildMatrix[-which(ParentChildMatrix[, 2] == "NA"), ]
   
-  # Subfunction to get lineage for a isngle taxon from a parent child list:
+  # Subfunction to get lineage for a single taxon from a parent child list:
   GetFullLineage <- function(BaseTaxon, ParentChildMatrix) {
     
     # Populate lineage with base taxon:
