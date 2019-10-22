@@ -5,7 +5,7 @@
 \title{Palaeobiology Database Tree Builder}
 \usage{
 PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
-  original = TRUE, interval = NULL, extant = "include",
+  original = FALSE, interval = NULL, extant = "include",
   stopfororphans = TRUE, validonly = TRUE, returnrank = "3",
   breaker = 100, plot.tree = FALSE, TimeScale = FALSE)
 }
