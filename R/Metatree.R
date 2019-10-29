@@ -822,7 +822,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   for(i in synonyms) synonymrows <- sort(c(synonymrows, which(ResolvedTaxonNumbers[, "TaxonValidity"] == i)))
   
   # Set junior synonym matrix:
-  JuniorSynonyms <- ResolvedTaxonNumbers[synonymrows, ]
+  JuniorSynonyms <- ResolvedTaxonNumbers[synonymrows, , drop = FALSE]
   
   # Create empty matrix to store senior synoyms:
   SeniorSynonyms <- matrix(nrow = 0, ncol = 8, dimnames = list(c(), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")))
