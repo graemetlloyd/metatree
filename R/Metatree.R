@@ -915,7 +915,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   JuniorSynonymsVector <- paste(JuniorSynonyms[, "InputNo"], gsub(" ", "_", JuniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
   # Rebuild senior synonyms into a vector of names:
-  SeniorSynonymsVector <- paste(unlist(lapply(apply(SeniorSynonyms[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, as.list), function(x) unname(gsub("txn:|var:", "", unlist(x)[!is.na(unlist(x))][1])))), gsub(" ", "_", SeniorSynonyms[, "TaxonName"]), sep = "%%%%")
+  SeniorSynonymsVector <- paste(unlist(lapply(apply(SeniorSynonyms[, c("OriginalTaxonNo", "ResolvedTaxonNo"), drop = FALSE], 1, as.list), function(x) unname(gsub("txn:|var:", "", unlist(x)[!is.na(unlist(x))][1])))), gsub(" ", "_", SeniorSynonyms[, "TaxonName"]), sep = "%%%%")
   
   # Build synonym matrix:
   SynonymyMatrix <- cbind(JuniorSynonymsVector, SeniorSynonymsVector)
