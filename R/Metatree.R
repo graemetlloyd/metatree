@@ -1593,10 +1593,16 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Print current processing status:
   cat("Done\nCalculating weights...")
   
+  # Update current year to youngest data set (in case this is not the actual current year) as will screw uo weights otherwise:
+  CurrentYear <- as.character(min(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear)))))
+  
   # Reformat weights to be input weights, publication year weights (equation 1 in Supplementary Information of Lloyd et al. 2016),
   # data set dependence weights (1 / (N siblings + 1)), and clade contradiction weights (1 / frequency of contradictory clades).
   # All weights are set on a zero to one scale initially and then multiplied by RelativeWeights:
   MRPList <- lapply(MRPList, function(x) {InputWeights <- x$Weights; x$Weights <- NULL; x$InputWeights <- RelativeWeights[1] * InputWeights; x$PublicationYearWeights <- RelativeWeights[2] * (rep(((2 ^ (0.5 * (as.numeric(x$PublicationYear) - CurrentVeilYear + 1))) - 1) / ((2 ^ (0.5 * (as.numeric(CurrentYear) - CurrentVeilYear + 1))) - 1), length(InputWeights))); x$DataSetDependenceWeights <- RelativeWeights[3] * rep(1 / (length(x$Sibling) + 1), length(InputWeights)); x$CladeContradictionWeights <- RelativeWeights[4] * MRPIntraMatrixWeights(x$Matrix); x})
+  
+  ###
+  
   
   # If using sum to combine weights collapse weights to just their sum:
   if(WeightCombination == "sum") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PublicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, sum); x$InputWeights <- NULL; x$PublicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
@@ -1610,8 +1616,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Get current minimum weight:
   MinimumWeight <- min(unlist(lapply(MRPList, function(x) x$Weights)))
   
-  # Calculate the multiplication factor for weight rescaling (10 to 1000):
-  MultiplicationFactor <- 1 / ((MaximumWeight - MinimumWeight) / 990)
+  # Calculate the multiplication factor for weight rescaling (10 to 1000), but use minimum weight if there is no variance:
+  MultiplicationFactor <- ifelse(1 / ((MaximumWeight - MinimumWeight) / 990) == Inf, MinimumWeight, 1 / ((MaximumWeight - MinimumWeight) / 990))
   
   # Calculate the addition factor for weight rescaling (10 to 1000):
   AdditionFactor <- 10 - (MinimumWeight * MultiplicationFactor)
