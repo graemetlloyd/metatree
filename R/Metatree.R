@@ -682,7 +682,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   if(length(FilesWithRogueTaxonNames) > 0) stop(paste("The following files contain rogue values in the taxonomic reconciliation (names): ", paste(FilesWithRogueTaxonNames, collapse = ", "), ". Ensure all taxon names are formed from alphanumerics, commas (the separating character) or underscores and try again.", sep = ""))
   
   # Reconcile OTU names with XML version:
-  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(rownames(x$Matrix)), function(z) which(y$TaxonMatrix[, "ListValue"] == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); x$FileName <- y$FileName; if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList[names(MRPList)], y = XMLList[names(MRPList)], SIMPLIFY = FALSE)
+  MRPList <- mapply(function(x, y) {rownames(x$Matrix)[unlist(lapply(as.list(y$TaxonMatrix[, "ListValue"]), function(z) which(rownames(x$Matrix) == z)))] <- paste(y$TaxonMatrix[, "recon_no"], y$TaxonMatrix[, "recon_name"], sep = "%%%%"); x$FileName <- y$FileName; if(!is.null(y$Parent)) x$Parent <- y$Parent; if(!is.null(y$Sibling)) x$Sibling <- y$Sibling; x}, x = MRPList[names(MRPList)], y = XMLList[names(MRPList)], SIMPLIFY = FALSE)
 
   # Print current processing status:
   cat("Done\nChecking for unsampled parents and siblings...")
