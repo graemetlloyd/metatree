@@ -947,7 +947,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   ResolvedTaxonNumbers <- ResolvedTaxonNumbers[, -which(colnames(ResolvedTaxonNumbers) == "OriginalTaxonNo")]
   
   # Remove deleted taxa from resolved names matrix (if there are any):
-  if(length(which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"]))) > 0) ResolvedTaxonNumbers <- ResolvedTaxonNumbers[-which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"])), ]
+  if(length(which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"]))) > 0) ResolvedTaxonNumbers <- ResolvedTaxonNumbers[-which(!is.na(ResolvedTaxonNumbers[, "TaxonValidity"])), , drop = FALSE]
   
   # Reformat parent taxon numbers into just numbers:
   ResolvedTaxonNumbers[, "ParentTaxonNo"] <- gsub("txn:", "", ResolvedTaxonNumbers[, "ParentTaxonNo"])
