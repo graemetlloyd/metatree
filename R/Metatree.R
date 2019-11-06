@@ -1029,6 +1029,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
   }
   
+  # Update parent numbers to valid versions only:
+  ResolvedTaxonNumbers[, "ParentTaxonNo"] <- unlist(lapply(apply(PaleobiologyDBTaxaQuerier(ResolvedTaxonNumbers[, "ParentTaxonNo"], original = FALSE)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) {x <- unlist(x); unname(gsub("txn:|var:", "", x[!is.na(x)][1]))}))
+  
   # Get initial parent child relationships based on OTUs:
   ParentChildRelationships <- paste(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[match(unlist(lapply(strsplit(ValidOTUNames, "%%%%"), '[', 1)), ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], sep = " belongs to ")
   
