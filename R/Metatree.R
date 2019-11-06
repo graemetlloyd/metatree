@@ -1711,8 +1711,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     # Embiggen MRP matrix so that weights are high enough to ensure constraint gets implemented:
     MRPList[[ConstraintDataSet]]$Matrix <- metatree::EmbiggenMatrix(Claddis::MakeMorphMatrix(MRPList[[ConstraintDataSet]]$Matrix, Weights = MRPList[[ConstraintDataSet]]$Weights), N = ceiling(NonConstraintWeightsTotal / 1000))$Matrix_1$Matrix
     
-    # Ensure current constraint weights are set at maximum possible value (1000):
-    MRPList[[ConstraintDataSet]]$Weights <- rep(1000, ncol(MRPList[[ConstraintDataSet]]$Matrix))
+    # Update weights by replicating N times as with matrix embiggining:
+    MRPList[[ConstraintDataSet]]$Weights <- rep(MRPList[[ConstraintDataSet]]$Weights, ceiling(NonConstraintWeightsTotal / 1000))
     
   }
 
