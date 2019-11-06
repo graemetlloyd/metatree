@@ -1603,7 +1603,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   cat("Done\nCalculating weights...")
   
   # Update current year to youngest data set (in case this is not the actual current year) as will screw uo weights otherwise:
-  CurrentYear <- as.character(min(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear)))))
+  CurrentYear <- as.character(max(as.numeric(unlist(lapply(MRPList, function(x) x$PublicationYear)))))
   
   # Reformat weights to be input weights, publication year weights (equation 1 in Supplementary Information of Lloyd et al. 2016),
   # data set dependence weights (1 / (N siblings + 1)), and clade contradiction weights (1 / frequency of contradictory clades).
