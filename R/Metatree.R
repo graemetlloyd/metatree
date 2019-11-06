@@ -347,7 +347,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     if(length(unique(MRPCharacterString)) < 2) stop("MRPCharacterString must contain both zeroes and ones.")
     
     # Check every MRP matrix column contains both zeroe and ones and stop and warn user if not:
-    if(length(unique(as.vector(MRPCharacterMatrix))) < 2) stop("MRPCharacterString must contain both zeroes and ones.")
+    if(length(unique(as.vector(MRPCharacterMatrix))) < 2) stop("MRPCharacterMatrix must contain both zeroes and ones.")
     
     # Find names corresponding to scores of "0" in the MRP string:
     StringZeroNames <- names(which(MRPCharacterString == "0"))
@@ -1673,8 +1673,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     # If a monophyly constraint add all other taxa outside the constraint (makes NAs zeroes):
     if(ConstraintType == "monophyly") MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix <- rbind(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix, matrix("0", ncol = ncol(MRPList[[grep("Constraint", names(MRPList))]]$Matrix), nrow = length(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix))), dimnames = list(setdiff(NewValidOTUs, rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix)), c())))
     
-    # Get combined weight of all non-constraint data (need to know to correctly weight the constraint data):
-    NonConstraintWeightsTotal <- sum(unname(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) x$Weights))))
+    # Build vector of atxa in constraint:
+    TaxaInConstraint <- rownames(MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix)
+    
+    # Get combined weight of all non-constraint that contradicts constraint (need to know to correctly weight the constraint data):
+    NonConstraintWeightsTotal <- sum(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) {TaxaInBoth <- intersect(rownames(x$Matrix), TaxaInConstraint); if(length(TaxaInBoth) > 2) {ConstraintMRPStrings <- x$Matrix[TaxaInBoth, ]; ConstraintMatrix <- MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix[TaxaInBoth, ]; ConstraintMatrix[is.na(ConstraintMatrix)] <- "0"; ConstraintMatrix <- ConstraintMatrix[, apply(ConstraintMatrix, 2, function(y) length(unique(y))) == 2, drop = FALSE]; if(length(unique(as.vector(ConstraintMRPStrings))) > 1) {x$ConstraintContradictions <- x$Weights[unique(unlist(lapply(apply(ConstraintMatrix, 2, list), function(z) {MRPCharacterContradiction(unlist(z), ConstraintMRPStrings)})))]} else {x$ConstraintContradictions <- integer(0)}} else {x$ConstraintContradictions <- integer(0)}; x$ConstraintContradictions})))
     
     # Update weights of constraint tree to maximum (allowing for weights to fall in the 999-1000 range if they represent conflicting clades):
     MRPList[[ConstraintDataSet]]$Weights <- round(MRPIntraMatrixWeights(MRPList[[ConstraintDataSet]]$Matrix) + 999, 2)
