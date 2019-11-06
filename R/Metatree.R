@@ -1679,6 +1679,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     # Get combined weight of all non-constraint that contradicts constraint (need to know to correctly weight the constraint data):
     NonConstraintWeightsTotal <- sum(unlist(lapply(MRPList[-grep(ConstraintDataSet, names(MRPList))], function(x) {TaxaInBoth <- intersect(rownames(x$Matrix), TaxaInConstraint); if(length(TaxaInBoth) > 2) {ConstraintMRPStrings <- x$Matrix[TaxaInBoth, ]; ConstraintMatrix <- MRPList[[grep(ConstraintDataSet, names(MRPList))]]$Matrix[TaxaInBoth, ]; ConstraintMatrix[is.na(ConstraintMatrix)] <- "0"; ConstraintMatrix <- ConstraintMatrix[, apply(ConstraintMatrix, 2, function(y) length(unique(y))) == 2, drop = FALSE]; if(length(unique(as.vector(ConstraintMRPStrings))) > 1) {x$ConstraintContradictions <- x$Weights[unique(unlist(lapply(apply(ConstraintMatrix, 2, list), function(z) {MRPCharacterContradiction(unlist(z), ConstraintMRPStrings)})))]} else {x$ConstraintContradictions <- integer(0)}} else {x$ConstraintContradictions <- integer(0)}; x$ConstraintContradictions})))
     
+    # If NonConstraintWeightsTotal is less than 10000 then set it at 10000 to ensure it is upweighted:
+    if(NonConstraintWeightsTotal < 10000) NonConstraintWeightsTotal <- 10000
+    
     # Update weights of constraint tree to maximum (allowing for weights to fall in the 999-1000 range if they represent conflicting clades):
     MRPList[[ConstraintDataSet]]$Weights <- round(MRPIntraMatrixWeights(MRPList[[ConstraintDataSet]]$Matrix) + 999, 2)
     
