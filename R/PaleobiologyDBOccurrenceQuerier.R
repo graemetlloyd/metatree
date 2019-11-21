@@ -1,17 +1,29 @@
 #' Palaeobiology Database Occurrence Querier
 #'
-#' Given a set of Paleobiology Database taxon number(s) returns occurrence information for those tax(a).
+#' @description
 #'
-#' Uses the Paleobiology Database (\code{paleobiodb.org}) API to query known taxon numbers and returns information on their occurrence as fossils.
+#' Given a set of Paleobiology Database taxon name(s) or number(s) returns occurrence information for those tax(a).
 #'
 #' @param taxon_nos A vector of Paleobiology database taxon number(s) to retrieve from the database.
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE) of names.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
 #' @param RetainUncertainOccurrences Logical indicating whether or not to retain uncertain (i.e., aff, cf., ?, "") occurrences (defaults to FALSE).
 #'
-#' @return A multi-column matrix with rows as occurrences.
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query known taxon numbers and returns information on their occurrence as fossils (where this data is available in the database).
+#'
+#' @return
+#'
+#' A multi-column matrix with rows as occurrences.
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
+#' @references
+#'
+#' Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 #'
 #' @examples
 #'

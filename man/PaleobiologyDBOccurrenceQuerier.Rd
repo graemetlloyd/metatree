@@ -20,16 +20,19 @@ PaleobiologyDBOccurrenceQuerier(taxon_nos, original = TRUE,
 A multi-column matrix with rows as occurrences.
 }
 \description{
-Given a set of Paleobiology Database taxon number(s) returns occurrence information for those tax(a).
+Given a set of Paleobiology Database taxon name(s) or number(s) returns occurrence information for those tax(a).
 }
 \details{
-Uses the Paleobiology Database (\code{paleobiodb.org}) API to query known taxon numbers and returns information on their occurrence as fossils.
+Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query known taxon numbers and returns information on their occurrence as fossils (where this data is available in the database).
 }
 \examples{
 
 # Occurrence query for Allosaurus fragilis:
 PaleobiologyDBOccurrenceQuerier(taxon_nos = "52962")
 
+}
+\references{
+Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
