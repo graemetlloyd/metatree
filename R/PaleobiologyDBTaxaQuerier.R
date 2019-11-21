@@ -1,10 +1,10 @@
 #' Palaeobiology Database Taxa Querier
 #'
-#' Given a Paleobiology Database taxon number returns basic information on that taxon.
+#' @description
 #'
-#' Uses the Paleobiology Database (\code{paleobiodb.org}) API to query known taxon numbers and returns information on their validity, name, and rank. Intended for use in building dynamic taxonomic resolutions when constructing metatree matrices (see Lloyd et al. 2016).
+#' Given a Paleobiology Database taxon name or number returns basic information on that taxon.
 #'
-#' @param taxon_nos A vector of Paleobiology database taxon numbers to retrieve from the database.
+#' @param taxon_nos A vector of Paleobiology Database taxon numbers to retrieve from the database.
 #' @param taxon_names A vector of taxon names to search for in the database (default left to NULL).
 #' @param original Whether or not to return the original (TRUE) or resolved version (FALSE).
 #' @param interval The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).
@@ -12,11 +12,23 @@
 #' @param stopfororphans Whether or not to stop with an Error message for taxa with no parent.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
 #'
-#' @return An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of each taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query known taxon names or numbers and returns information on their validity, name, and rank. Intended for use in building dynamic taxonomic resolutions when constructing metatree matrices (see Lloyd et al. 2016).
 #'
-#' @references Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#' @return
+#'
+#' An eight-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of each taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), and the accepted taxon name (if relevant).
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
+#' @references
+#'
+#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#'
+#' Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 #'
 #' @examples
 #'
