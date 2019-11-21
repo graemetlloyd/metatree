@@ -1,20 +1,98 @@
-#' Prunes an MRP matrix of redundant characters
+#' Prunes an MRP matrix of any redundant characters
 #'
-#' Prunes an MRP matrix of redundant characters (Pisani et al. 2002)
+#' @description
 #'
-#' @param MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMorphNexus}.
+#' Prunes an MRP matrix of any redundant (duplicate or autapomorphic) characters following Pisani et al. (2002).
 #'
-#' @return A modified matrix with any now redundant characters removed.
+#' @param
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMorphNexus}. Must contain only 0 or 1 states.
+#'
+#' @details
+#'
+#' Matrix representations must be handled carefully when taxa (rows) or characters (columns) are being pruned or duplicated, as they are by the \code{Metatree} function. Specifically, as noted by Pisani et al. (2002; their Figure 1) if a row gets pruned it will often create duplicate characters that, if unchecked, will inadvertently upweight some relationships incorrectly.
+#'
+#' To illustrate this, consider the following scenario as proposed by Pisani et al. (2002). A matrix representation for a tree with six tips (labelled A-F) is encoded with four characters (nodes or bipartitions, labelled 1-4):
+#'
+#' \preformatted{  1 2 3 4
+#' A 0 0 0 0
+#' B 0 0 0 1
+#' C 0 0 1 1
+#' D 0 1 1 1
+#' E 1 1 1 1
+#' F 1 1 1 1}
+#'
+#' Then, following removal of taxon D (e.g., because taxonomic reconciliation suggests it is a nomen dubium) the matrix will now look like this:
+#'
+#' \preformatted{  1 2 3 4
+#' A 0 0 0 0
+#' B 0 0 0 1
+#' C 0 0 1 1
+#' E 1 1 1 1
+#' F 1 1 1 1}
+#'
+#' We now see that characters 1 and 2 are identical, effectively upweighting this relationship in the matrix representation.
+#'
+#' This can be countered by removing the offending character (column), to give us the fairer representation:
+#'
+#' \preformatted{  1 3 4
+#' A 0 0 0
+#' B 0 0 1
+#' C 0 1 1
+#' E 1 1 1
+#' F 1 1 1}
+#'
+#' This function performs a check and correction for such duplicate characters, but also removes those that become autapomorphic in a similar way. For example, if we also removed taxon F:
+#'
+#' \preformatted{  1 3 4
+#' A 0 0 0
+#' B 0 0 1
+#' C 0 1 1
+#' E 1 1 1}
+#'
+#' Character 1 is now redundant, not because it is duplicated but because it carries no parsimony-informative information. NB: in practical terms this wouldn't effect the results, but removing characters like this can dramatically reduce data set size and hence minimise memory issues downstream. In this case, collapsing the data to just two characters:
+#'
+#' \preformatted{  3 4
+#' A 0 0
+#' B 0 1
+#' C 1 1
+#' E 1 1}
+#'
+#' Note that primarily this function is intended for internal use by \code{Metatree}, but may have some value to a user as a stand alone function.
+#'
+#' @return
+#'
+#' A modified MRP matrix with redundant (duplicate or autapomorphic) characters removed.
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @references
 #'
-#' Pisani et al. 2002
+#' Pisani, D., Yates, A. M., Langer, M. C. and Benton, M. J., 2002. A genus-level supertree of the Dinosauria. Proceedings of the Royal Society of London B, 269, 915-921.
 #'
 #' @examples
 #'
-#' # Nothing yet.
+#' # Build the Pisani et al. (2002) example matrix:
+#' PisaniExample <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+#'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
+#'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
+#'
+#' # Confirm it matches the Pisani example by inspection:
+#' PisaniExample$Matrix_1$Matrix
+#'
+#' # Remove taxon D
+#' PisaniExample <- Claddis::MatrixPruner(PisaniExample, taxa2prune = c("D"))
+#'
+#' # Confirm that first two characters are redundant by inspection:
+#' PisaniExample$Matrix_1$Matrix
+#'
+#' # Apply pruning alogirhtm to data:
+#' PisaniExample <- PisaniMRPPrune(PisaniExample)
+#'
+#' # Confirm that first two characters are now merged by inspection:
+#' PisaniExample$Matrix_1$Matrix
 #'
 #' @export PisaniMRPPrune
 PisaniMRPPrune <- function(MRPMatrix) {
