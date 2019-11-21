@@ -1,8 +1,8 @@
 #' Palaeobiology Database Child Finder
 #'
-#' Given a Paleobiology Database taxon number returns basic information on all species-level children.
+#' @description
 #'
-#' Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
+#' Given a Paleobiology Database taxon number returns basic information on all species-level children.
 #'
 #' @param taxon_nos The Paleobiology database taxon number.
 #' @param taxon_names A taxon name to search for in the database (default left to NULL); overrides taxon_nos if used.
@@ -13,15 +13,27 @@
 #' @param returnrank Whether or not to only return taxa of a specific rank (e.g., "3" for species, "5" for genera). See Paleobiology Database API for more infomation.
 #' @param breaker Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).
 #'
-#' @return A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
 #'
-#' @references Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#' @return
+#'
+#' A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
+#' @references
+#'
+#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+#'
+#' Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 #'
 #' @examples
 #'
-#' # Taxon query for Loxommatinae:
+#' # Taxon query for Loxommatinae (asking for species only):
 #' PaleobiologyDBChildFinder("339413", returnrank = "3")
 #'
 #' @export PaleobiologyDBChildFinder

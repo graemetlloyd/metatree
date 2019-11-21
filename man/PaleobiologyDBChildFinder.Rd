@@ -32,16 +32,18 @@ A ten-column matrix detailing the original taxon number (if relevant), the valid
 Given a Paleobiology Database taxon number returns basic information on all species-level children.
 }
 \details{
-Uses the Paleobiology Database (\code{paleobiodb.org}) API to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
+Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
 }
 \examples{
 
-# Taxon query for Loxommatinae:
+# Taxon query for Loxommatinae (asking for species only):
 PaleobiologyDBChildFinder("339413", returnrank = "3")
 
 }
 \references{
 Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+
+Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
