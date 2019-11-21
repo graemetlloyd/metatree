@@ -10,9 +10,9 @@ PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
   breaker = 100, plot.tree = FALSE, TimeScale = FALSE)
 }
 \arguments{
-\item{taxon_nos}{Either a vector of Paleobiology database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.}
+\item{taxon_nos}{Either a vector of Paleobiology Database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.}
 
-\item{taxon_names}{Either a vector of Paleobiology database taxon names that will serve as tips, or a single name that will define the clade requested. Name(s) must match Paleobiology Database records.}
+\item{taxon_names}{Either a vector of Paleobiology Database taxon names that will serve as tips, or a single name that will define the clade requested. Name(s) must match Paleobiology Database records.}
 
 \item{original}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
@@ -30,7 +30,7 @@ PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
 
 \item{plot.tree}{Logical whether or not to produce a plot of the resulting tree alongside the output (default is FALSE).}
 
-\item{TimeScale}{Logical indicating whether or not to timescale the tree.}
+\item{TimeScale}{Logical indicating whether or not to timescale the tree. (NOT OPERATIONAL YET!)}
 }
 \value{
 A phylo object in ape format with node labels. Note that sometimes multiple labels may be valid for a node and if so these are separated by "_et_".
@@ -39,7 +39,7 @@ A phylo object in ape format with node labels. Note that sometimes multiple labe
 Using Paleobiology Database taxonomy builds a phylogenetic tree.
 }
 \details{
-Taxonomies such as those in the Paleobiology Database (\code{paleobiodb.org}) can also be represented as phylogenetic trees. These can then be used either to aid in reconctrsucting meta-analaytical phylogenies (e.g., Lloyd et al. 2016), or as surrogates for phylogenies when none exist (Soul and Friedman 2015).
+Taxonomies such as those in the Paleobiology Database (\code{paleobiodb.org}; queriable via the API, Peters and McLennen 2016) can also be represented as phylogenetic trees. These can then be used either to aid in reconstructing meta-analytical phylogenies (e.g., Lloyd et al. 2016), or as surrogates for phylogenies where none exist (Soul and Friedman 2015).
 
 The function presented here can either be handed a single higher taxon (e.g., Dinosauria) or a series of (presumably) lower level taxa (genera, species) for which a taxonomic "phylogeny" is desired. Note that all names must appear in the Paleobiology Database, and that it is recommended you actual use the taxonomic number desired to avoid any potential homonym issues, either between animals and plants or lower- and higher-level taxa.
 
@@ -47,9 +47,9 @@ Internally the function will call \link{PaleobiologyDBChildFinder} and/or \link{
 
 The resulting tree is in ape format with node labels, but currently no ages or branch lengths (these are planned future additions).
 
-Note also that the resulting tree should be treated with caution as it will rely solely on what is currently accessible in the Paleobiology Database (\code{paleobiodb.org}). As this database is incomplete it will not necssarily include all valid species (i.e., it logically cannot include taxa not entered in the database). Similarly, the resulting taxonomy is a synthesis of the set of opinions currently entered into the database for the taxa concerned.
+Note also that the resulting tree should be treated with caution as it will rely solely on what is currently accessible in the Paleobiology Database (\code{paleobiodb.org}). As this database is incomplete it will not necessarily include all valid species (i.e., it logically cannot include taxa not entered in the database). Similarly, the resulting taxonomy is a synthesis of the set of opinions currently entered into the database for the taxa concerned.
 
-Finally, note that typically the resulting tree will contain multiple multifurcations (polytomies) and hence may not be usable in a lot of phylogenetics software without first resolving these to form a bifurcating tree. Caution should also be applied in how this is done, e.g., see Bell and Lloyd (2015).
+Finally, note that typically the resulting tree will contain multiple multifurcations (polytomies) and hence may not be usable in a lot of phylogenetic applications without first resolving these to form a bifurcating tree. (Interested users should consult the functions \code{paleotree::resolveTreeChar} or \code{paleotree::timeLadderTree}.) Caution should also be applied in how this is done, e.g., see Bell and Lloyd (2015).
 }
 \examples{
 
@@ -63,6 +63,8 @@ PaleobiologyDBTreeBuilder(taxon_names =
 Bell, M. A. and Lloyd, G. T., 2015. strap: an R package for plotting phylogenies against stratigraphy and assessing their stratigraphic congruence. Palaeontology, 58, 379-389.
 
 Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+
+Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
 
 Soul, L. C. and Friedman, M., 2015, Taxonomy and phylogeny can yield comparable results in comparative paleontological analyses. Systematic Biology, 64, 608-620.
 }
