@@ -16,7 +16,7 @@ A modified MRP matrix with redundant (duplicate or autapomorphic) characters rem
 Prunes an MRP matrix of any redundant (duplicate or autapomorphic) characters following Pisani et al. (2002).
 }
 \details{
-Matrix representations must be handled carefully when taxa (rows) or characters (columns) are being pruned or duplicated, as they are by the \code{Metatree} function. Specifically, as noted by Pisani et al. (2002; their Figure 1) if a row gets pruned it will often create duplicate characters that, if unchecked, will inadvertently upweight some relationships incorrectly.
+Matrix representations must be handled carefully when taxa (rows) or characters (columns) are being pruned or duplicated, as they are by the \link{Metatree} function. Specifically, as noted by Pisani et al. (2002; their Figure 1) if a row gets pruned it will often create duplicate characters that, if unchecked, will inadvertently upweight some relationships incorrectly.
 
 To illustrate this, consider the following scenario as proposed by Pisani et al. (2002). A matrix representation for a tree with six tips (labelled A-F) is encoded with four characters (nodes or bipartitions, labelled 1-4):
 
@@ -64,7 +64,7 @@ B 0 1
 C 1 1
 E 1 1}
 
-Note that primarily this function is intended for internal use by \code{Metatree}, but may have some value to a user as a stand alone function.
+Note that primarily this function is intended for internal use by \link{Metatree}, but may have some value to a user as a stand alone function.
 }
 \examples{
 

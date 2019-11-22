@@ -10,7 +10,7 @@
 #'
 #' A list of published cladistic analyses is available from \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com}, but not all of these have available data sets. This function serves as a tool to grab a list of the file names available for a specific clade, for example \href{http://www.graemetlloyd.com/matricht.html}{ichthyopterygians} (see example code below).
 #'
-#' The intended purpose of this function is to isolate filenames for a given clade so only these are handed as input to the \code{Metatree} function instead of using the full set, many of which might be irrelevant for a given target clade.
+#' The intended purpose of this function is to isolate filenames for a given clade so only these are handed as input to the \link{Metatree} function instead of using the full set, many of which might be irrelevant for a given target clade.
 #'
 #' @return
 #'

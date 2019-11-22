@@ -18,7 +18,7 @@ A list of pseudo-independent file names.
 Given a directory of metadata files, returns a list of pseudo-independent data sets.
 }
 \details{
-There are many applications for meta-analytical analysis of cladistic data sets (see, for example Wagner 2000, Liow 2007, Hughes et al. 2013, Wright et al. 2016), but a major consideration should always be first establishing an independent compilation of data sets. This function applies a set of criteria laid out in Wright et al. (2016) that primarily focuses on non-independence of data sets due to their repeated reuse and assumes this data is captured in XML files in the same format used by the \code{Metatree} function.
+There are many applications for meta-analytical analysis of cladistic data sets (see, for example Wagner 2000, Liow 2007, Hughes et al. 2013, Wright et al. 2016), but a major consideration should always be first establishing an independent compilation of data sets. This function applies a set of criteria laid out in Wright et al. (2016) that primarily focuses on non-independence of data sets due to their repeated reuse and assumes this data is captured in XML files in the same format used by the \link{Metatree} function.
 
 Specifically, the function uses parent-child and sibling-sibling relationships between data sets to first identify clusters of non-independent data sets. Then from each cluster it selects (in priority order) the data set with: (i) the most characters, (ii) the most taxa, (iii) the most recent publication date, or (iv) if two or more data sets tie on all three criteria, then simply the first data set alphabetically.
 

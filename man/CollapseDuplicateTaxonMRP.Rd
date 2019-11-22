@@ -15,7 +15,7 @@ Collapses an MRP matrix with duplicate taxa until all taxa are unique.
 \details{
 Duplicate taxon names are problematic for downstream analysis. Generally speaking users should ensure all OTU names are unique. However, in some cases it might make more sense to collapse the matrix until all taxa are unique. Typically this will involve reducing the row count (unique taxa means fewer taxa), but increasing the character count (duplicate taxa means more unique codings).
 
-This function automates this process and is used internally by the \code{Metatree} function, but is also made available for individual use here.
+This function automates this process and is used internally by the \link{Metatree} function, but is also made available for individual use here.
 }
 \examples{
 
