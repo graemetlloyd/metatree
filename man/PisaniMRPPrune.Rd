@@ -92,6 +92,9 @@ PisaniExample$Matrix_1$Matrix
 \references{
 Pisani, D., Yates, A. M., Langer, M. C. and Benton, M. J., 2002. A genus-level supertree of the Dinosauria. Proceedings of the Royal Society of London B, 269, 915-921.
 }
+\seealso{
+For another means by which MRP matrices require collapsing see \link{CollapseDuplicateTaxonMRP}.
+}
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
