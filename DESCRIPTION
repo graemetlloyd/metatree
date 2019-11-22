@@ -12,7 +12,7 @@ Depends:
 Imports:
     gdata,
     stats
-Description: Generates meta-analytical phylogenies.
+Description: A collection of functions to help generate meta-analytical hypotheses of species rrelationships.
 Encoding: UTF-8
 License: GPL (>=2)
 LazyData: yes

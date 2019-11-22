@@ -6,17 +6,17 @@
 \alias{metatree}
 \title{Generating Meta-Analytical Phylogenies}
 \description{
-Generates meta-analytical phylogenies.
+A collection of functions to help generate meta-analytical hypotheses of species rrelationships.
 }
 \examples{
 
-# Nothing yet
+# See individual functions
 
 }
 \references{
-Lloyd et al. (2008).
+Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
 }
 \author{
 Graeme T. Lloyd <graemetlloyd@gmail.com>
 }
-\keyword{phylogeny,supertree}
+\keyword{metatree,phylogeny,supertree}
