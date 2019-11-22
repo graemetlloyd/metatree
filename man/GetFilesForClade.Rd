@@ -10,15 +10,19 @@ GetFilesForClade(HTMLendings)
 \item{HTMLendings}{Vector of strings giving matrix ending for desired HTML.}
 }
 \value{
-A vector of file names intended for use with the \code{Metatree} function.
+A vector of available file names (without appendix).
 }
 \description{
-Gets file list for given clade from HTML (graemetllouyd.com).
+Gets available file list for a given clade from the web site graemetlloyd.com.
+}
+\details{
+A list of published cladistic analyses is available from \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com}, but not all of these have available data sets. This function serves as a tool to grab a list of the file names available for a specific clade, for example \href{http://www.graemetlloyd.com/matricht.html}{ichthyopterygians} (see example code below).
+
+The intended purpose of this function is to isolate filenames for a given clade so only these are handed as input to the \code{Metatree} function instead of using the full set, many of which might be irrelevant for a given target clade.
 }
 \examples{
 
-# Get all ichthyosaur file names
-# from graemetlloyd.com:
+# Get all ichthyosaur file names from graemetlloyd.com:
 GetFilesForClade("matricht.html")
 
 }
