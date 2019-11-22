@@ -2,7 +2,7 @@
 
 #' Generating Meta-Analytical Phylogenies
 #' 
-#' Generates meta-analytical phylogenies.
+#' A collection of functions to help generate meta-analytical hypotheses of species rrelationships.
 #' 
 #' @name metatree-package
 #'
@@ -14,13 +14,13 @@
 #'
 #' @references
 #'
-#' Lloyd et al. (2008).
+#' Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
 #'
-#' @keywords phylogeny,supertree
+#' @keywords metatree,phylogeny,supertree
 #'
 #' @examples
 #' 
-#' # Nothing yet
+#' # See individual functions
 #'
 #' @exportPattern "^[[:alpha:]]+"
 #' @import ape
@@ -33,20 +33,3 @@ NULL
 
 #' @importFrom stats dist
 NULL
-
-##' Character-taxon matrix from Gauthier 1986
-##'
-##' The character-taxon matrix from Gauthier (1986).
-##'
-##'
-##' @name Gauthier1986
-##' @docType data
-##' @format A character-taxon matrix in the format imported by \link{ReadMorphNexus}.
-##' @references Gauthier, J. A., 1986. Saurischian monophyly and the origin of
-##' birds. In Padian, K. (ed.) The Origin of Birds and the Evolution of Flight.
-##' Towne and Bacon, San Francisco, CA, United States, 1-55.
-##' @keywords datasets
-#NULL
-
-
-
