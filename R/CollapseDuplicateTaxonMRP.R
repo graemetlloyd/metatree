@@ -8,15 +8,44 @@
 #'
 #' @details
 #'
-#' Duplicate taxon names are problematic for downstream analysis. Generally speaking users should ensure all OTU names are unique. However, in some cases it might make more sense to collapse the matrix until all taxa are unique. Typically this will involve reducing the row count (unique taxa means fewer taxa), but increasing the character count (duplicate taxon means more unique codings).
+#' Duplicate taxon names are problematic for downstream analysis. Generally speaking users should ensure all OTU names are unique. However, in some cases it might make more sense to collapse the matrix until all taxa are unique. Typically this will involve reducing the row count (unique taxa means fewer taxa), but increasing the character count (duplicate taxa means more unique codings).
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' This function automates this process and is used internally by the \code{Metatree} function, but is also made available for individual use here.
 #'
-#' @keywords NEXUS
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
+#' @keywords
+#
+#' MRP,NEXUS
+#'
+#' @seealso
+#'
+#' For another means by which MRP matrices require collapsing see \link{PisaniMRPPrune}.
 #'
 #' @examples
 #'
-#' # Nothing yet.
+#' # Build an example matrix:
+#' ExampleMRP <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+#'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
+#'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
+#'
+#' # Show taxon names are currently unique by inspection:
+#' rownames(ExampleMRP$Matrix_1$Matrix)
+#'
+#' # Now rename taxon F as taxon E:
+#' rownames(ExampleMRP$Matrix_1$Matrix)[6] <- "E"
+#'
+#' # Show taxon E is duplicated by inspection:
+#' rownames(ExampleMRP$Matrix_1$Matrix)
+#'
+#' # Now collapse to just unique taxa using function:
+#' ExampleMRP <- CollapseDuplicateTaxonMRP(ExampleMRP)
+#'
+#' # Confirm that matrix has now been collapsed to five unique taxa
+#' # (and four unique characters) by inspection:
+#' ExampleMRP$Matrix_1$Matrix
 #'
 #' @export CollapseDuplicateTaxonMRP
 CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
