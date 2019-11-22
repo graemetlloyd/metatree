@@ -15,14 +15,28 @@ EmbiggenMatrix(CladisticMatrix, N)
 A cladistic matrix in the format imported by \code{Claddis::ReadMorphNexus}.
 }
 \description{
-Given a cladistic matrix duplicates the block N times.
+Given a cladistic matrix with a single block of characters, duplicates that block N times.
 }
 \details{
-Given a cladistic matrix duplicates the block N times.
+Given a cladistic matrix in the format imported by \code{Claddis::ReadMorphNexus} with only a single block of characters (i.e., not a mix of morpholgical and molecular, or discrete and continuous) will duplicate that block N times. Thus if the block contains 10 characters and N is 5 the resulting matrix will have 50 characters total.
+
+This function exists for internal use in the \code{Metatree} function as a means of upweighting MRP data beyond the limits of TNT (maximum weight 1000) by duplicating blocks. However, it is also made available for individual use here.
 }
 \examples{
 
-# Nothing yet.
+# Build an example matrix of six species and four characters:
+ExampleMatrix <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+  0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
+  nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
+
+# Inspect starting matrix:
+ExampleMatrix$Matrix_1$Matrix
+
+# Duplicate block five times (20 characters):
+ExampleMatrix <- EmbiggenMatrix(ExampleMatrix, 5)
+
+# Inspect matrix to check it now contains 20 characters:
+ExampleMatrix$Matrix_1$Matrix
 
 }
 \author{
