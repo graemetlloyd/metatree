@@ -2,35 +2,47 @@
 % Please edit documentation in R/GetPseudoIndependentPhyloFile.R
 \name{GetPseudoIndependentPhyloFiles}
 \alias{GetPseudoIndependentPhyloFiles}
-\title{Counts the changes in a series of time bins}
+\title{Get pseudo-independent cladistic data sets}
 \usage{
 GetPseudoIndependentPhyloFiles(xmlwd, exclude.list)
 }
 \arguments{
-\item{xmlwd}{Text.}
+\item{xmlwd}{The working directory containing the XML files.}
 
-\item{exclude.list}{Text.}
+\item{exclude.list}{An optional list of data sets to exclude a priori (see details).}
 }
 \value{
-A vector giving the number of changes for each time bin. Names indicate the maximum and minimum (bottom and top) values for each time bin.
+A list of pseudo-independent file names.
 }
 \description{
-Given a vector of dates for a series of time bins and another for the times when a character change occurred will return the total number of changes in each bin.
+Given a directory of metadata files, returns a list of pseudo-independent data sets.
 }
 \details{
-Calculates the total number of evolutionary changes in a series of time bins. This is intended as an internal function for rate calculations, but could be used for other purposes (e.g., counting any point events in a series of time bins).
+There are many applications for meta-analytical analysis of cladistic data sets (see, for example Wagner 2000, Liow 2007, Hughes et al. 2013, Wright et al. 2016), but a major consideration should always be first establishing an independent compilation of data sets. This function applies a set of criteria laid out in Wright et al. (2016) that primarily focuses on non-independence of data sets due to their repeated reuse and assumes this data is captured in XML files in the same format used by the \code{Metatree} function.
+
+Specifically, the function uses parent-child and sibling-sibling relationships between data sets to first identify clusters of non-independent data sets. Then from each cluster it selects (in priority order) the data set with: (i) the most characters, (ii) the most taxa, (iii) the most recent publication date, or (iv) if two or more data sets tie on all three criteria, then simply the first data set alphabetically.
+
+Note that in practice other pruning may be desired, e.g., to exclude data sets of minimum or maximum size (taxa or characters), however this is not automated here. It is also recommended that some data sets never be considered, e.g., because they are molecular when morphology is desired, they concern trace or trackway taxa, they are ontogenetic not phylogenetic, or they concern supertree or metatree characters. These must be curated manually and can be excluded from analysis by using the \code{exclude.list} option.
+
+Note also that the term pseudo-independent is applied here as the function only considers data set non-independence through inherited character lists and not taxonomic independence, which may also bias results if not accounted for.
 }
 \examples{
 
-# Create a random dataset of 100 changes:
-change.times <- runif(100, 0, 100)
+# Example code (commented out here as would only work locally):
+#GetPseudoIndependentPhyloFiles("~/Documents/xml")
 
-# Create time bins:
-time.bins <- seq(100, 0, length.out=11)
+}
+\references{
+Hughes, M., Gerber, S. and Wills, M. A., 2013. Clades reach highest morphological disparity early in their evolution. Proceeedings of the National Academy of Science U.S.A., 110, 13875–13879.
 
-# Get N changes for each bin:
-ChangesInBins(change.times, time.bins)
+Liow, L. H., 2007. Lineages with long durations are old and morphologically average: an analysis using multiple datasets. Evolution, 61, 885–901.
 
+Wagner, P. J., 2000. Exhaustion of morphologic character states among fossil taxa. Evolution, 54, 365–386.
+
+Wright, A. M., Lloyd, G. T. and Hillis, D. M., 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. Systematic Biology, 65, 602-611.
+}
+\seealso{
+For a more detailed description of how XML files should be formatted see the \link{Metatree} function.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
