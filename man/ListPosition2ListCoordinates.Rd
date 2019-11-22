@@ -2,7 +2,7 @@
 % Please edit documentation in R/ListPosition2ListCoordinates.R
 \name{ListPosition2ListCoordinates}
 \alias{ListPosition2ListCoordinates}
-\title{Gives position of the kth item in a list}
+\title{Gives the exact position of the kth item in a list}
 \usage{
 ListPosition2ListCoordinates(Position, ListDimensions)
 }
@@ -12,15 +12,18 @@ ListPosition2ListCoordinates(Position, ListDimensions)
 \item{ListDimensions}{The dimensions (vector length) of each part of the list in order.}
 }
 \value{
-The position, in tersm of both list number ($ListNumber) and list position ($ListPosition), of the kth value.
+The position, in terms of both list number ($ListNumber) and list position ($ListPosition), of the kth value.
 }
 \description{
-Gives position of the kth item in a list of vectors.
+Gives the exact position of the kth item in a list comprised of vectors.
+}
+\details{
+The R language has a great variety of ways that data can be stored, but sometimes it can be hard to isolate the required information. For example, imagine you store data in a list composed of vectors of length 1, 3, 2, 6, 1, and 3, but you just want to know where you will find the 13th value. This function will give "coordinates" for that value corresponding to the list number (5 in the example) and vector position in that list (1 in the example).
 }
 \examples{
 
 # Find the position of the 13th value:.
-ListPosition2ListCoordinates(13, c(1,3,2,6,1,3))
+ListPosition2ListCoordinates(13, c(1, 3, 2, 6, 1, 3))
 
 }
 \author{
