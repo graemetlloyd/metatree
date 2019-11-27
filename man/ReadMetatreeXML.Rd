@@ -275,6 +275,9 @@ Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved sof
 
 Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. Biology Letters, 12, 20160609.
 }
+\seealso{
+\link{WriteMetatreeXML}.
+}
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
 }
