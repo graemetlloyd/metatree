@@ -39,9 +39,9 @@ PaleobiologyDBTaxaQuerier(taxon_nos = "52962")
 
 }
 \references{
-Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. Biology Letters, 12, 20160609.
+Lloyd, G. T., Bapst, D. W., Friedman, M. and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight, and crown birds. \emph{Biology Letters}, \bold{12}, 20160609.
 
-Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
+Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. \emph{Paleobiology}, \bold{42}, 1-7.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}

@@ -31,7 +31,7 @@
 #'
 #' @references
 #'
-#' Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida (Brachiopoda) using Morphological and Molecular Data. Systematic Biology, 67, 32-48.
+#' Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida (Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology}, \bold{67}, 32-48.
 #'
 #' @seealso
 #'

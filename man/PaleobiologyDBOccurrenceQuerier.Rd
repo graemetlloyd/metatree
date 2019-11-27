@@ -32,7 +32,7 @@ PaleobiologyDBOccurrenceQuerier(taxon_nos = "52962")
 
 }
 \references{
-Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. Paleobiology, 42, 1-7.
+Peters, S. E. and McClennen, M., 2016. The Paleobiology Database application programming interface. \emph{Paleobiology}, \bold{42}, 1-7.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}

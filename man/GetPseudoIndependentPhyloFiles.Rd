@@ -33,13 +33,13 @@ Note also that the term pseudo-independent is applied here as the function only 
 
 }
 \references{
-Hughes, M., Gerber, S. and Wills, M. A., 2013. Clades reach highest morphological disparity early in their evolution. Proceeedings of the National Academy of Science U.S.A., 110, 13875–13879.
+Hughes, M., Gerber, S. and Wills, M. A., 2013. Clades reach highest morphological disparity early in their evolution. \emph{Proceeedings of the National Academy of Science U.S.A.}, \bold{110}, 13875–13879.
 
-Liow, L. H., 2007. Lineages with long durations are old and morphologically average: an analysis using multiple datasets. Evolution, 61, 885–901.
+Liow, L. H., 2007. Lineages with long durations are old and morphologically average: an analysis using multiple datasets. \emph{Evolution}, \bold{61}, 885–901.
 
-Wagner, P. J., 2000. Exhaustion of morphologic character states among fossil taxa. Evolution, 54, 365–386.
+Wagner, P. J., 2000. Exhaustion of morphologic character states among fossil taxa. \emph{Evolution}, \bold{54}, 365–386.
 
-Wright, A. M., Lloyd, G. T. and Hillis, D. M., 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. Systematic Biology, 65, 602-611.
+Wright, A. M., Lloyd, G. T. and Hillis, D. M., 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. \emph{Systematic Biology}, \bold{65}, 602-611.
 }
 \seealso{
 For a more detailed description of how XML files should be formatted see the \link{Metatree}, \link{ReadMetatreeXML} or \link{WriteMetatreeXML} functions.

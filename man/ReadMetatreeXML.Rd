@@ -271,9 +271,9 @@ Similar to the parent tag, this tag is used to denote data sets with equal claim
 
 }
 \references{
-Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodivers Data Journal}, \bold{2}, e1053.
+Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodiversity Data Journal}, \bold{2}, e1053.
 
-Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. Biology Letters, 12, 20160609.
+Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. \emph{Biology Letters}, \bold{12}, 20160609.
 }
 \seealso{
 \link{WriteMetatreeXML}.

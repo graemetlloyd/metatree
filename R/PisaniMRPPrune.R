@@ -70,7 +70,7 @@
 #'
 #' @references
 #'
-#' Pisani, D., Yates, A. M., Langer, M. C. and Benton, M. J., 2002. A genus-level supertree of the Dinosauria. Proceedings of the Royal Society of London B, 269, 915-921.
+#' Pisani, D., Yates, A. M., Langer, M. C. and Benton, M. J., 2002. A genus-level supertree of the Dinosauria. \emph{Proceedings of the Royal Society of London B}, \bold{269}, 915-921.
 #'
 #' @seealso
 #'

@@ -21,7 +21,7 @@
 #'
 #' @references
 #'
-#' Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. Biology Letters, 12, 20160609.
+#' Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. \emph{Biology Letters}, \bold{12}, 20160609.
 #'
 #' @seealso
 #'
