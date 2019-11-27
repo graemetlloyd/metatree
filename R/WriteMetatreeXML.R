@@ -1,21 +1,42 @@
-#' Writes a metatree-format XML file
+#' Writes out a metatree-format XML file
 #'
-#' Writes out a metatree-format XML file (Lloyd et al. 2016).
+#' @description
+#'
+#' Writes out a metatree-format XML file.
 #'
 #' @param XML The XML file to write. Must be in format imported by \link{ReadMetatreeXML}.
 #' @param File Path to XML file to write.
 #'
-#' @return A nested list reflecting the nested XML tags of the input file.
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' The metatree XML format (Lloyd et al. 2016) is described in detail in the \link{ReadMetatreeXML} help file and is primarily used by the \link{Metatree} function. However, a user may also wish to edit an XML file in R and then write it to a file, and that is what this function does.
+#'
+#' @return
+#'
+#' Nothing is returned, but a file is produced.
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @references
 #'
 #' Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. Biology Letters, 12, 20160609.
 #'
+#' @seealso
+#'
+#' \link{ReadMetatreeXML}.
+#'
 #' @examples
 #'
-#' # Nothing yet.
+#' # Example read line:
+#' #x <- ReadMetatreeXML("Rogers_etal_2012a.xml", Invisible = FALSE)
+#'
+#' # Example write line:
+#' #WriteMetatreeXML(x, "Rogers_etal_2012a.xml")
+#'
+#' # (Note that this is commented out as it would only work locally,
+#' # but should give the user an idea of the syntax)
 #'
 #' @export WriteMetatreeXML
 WriteMetatreeXML <- function(XML, File) {
@@ -141,7 +162,3 @@ WriteMetatreeXML <- function(XML, File) {
   write(Output, File)
 
 }
-
-#XML <- ReadMetatreeXML("~/Documents/Homepage/www.graemetlloyd.com/xml/Zhu_et_Ahlberg_2004a.xml")
-#File <- "Zhu_et_Ahlberg_2004a.xml"
-#WriteMetatreeXML(XML, File)
