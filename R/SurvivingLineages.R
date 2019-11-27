@@ -1,13 +1,23 @@
 #' Finds unique surviving lineages of an extinction
-#' 
-#' Finds unique surviving lineages of an extinction given a tree and vector of binary extinction-survival.
+#'
+#' @description
+#'
+#' Finds unique surviving lineages of an extinction given a tree and vector of binary (extinction or survival) values.
 #' 
 #' @param Tree A single tree in ape's phylo format.
-#' @param SurvivorVictim A numeric vector of victims (0) and survivors (1) withs names matching to Tree$tip.label.
+#' @param SurvivorVictim A numeric vector of victims (0) and survivors (1) with names matching to Tree$tip.label.
 #'
-#' @return A list of surviving lineages (may be clades - vectors of length > 1) or individual tips (vectors of length 1).
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' Given a tree that crosses some extinction boundary, with both extinct and surviving species as tips, we might be interested in knowing how many individual lineages survived. This function finds unique lineages (sets of tips) that survive the boundary.
+#'
+#' @return
+#'
+#' A list of surviving lineages (may be clades - vectors of length greater than one) or individual tips (vectors of length one).
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @examples
 #'
@@ -16,6 +26,9 @@
 #'
 #' # Generate a random 10 tip tree:
 #' Tree <- ape::rtree(10)
+#'
+#' # Remove branch lengths (not used here):
+#' Tree$edge.length <- NULL
 #'
 #' # Create random vector of survivors (!) and victims (0):
 #' SurvivorVictim <- sample(c(0, 1), size = 10, replace = TRUE)
@@ -92,5 +105,3 @@ SurvivingLineages <- function(Tree, SurvivorVictim) {
   return(AllSurvivorClades)
   
 }
-
-
