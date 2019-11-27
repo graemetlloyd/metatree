@@ -42,7 +42,7 @@
 #'
 #' @return
 #'
-#' An MRP matrix in \link{Claddis::ReadMorphNexus} format.
+#' An MRP matrix in \code{Claddis::ReadMorphNexus} format.
 #'
 #' @author
 #'
