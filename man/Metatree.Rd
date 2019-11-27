@@ -266,7 +266,7 @@ Baum, B. R., 1992. Combining trees as a way of combining data sets for phylogene
 
 Goloboff, P. A. and Catalano, S. A., 2016. TNT version 1.5, including a full implementation of phylogenetic morphometrics. \emph{Cladistics}, \bold{32}, 221-238.
 
-Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodivers Data Journal}, \bold{2}, e1053.
+Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodiversity Data Journal}, \bold{2}, e1053.
 
 Lloyd, G. T., Davis, K. E., Pisani, D., Tarver, J. E., Ruta, M., Sakamoto, M., Hone, D. W. E., Jennings, R. & Benton, M. J., 2008. Dinosaurs and the Cretaceous Terrestrial Revolution. \emph{Proceedings of the Royal Society B}, \bold{275}, 2483-2490.
 
