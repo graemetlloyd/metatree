@@ -86,7 +86,7 @@ BEGIN ASSUMPTIONS;
   OPTIONS  DEFTYPE=unord PolyTcount=MINSTEPS ;
 END;}
 
-Note that all characters must be either zero or one (i.e., the function cannot currently deal with Purvis MRP; Purvis 1995). Each MRP file should also have a corresponding metadata file in a specific format expressed as XML. Multiple examples of this format are available at \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com}, but a simple version is also shown below. Note that this corresponds to the MRP file above.
+Note that all characters must be either zero or one (i.e., the function cannot currently deal with Purvis MRP; Purvis 1995). Each MRP file should also have a corresponding metadata file in a specific format expressed as XML. Multiple examples of this format are available at \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com} and a much more detailed description of the XML structure can be found in the help file for the \link{ReadMetatreeXML} function, but a simple version is also shown below. Note that this corresponds to the MRP file above.
 
 \preformatted{<?xml version="1.0" standalone="yes"?>
 <SourceTree>
