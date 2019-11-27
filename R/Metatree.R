@@ -36,14 +36,14 @@
 #' \preformatted{#NEXUS
 #'
 #' BEGIN DATA;
-#'   DIMENSIONS  NTAX=4 NCHAR=11;
+#'   DIMENSIONS  NTAX=4 NCHAR=3;
 #'   FORMAT SYMBOLS= " 0 1" MISSING=? GAP=- ;
 #' MATRIX
 #'
-#' Ancilla      00000010000
-#' Turrancilla  00111000110
-#' Ancillista   11010100001
-#' Amalda       11110011100
+#' Ancilla      000
+#' Turrancilla  011
+#' Ancillista   101
+#' Amalda       111
 #' ;
 #' END;
 #'
