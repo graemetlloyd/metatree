@@ -2,7 +2,7 @@
 #'
 #' @description
 #'
-#' Using Paleobiology Database taxonomy builds a phylogenetic tree.
+#' Using the Paleobiology Database taxonomy builds a phylogenetic tree.
 #'
 #' @param taxon_nos Either a vector of Paleobiology Database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.
 #' @param taxon_names Either a vector of Paleobiology Database taxon names that will serve as tips, or a single name that will define the clade requested. Name(s) must match Paleobiology Database records.

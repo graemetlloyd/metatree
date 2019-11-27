@@ -36,7 +36,7 @@ PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
 A phylo object in ape format with node labels. Note that sometimes multiple labels may be valid for a node and if so these are separated by "_et_".
 }
 \description{
-Using Paleobiology Database taxonomy builds a phylogenetic tree.
+Using the Paleobiology Database taxonomy builds a phylogenetic tree.
 }
 \details{
 Taxonomies such as those in the Paleobiology Database (\code{paleobiodb.org}; queriable via the API, Peters and McLennen 2016) can also be represented as phylogenetic trees. These can then be used either to aid in reconstructing meta-analytical phylogenies (e.g., Lloyd et al. 2016), or as surrogates for phylogenies where none exist (Soul and Friedman 2015).

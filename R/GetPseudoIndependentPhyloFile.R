@@ -37,7 +37,7 @@
 #'
 #' @seealso
 #'
-#' For a more detailed description of how XML files should be formatted see the \link{Metatree} function.
+#' For a more detailed description of how XML files should be formatted see the \link{Metatree}, \link{ReadMetatreeXML} or \link{WriteMetatreeXML} functions.
 #'
 #' @examples
 #'

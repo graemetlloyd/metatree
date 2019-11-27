@@ -42,7 +42,7 @@ Wagner, P. J., 2000. Exhaustion of morphologic character states among fossil tax
 Wright, A. M., Lloyd, G. T. and Hillis, D. M., 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. Systematic Biology, 65, 602-611.
 }
 \seealso{
-For a more detailed description of how XML files should be formatted see the \link{Metatree} function.
+For a more detailed description of how XML files should be formatted see the \link{Metatree}, \link{ReadMetatreeXML} or \link{WriteMetatreeXML} functions.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
