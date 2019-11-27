@@ -9,20 +9,270 @@ ReadMetatreeXML(File, Invisible = TRUE)
 \arguments{
 \item{File}{Path to XML file to read.}
 
-\item{Invisible}{Logical indicating whether to immediately show entire output (FALSE) or not (TRUE, the default).}
+\item{Invisible}{Logical indicating whether to print output to screen (FALSE) or not (TRUE, the default).}
 }
 \value{
 A nested list reflecting the nested XML tags of the input file.
 }
 \description{
-Reads in a metatree-format XML file (Lloyd et al. 2016).
+Reads in a metatree-formatted XML file.
+}
+\details{
+\bold{Introduction}
+
+The two main file inputs to the \link{Metatree} function are an MRP file, summarising the unique bipartitions found amongst the source trees, and an XML file containing important metadata about the data set. This file must be in a very specific format to be used by the \link{Metatree} function and that format is described in detail here.
+
+Note that this is the format the metatree approach (Lloyd et al. 2016) is based on and borrows heavily from the Supertree Toolkit format of Hill and Davis (2014).
+
+\bold{Example data set}
+
+Multiple examples of this format are available at \href{http://www.graemetlloyd.com/matr.html}{graemetlloyd.com}, but a simple version is also shown below.
+
+\preformatted{<?xml version="1.0" standalone="yes"?>
+<SourceTree>
+  <Source>
+    <Author>
+      <List>Michaux, B.</List>
+    </Author>
+    <Year>1989</Year>
+    <Title>Cladograms can reconstruct phylogenies: an example from the fossil record</Title>
+    <Journal>Alcheringa</Journal>
+    <Volume>13</Volume>
+    <Pages>21-36</Pages>
+    <Booktitle/>
+    <Publisher/>
+    <City/>
+    <Editor/>
+  </Source>
+  <Taxa number="4">
+    <List recon_name="Ancilla" recon_no="10760">Ancilla</List>
+    <List recon_name="DELETE" recon_no="-1">Turrancilla</List>
+    <List recon_name="Ancillista" recon_no="10763">Ancillista</List>
+    <List recon_name="Amalda" recon_no="10743">Amalda</List>
+  </Taxa>
+  <Characters>
+    <Molecular/>
+    <Morphological number="11">
+      <Type>Osteology</Type>
+    </Morphological>
+    <Behavioural/>
+    <Other/>
+  </Characters>
+  <Analysis>
+    <Type>Maximum Parsimony</Type>
+  </Analysis>
+  <Notes>Based on reanalysis of the original matrix.</Notes>
+  <Filename>Michaux_1989aa</Filename>
+  <Parent/>
+  <Sibling/>
+</SourceTree>}
+
+The XML format is composed of a series of "tags", typically with opening (e.g., <List>) and closing (e.g., </List>) pairs, with unused tags containg a lsahs at the end (e.g., <Sibling/>).
+
+The main tags are visited in order below.
+
+\bold{XML tag}
+
+\preformatted{<?xml version="1.0" standalone="yes"?>}
+
+This simply states the filetype for machine-readable purposes and should not vary at all.
+
+\bold{SourceTree tag}
+
+\preformatted{<SourceTree> ... </SourceTree>}
+
+This tag envelops the whole rest of the file and should always be used.
+
+\bold{Source tag}
+
+\preformatted{<Source> ... </Source>}
+
+This tag contains the information regarding the source reference and contains multiple subtags, some of which will not always be employed (e.g., depending on whether the reference corresponds to a journal article or a book chapter).
+
+\emph{Author tag}
+
+\preformatted{<Author> ... </Author>}
+
+For the authors of the work. Multiple authors are allowed and each should be placed in separate <List> tags.
+
+\emph{Year tag}
+
+\preformatted{<Year> ... </Year>}
+
+The year of publication.
+
+\emph{Title tag}
+
+\preformatted{<Title> ... </Title>}
+
+The title of the work. If a book (but not a book chapter) then use <Booktitle> instead (see below).
+
+\emph{Journal tag}
+
+\preformatted{<Journal> ... </Journal>}
+
+The journal name (if a journal article).
+
+\emph{Volume tag}
+
+\preformatted{<Volume> ... </Volume>}
+
+The volume number (for journal articles).
+
+\emph{Pages tag}
+
+\preformatted{<Pages> ... </Pages>}
+
+The page numbers (or article number for some newer journal types).
+
+\emph{Booktitle tag}
+
+\preformatted{<Booktitle> ... </Booktitle>}
+
+The book title if a book or book chapter.
+
+\emph{Publisher tag}
+
+\preformatted{<Publisher> ... </Publisher>}
+
+The publisher, if a book or book chapter.
+
+\emph{City tag}
+
+\preformatted{<City> ... </City>}
+
+The city of publication, if a book or book chapter.
+
+\emph{Editor tag}
+
+\preformatted{<Editor> ... </Editor>}
+
+The editor, or editors (for book chapters). Like authors there can be multiple so each should be included in a <List> tag.
+
+\bold{Taxa tag}
+
+\preformatted{<Taxa> ... </Taxa>}
+
+This tag contains the information on the taxa (Operational Taxonomic Units; OTUs), including the reconciliation between these and the Paleobiology Database \href{https://paleobiodb.org/}{paleobiodb.org}.
+
+Note that the total number of taxa should be included in the \emph{opening} tag, e.g., <Taxa number="12">.
+
+Individual taxa should then be included in <List> tags. Note that the name inside the tag MUST match exactly the names in the MRP file and should not be manually edited to avoid this. The \link{Metatree} function will check for this, but the
+
+Information on the reconciliation is included inside each opening <List> tag using both the "recon_name" and "recon_no" values (e.g., <List recon_name="Amalda" recon_no="10743">). By default these should be recon_name="DELETE" and recon_no="-1", indicating the OTU has not yet been reconciled with the Paleobiology Database and should thus be pruned during the metatree construction process. (I.e., this is much safer than assigning a random real taxon to each OTU.) In operation the "DELETE" value will lead to these taxa being pruned inside the \link{Metatree} function and the "-1" indicates that the taxon has not been checked yet. A user may wish to set a taxon to DELETE \emph{after} checking, for example because it represents a hypothetical outgroup not a real species. In these case the recon_no should be set to "0" instead. Note that "0" and "1" are used here as reserved values because the Paleobiology Database numbering system begins at "1" and hence any number greater than "0" will (potentially) represent a real taxon.
+
+However, for the \link{Metatree} function to work in any meaningful way the majority of OTUs must be reconciled with the Paleobiology Database, including BOTH the taxon name(s) and taxon number(s). The reason for this apparent redundancy is to ensure data integrity and is predicated on multiple considerations. Firstly, names are not unique and can exist multiple times because, for example, they are used for both an animal and a plant, they are used separately to denote higher or lower taxa (allowed within ICZN rules), or simply there is an uncorrected homonym issue in the Paleobiology Database. Thus names should never be used in isolation as many mishaps may befall you if you do.
+
+Numbers could theoretically be used in isolation, but two dangers arise here. First, a typographical error is much more easily made without being spotted as human beings are more attuned to spot say, Tyrannosuarus, instead of Tyrannosaurus than 314567, instead of 314657. Second, a name corresponding to a specific taxon number can be updated or edited and cross-validation is thus required to ensure names and numbers match. Again, the \link{Metatree} function will check for these issues as it operates.
+
+Many users may not be aware of how to find taxon numbers in the database, but a simple way is to search for the required name and find the corresponding page in the database. For example, the page for \emph{Tyrannosaurus rex} is \href{https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=54833}{here}. Look at the URL in your browser and you should see it ends (or contains) \code{taxon_no=54833}. Thus we could reconcile the OTU "Trex" as follows:
+
+\preformatted{<List recon_name="Tyrannosaurus_rex" recon_no="54833">Trex</List>}
+
+Note that recon_name is the full name, as it is spelled in the Paleobiology Database, and using underscores where spaces would otherwise exist (i.e., between the genus and the species).
+
+This might seem like a laborious process if you have hundreds of tips (or many thousands across a series of input data sets), but without careful manual checking for taxonomic reconciliation any composite analysis will be confounded. (I can point you in the direction of some truly awful examples if you ask me but will not publicly shame the guilty parties here.) Thus here I do not provide, or encourage, attempts to automate this process.
+
+Taxonomic reconciliation (matching OTU names to valid and appropriate taxa) is obviously critical and hence some best practice guidelinea are offered here:
+
+1. \bold{Endeavour to use species-level reconciliations at all times}. It has become common practice amongst many palaeontological authors to only write the genus name in phylogenetic analyses, instead of the species actually examined. This can lead to unintended consequences when the contents of those genera shift (e.g., track the history of \emph{Brontosaurus}). Using species-level names avoids this issue, allowing a dynamic taxonomy (i.e., the Paleobiology Database) to take care of these updates for you. If a supra-specific system is used instead then the user is doomed to repeat the same manual checks over and over again. In other words, if you reconcile with a species name at the beginning then you never need to update that reconciliation again.
+
+2. \bold{Never manually perform synonymisation}. In other words, taxa should be entered as the original authors intended and any synonymisations done automatically by calls to a single database (here, the Paleobiology Database). The same goes for nomen dubia and the like. The reason is simply that this is not a sustainable aproach and will require contnued re-examination of XMLs and ultimately errors will creep in, compromising the data. Again, reconcile once correctly when the file is created and it never needs to be revisited.
+
+3. \bold{Multiple taxon reconciliation is possible}. In some cases authors will explicitly code a single OTU from multiple specimens or species. This can be accounted for two by assigning multiple species to that OTU. For example, let's say an author codes both species of \emph{Unenlagia} as a single OTU (Unenlagia). This means there should really be two recon_name values and two recon_no values. This is dealt with by using commas and semicolons respectively, i.e.:
+
+\code{<List recon_name="Unenlagia_comahuensis,Unenlagia_paynemili" recon_no="65422;65423">Unenlagia</List>}
+
+Note that the order matters here (the numbers and names must be in the correct order). Again, the \link{Metatree} function will check this and warn the user, but it is always less work to get it right the first time.
+
+It is also important to remember that in doing multiple taxon reconciliations this way the metatree process will assume the OTU is monophyletic, i.e., that the species involved form a clade. It can create downstream problems if this is not the case so multiple taxon reconciliations should always be performed carefully.
+
+Overall the key thing to remember is that taxonomy is not static and that a well designed taxonomic reconciliation process will take this into account: that is the intended aim here.
+
+\bold{Characters tag}
+
+\preformatted{<Characters> ... </Characters>}
+
+This tag contains very limited information on the characters used in the matrix, including total number and type. Currently the \link{Metatree} function does not use this data directly, although it may be used in future to apply some automated filtering (e.g., morphology only, exclude MRP etc.). Thus at present this is not a critical field to fill in, but may become so in future.
+
+Four main overall types are currently included (molecular, morphological, behavioural and other) and the number of each should be included in the opening tag (as long as there are at least one), followed by the more specific type(s) in <Type> tags. E.g.:
+
+\preformatted{<Morphological number="58">
+  <Type>Osteology</Type>
+</Morphological>}
+
+\emph{Molecular tag}
+
+\preformatted{<Molecular> ... </Molecular>}
+
+The number and type (e.g., mtDNA, RAG1 etc.) of molecular characters.
+
+\emph{Molecular tag}
+
+\preformatted{<Morphological> ... </Morphological>}
+
+The number and type (e.g., osteology, dermal etc.) of morphological characters.
+
+\emph{Behavioural tag}
+
+\preformatted{<Behavioural> ... </Behavioural>}
+
+The number and type (e.g., nesting style, diurnality etc.) of behavioural characters.
+
+\emph{Other tag}
+
+\preformatted{<Behavioural> ... </Behavioural>}
+
+The number and type (e.g., MRP, geographic etc.) of any other characters.
+
+\bold{Analysis tag}
+
+\preformatted{<Analysis> ... </Analysis>}
+
+This tag contains inforamtion on the type of analysis performed to generate the MRP data (e.g., parsimony, Bayesian, likelihood). The specific approach should appear in a single <Type> tag. E.g.:
+
+\preformatted{<Analysis>
+  <Type>Maximum Parsimony</Type>
+</Analysis>}
+
+\bold{Notes tag}
+
+\preformatted{<Notes> ... </Notes>}
+
+Simply any notes the user may want to append to the file.
+
+\bold{Filename tag}
+
+\preformatted{<Filename> ... </Filename>}
+
+The filename used (excluding extension). Ideally this should match across the XML and MRP files and be formatted as a pseudo-citation. For example, if the citation would be Rogers et al. (2012), the filename would be Rogers_etal_2012. Additonally, it is helpful to append a lowercase letter to the end of files in case these names end up being non-unique, i.e., Rogers_etal_2012a for the first citation, Rogers_etal_2012b for the second, and so on. Finally, some references may include multiple analyses and so these can be distinguished by using an additional lowercase letter, e.g., Rogers_etal_2012aa and Rogers_etal_2012ab etc.
+
+(NB: The disadvantage of such a system is that it will breakdown as soon as there are 27 or more duplicate citations or data sets from a single reference. In practice this has not become a problem yet, but I might review and change this in future.)
+
+\bold{Parent tag}
+
+\preformatted{<Parent> ... </Parent>}
+
+The filename of any other data set in the sample that can logically be considered the parent of the current data set. This tag is used to deal with the fact that many morphological data sets are not independent (<Parent/> would be used if they were), but are based wholly or primarily on some older data set with little or no modification (e.g., adding a single new row (taxon) or updating some codings). This information is used within \link{Metatree} to prune redundnat data sets and reweight remaining non-indpendent ones and so is critical to the metatree construction process.
+
+\bold{Sibling tag}
+
+\preformatted{<Sibling> ... </Sibling>}
+
+Similar to the parent tag, this tag is used to denote data sets with equal claim to priority, but that do not represent a parent-child relationship. These tend to be rarer in my experience, but do crop up occasionally when, for example, two different coding schemes are applied.
 }
 \examples{
 
-# Nothing yet.
+# Example line (that would print to screen):
+#ReadMetatreeXML("Rogers_etal_2012a.xml", Invisible = FALSE)
+
+# (Note that this is commented out as it would only work locally,
+# but should give the user an idea of the syntax)
 
 }
 \references{
+Hill, J. and Davis, K. E., 2014. The Supertree Toolkit 2: a new and improved software package with a Graphical User Interface for supertree construction. \emph{Biodivers Data Journal}, \bold{2}, e1053.
+
 Lloyd, G. T., Bapst, D. W., Friedman, M., and Davis, K. E., 2016. Probabilistic divergence time estimation without branch lengths: dating the origins of dinosaurs, avian flight and crown birds. Biology Letters, 12, 20160609.
 }
 \author{
