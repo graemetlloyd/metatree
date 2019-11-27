@@ -1,32 +1,57 @@
-#' Produces tree contradiction distance matrix
+#' Multiple tree contradiction distances
 #'
-#' Given a set of input trees calculates all pariwise tree contradictions.
+#' @description
 #'
-#' This is effectively an attempt to do for the paleotree function "treeContradiction" what phytools "multiRF" does for Robinson-Foulds, i.e., operate on all pairwise comparisons instead of a single one.
+#' Given a set of input trees calculates all pairwise tree contradictions and returns a matrix.
 #'
 #' @param trees An object of class 'multi.phylo'.
-#' @param rescale Whether or not to rescale contradictions (zero to one).
+#' @param rescale Logical indicating whether (TRUE; default) or not (FALSE) to rescale contradictions (i.e., place on a zero to one scale).
 #'
-#' @return A contradiction (distance) matrix.
+#' @details
 #'
-#' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#' The contradiction metric was introduced by Bapst et al. (2018) as effectively an extension of the Robinson-Fould distance that accounts for non-bifurcating trees. More specifically, it assumes that any polytomies in those trees are effectively "soft", representing uncertainty, rather than "hard", representing a real hypothesis of relationships (effectively what Robinson-Foulds does).
 #'
-
+#' An explanation of how the metric works is best understood in the context of Robinson-Foulds (RF), which works by comparing two trees, summing the clades (bipartitions) unique to the first tree with those unique to the second tree. (Trees must contain the same labelled tips.) Thus identical trees would score a value of zero, and maximally dissimilar trees a value of 2(N - 2), where N is the number of tips and both trees are fully bifurcating. Note that notionally RF is for unrooted trees, but I find it makes more sense to think of it as not counting the root as this will always be identical across two trees (representing the clade containing all tips). This is why the maximum is N - 2 and not N - 1 (the latter being the number of all internal nodes, i.e., clades).
+#'
+#' Extending this concept to multifurcating trees imagine we wish to compare a star phylogeny with any fully bifurcating tree, we would get an RF of N - 2 (the number of clades in the bifurcating tree, excluding the root). This might make sense for many purposes as it considers the trees to be distinct, e.g., some distacne apart in tree-space. However, for some purposes we might really care whether or not the two trees \emph{contradict} each other. For example, knowing nothing else about the data, might a bifurcating tree potentially belong to the the sample of trees used to produce a multifurcating consensus tree? If this is what we want to know then we are searching for trees that have a contradiction of zero. In the case of a star phylogeny this would trivially be any other tree (as any set of relationships cannot logically conflict with no relationships). It is this measure that the contradiction metric attempts to capture.
+#'
+#' In practice this works by asking how many clades (bipartitions) explicitly contradict across two trees. This can also be rescaled (zero to one) by dividing by the total number of possible contradictions (N - 2).
+#'
+#' Note that a function to calculate contradiction has already been introduced by Dave Bapst in his \code{paleotree} package and users should also consult that function for a description.
+#'
+#' The intended purpose of this function is simply a faster implementation for users who wish to compute many tree contradiction differences simultaneously.
+#'
+#' @return
+#'
+#' A pairwise contradiction matrix, where rows and columns represent the input trees in the same order.
+#'
+#' @author
+#'
+#' Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
+#'
 #' @references
-#' This contradiction difference measure was introduced in:
 #'
-#' Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida
-#' (Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology} 67(1):32-48. doi: 10.1093/sysbio/syx049
-
+#' Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida (Brachiopoda) using Morphological and Molecular Data. Systematic Biology, 67, 32-48.
+#'
 #' @seealso
-#' A less-optimized function for obtaining the contradiction difference measure
-#' is \code{\link[paleotree]{treeContradiction}}, found in package \code{paleotree}.
-
-
-
+#'
+#' \code{paleotree::treeContradiction}
+#'
 #' @examples
 #'
-#' # Nothing yet
+#' # Generate three example trees (with tips labelled A-D):
+#' ExampleTrees <- read.tree(text = c("(A,B,C,D);", "(A,(B,(C,D)));",
+#'   "((A,B),C,D);"))
+#'
+#' # View trees, to show multifurcations:
+#' par(mfrow = c(1, 3))
+#' x <- lapply(ExampleTrees, plot, cex = 2)
+#'
+#' # Calculate rescaled tree contradiction differences matrix:
+#' MultiTreeContradiction(ExampleTrees)
+#'
+#' # Calculate raw tree contradiction differences matrix:
+#' MultiTreeContradiction(ExampleTrees, rescale = FALSE)
 #'
 #' @export MultiTreeContradiction
 MultiTreeContradiction <- function(trees, rescale = TRUE) {
@@ -46,7 +71,7 @@ MultiTreeContradiction <- function(trees, rescale = TRUE) {
       #
       Output <- !(all(matchA) | all(matchB))
       
-      #
+    #
     } else {
       
       #
