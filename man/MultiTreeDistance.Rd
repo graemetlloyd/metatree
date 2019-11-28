@@ -2,44 +2,45 @@
 % Please edit documentation in R/MultiTreeDistance.R
 \name{MultiTreeDistance}
 \alias{MultiTreeDistance}
-\title{Pairwise distance matrix for a set of trees}
+\title{Multiple tree distances}
 \usage{
-MultiTreeDistance(trees, distance = "contradiction", scale = TRUE)
+MultiTreeDistance(trees, distance = "contradiction", rescale = TRUE)
 }
 \arguments{
 \item{trees}{An object of class 'multi.phylo'.}
 
 \item{distance}{The type of disatnce to use, must be one of "RF" (RObinson-Foulds) or "contradiction" (tree contradiction).}
 
-\item{scale}{Whether or not to scale the distance (zero to one).}
+\item{rescale}{Whether or not to rescale the distance (zero to one).}
 }
 \value{
-A pairwise tree distance matrix.
+A symmetric matrix of pairwise tree distances.
 }
 \description{
-Given a set of input trees, calculates all pair-wise tree distances.
+Given a set of input trees, calculates all pairwise tree distances.
 }
 \details{
-This is effectively an attempt to both do a multi-tree version of the paleotree function
-\code{\link[paleotree]{treeContradiction}} and a faster version of phytools' \code{\link[phytools]{multiRF}} function when
-dealing with very large number of trees or tips (hundreds of trees or tips).
-The function works by converting the partitions into matrices and operating on those rather than the tree objects.
-This can substantially reduce the memory required and hence sped up the calculations, but only when data sets are large.
+This function is an incomplete attempt to generalise the \link{MultiTreeContradiction} function to incorporate not just contradiction differences (Bapst et al. 2018), but also the Robinson-Foulds distance metric (Robinson and Foulds 1981).
+
+It is not yet ready for general use.
 }
 \examples{
 
-# Nothing yet
+# Generate three example trees (with tips labelled A-D):
+ExampleTrees <- read.tree(text = c("(A,B,C,D);", "(A,(B,(C,D)));",
+  "((A,B),C,D);"))
+
+# Calculate rescaled RF distances matrix:
+MultiTreeDistance(ExampleTrees, distance = "RF")
 
 }
 \references{
-This contradiction difference measure was introduced in:
+Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined analysis of extant Rhynchonellida (Brachiopoda) using morphological and molecular data. \emph{Systematic Biology}, \bold{67}, 32-48.
 
-Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida
-(Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology} 67(1):32-48. doi: 10.1093/sysbio/syx049
+Robinson, D. F. and Foulds, L. R., 1981. Comparison of phylogenetic trees. \emph{Mathematical Biosciences}, \bold{53}, 131-147.
 }
 \seealso{
-A less-optimized function for obtaining the contradiction difference measure
-is \code{\link[paleotree]{treeContradiction}}, found in package \code{paleotree}.
+\code{paleotree::treeContradiction} and \code{phytools::multiRF}.
 }
 \author{
 Graeme T. Lloyd \email{graemetlloyd@gmail.com}
