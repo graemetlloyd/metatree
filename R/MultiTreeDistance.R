@@ -176,7 +176,7 @@ MultiTreeDistance <- function(trees, distance = "contradiction", rescale = TRUE)
   }
   
   # If scaling trees divide through by maximum possible value:
-  if(scale) OutputMatrix <- OutputMatrix / ((NTips - 2) * 2)
+  if(rescale) OutputMatrix <- OutputMatrix / ((NTips - 2) * 2)
   
   # Return distacne matrix:
   return(OutputMatrix)
