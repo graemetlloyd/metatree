@@ -58,7 +58,7 @@
 #'   <Sibling/>
 #' </SourceTree>}
 #'
-#' The XML format is composed of a series of "tags", typically with opening (e.g., <List>) and closing (e.g., </List>) pairs, with unused tags containg a lsahs at the end (e.g., <Sibling/>).
+#' The XML format is composed of a series of "tags", typically with opening (e.g., <List>) and closing (e.g., </List>) pairs, with unused tags containing a slash at the end (e.g., <Sibling/>).
 #'
 #' The main tags are visited in order below.
 #'

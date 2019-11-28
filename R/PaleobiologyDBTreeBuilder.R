@@ -54,8 +54,7 @@
 #'
 #' @examples
 #'
-#' # Build a phylogenetic tree out of some famous
-#  # dinosaurs:
+#' # Build a phylogenetic tree out of some famous dinosaurs:
 #' PaleobiologyDBTreeBuilder(taxon_names =
 #'   c("Tyrannosaurus rex", "Triceratops horridus",
 #'   "Brontosaurus excelsus"), plot.tree = TRUE)

@@ -28,10 +28,10 @@ set.seed(17)
 # Generate a random 10 tip tree:
 Tree <- ape::rtree(10)
 
-# Remove branch lengths (not used here):
+# Remove branch lengths as they will not be used here:
 Tree$edge.length <- NULL
 
-# Create random vector of survivors (!) and victims (0):
+# Create random vector of survivors (1) and victims (0):
 SurvivorVictim <- sample(c(0, 1), size = 10, replace = TRUE)
 
 # Assign tip names to survivors and victims:

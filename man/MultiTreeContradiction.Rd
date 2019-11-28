@@ -18,7 +18,7 @@ A pairwise contradiction matrix, where rows and columns represent the input tree
 Given a set of input trees calculates all pairwise tree contradictions and returns a matrix.
 }
 \details{
-The contradiction metric was introduced by Bapst et al. (2018) as effectively an extension of the Robinson-Fould distance that accounts for non-bifurcating trees. More specifically, it assumes that any polytomies in those trees are effectively "soft", representing uncertainty, rather than "hard", representing a real hypothesis of relationships (effectively what Robinson-Foulds does).
+The contradiction metric was introduced by Bapst et al. (2018) as effectively an extension of the Robinson-Fould distance (Robinson and Foulds 1981) that accounts for non-bifurcating trees. More specifically, it assumes that any polytomies in those trees are effectively "soft", representing uncertainty, rather than "hard", representing a real hypothesis of relationships (effectively what Robinson-Foulds does).
 
 An explanation of how the metric works is best understood in the context of Robinson-Foulds (RF), which works by comparing two trees, summing the clades (bipartitions) unique to the first tree with those unique to the second tree. (Trees must contain the same labelled tips.) Thus identical trees would score a value of zero, and maximally dissimilar trees a value of 2(N - 2), where N is the number of tips and both trees are fully bifurcating. Note that notionally RF is for unrooted trees, but I find it makes more sense to think of it as not counting the root as this will always be identical across two trees (representing the clade containing all tips). This is why the maximum is N - 2 and not N - 1 (the latter being the number of all internal nodes, i.e., clades).
 
@@ -49,6 +49,8 @@ MultiTreeContradiction(ExampleTrees, rescale = FALSE)
 }
 \references{
 Bapst, D. W., H. A. Schreiber, and S. J. Carlson. 2018. Combined Analysis of Extant Rhynchonellida (Brachiopoda) using Morphological and Molecular Data. \emph{Systematic Biology}, \bold{67}, 32-48.
+
+Robinson, D. F. and Foulds, L. R., 1981. Comparison of phylogenetic trees. \emph{Mathematical Biosciences}, \bold{53}, 131-147.
 }
 \seealso{
 \code{paleotree::treeContradiction}

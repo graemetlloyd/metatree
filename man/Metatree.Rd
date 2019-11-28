@@ -179,7 +179,7 @@ Note that the constraint works by simply upweighting the constraint data set's M
 
 \emph{Weighting source data}
 
-A major failing of many formal supertree approaches is to weight all input data equally by default without any consideration of variation in information quality. This is problematic for multiple reasons, but it s also very easily dealt with as most parsimony-based inference software (the intended inference software for the final MRP matrix) can take weighting information as input and apply it accordingly. Here the function considers four possible types of weighting:
+A major failing of many formal supertree approaches is to weight all input data equally by default without any consideration of variation in information quality. This is problematic for multiple reasons, but it's also very easily dealt with as most parsimony-based inference software (the intended inference software for the final MRP matrix) can take weighting information as input and apply it accordingly. Here the function considers four possible types of weighting:
 
 \enumerate{
   \item Weighting by input values
@@ -233,6 +233,7 @@ Users will also typically find the first time they run it on their data multiple
 Need to add:
 
 - Linear list of operations of function
+
 - Output explanations
 }
 \examples{
