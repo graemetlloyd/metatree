@@ -1642,7 +1642,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   cat("Done\nChecking for phylogeny-taxonomy contradictions...")
   
   # Do first pass to find any contradictions between taxonomy MRP and the fully reconciled source matrix:
-  MRPList <- lapply(MRPList, function(x) {TaxonomyMRPStrings <- TaxonomyMRP[rownames(x$Matrix), ]; TaxonomyMRPStrings[is.na(TaxonomyMRPStrings)] <- "0"; TaxonomyMRPStrings <- TaxonomyMRPStrings[, apply(TaxonomyMRPStrings, 2, function(y) length(unique(y))) == 2]; x$TaxonomyContradictions <- names(which(unlist(lapply(apply(TaxonomyMRPStrings, 2, list), function(z) length(MRPCharacterContradiction(unlist(z), x$Matrix))) > 0))); x$TaxonomyContradictionProportion <- length(x$TaxonomyContradictions) / ncol(TaxonomyMRPStrings); x})
+  MRPList <- lapply(MRPList, function(x) {TaxonomyMRPStrings <- TaxonomyMRP[rownames(x$Matrix), ]; TaxonomyMRPStrings[is.na(TaxonomyMRPStrings)] <- "0"; TaxonomyMRPStrings <- TaxonomyMRPStrings[, apply(TaxonomyMRPStrings, 2, function(y) length(unique(y))) == 2, drop = FALSE]; x$TaxonomyContradictions <- names(which(unlist(lapply(apply(TaxonomyMRPStrings, 2, list), function(z) length(MRPCharacterContradiction(unlist(z), x$Matrix))) > 0))); x$TaxonomyContradictionProportion <- length(x$TaxonomyContradictions) / ncol(TaxonomyMRPStrings); x})
   
   # Store monophyletic taxa (those not contradicted by any phylogenetic characters - useful for chunking larger data if found):
   MonophyleticTaxa <- setdiff(colnames(TaxonomyMRP), unique(unlist(lapply(MRPList, function(x) x$TaxonomyContradictions))))
