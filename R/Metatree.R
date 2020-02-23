@@ -1142,7 +1142,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
     # As long as the parent is not "Life" (top of taxonomic hierarchy not reached):
     while(currentparent != "Life") {
-      
+      if(length(currentparent) > 1) stop("")
       # Update child with previous parent:
       currentchild <- currentparent
       
@@ -1505,6 +1505,12 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Add publication year to each data set (in presses are ascribed the current year):
   MRPList <- lapply(MRPList, function(x) {x$PublicationYear <- gsub("[:A-Z:a-z:]|_|-", "", gsub("inpress", CurrentYear, x$FileName)); x})
   
+  
+  
+  
+  
+  
+  
   # Find any missing parents:
   MissingParents <- setdiff(unique(unname(unlist(lapply(MRPList, function(x) x$Parent[nchar(x$Parent) > 0])))), names(MRPList))
   
@@ -1521,10 +1527,14 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   ChildDataSets <- lapply(ChildDataSets, function(x) sort(unique(c(x, unname(unlist(ChildDataSets[intersect(x, names(ChildDataSets))]))))))
   
   # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
-  MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); x$Parent <- names(which(unlist(lapply(ChildDataSets, function(y) length(intersect(y, x$FileName)))) > 0)); x})
+  MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); if(!is.null(MRPList[[x$Parent[1]]]$Parent)) while(nchar(MRPList[[x$Parent[1]]]$Parent) > 0) x$Parent <- c(MRPList[[x$Parent[1]]]$Parent, x$Parent); x})
   
-  # Get any redundnat parent data sets (all taxa included in at least one child data set):
-  RedundantParents <- unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) {ActiveParent <- setdiff(x$Parent[nchar(x$Parent) > 0], MissingParents); if(length(ActiveParent) > 0) if(length(setdiff(rownames(MRPList[[ActiveParent]]$Matrix), rownames(x$Matrix))) == 0) x$Parent}))))
+  # OLD LINE FOR ABOVE THAT I AM PRETTY SURE IS BROKEN BUT AM LEAVING HERE FOR NOW IN CASE IT AIN'T
+  # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
+  #MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); x$Parent <- names(which(unlist(lapply(ChildDataSets, function(y) length(intersect(y, x$FileName)))) > 0)); x})
+  
+  # Get any redundant parent data sets (all taxa included in at least one child data set):
+  RedundantParents <- unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) { cat(x$FileName) ; ActiveParent <- setdiff(x$Parent[nchar(x$Parent) > 0], MissingParents); if(length(ActiveParent) > 0) if(length(setdiff(rownames(MRPList[[ActiveParent]]$Matrix), rownames(x$Matrix))) == 0) x$Parent}))))
   
   # If redundant parents were found then collapsee these data sets back to empty matrix and weights::
   if(length(RedundantParents) > 0) MRPList[RedundantParents] <- lapply(MRPList[RedundantParents], function(x) {x$Matrix <- matrix(ncol = 0, nrow = 0); x$Weights <- vector(mode = "numeric"); x})
