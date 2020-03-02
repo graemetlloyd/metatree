@@ -1505,12 +1505,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Add publication year to each data set (in presses are ascribed the current year):
   MRPList <- lapply(MRPList, function(x) {x$PublicationYear <- gsub("[:A-Z:a-z:]|_|-", "", gsub("inpress", CurrentYear, x$FileName)); x})
   
-  
-  
-  
-  
-  
-  
   # Find any missing parents:
   MissingParents <- setdiff(unique(unname(unlist(lapply(MRPList, function(x) x$Parent[nchar(x$Parent) > 0])))), names(MRPList))
   
@@ -1533,10 +1527,13 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
   #MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); x$Parent <- names(which(unlist(lapply(ChildDataSets, function(y) length(intersect(y, x$FileName)))) > 0)); x})
   
-  # Get any redundant parent data sets (all taxa included in at least one child data set):
-  RedundantParents <- unique(unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) { cat(x$FileName) ; ActiveParent <- setdiff(x$Parent[nchar(x$Parent) > 0], MissingParents); if(length(ActiveParent) > 0) if(length(setdiff(rownames(MRPList[[ActiveParent]]$Matrix), rownames(x$Matrix))) == 0) x$Parent}))))
+  # Build an empty redundant parent list for later use if no parents exist:
+  RedundantParents <- vector(mode = "character")
   
-  # If redundant parents were found then collapsee these data sets back to empty matrix and weights::
+  # If parents exist build a vector of those that are redundant (at least one child data set contains their full taxonomic complement):
+  if(length(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) x$Parent[nchar(x$Parent) > 0]))) > 0) RedundantParents <- unlist(lapply(as.list(unique(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(x) x$Parent[nchar(x$Parent) > 0])))), function(x) {Children <- unname(unlist(lapply(MRPList[ActiveMRP(MRPList)], function(y) if(any(y$Parent == x)) y$FileName))); if(any(unlist(lapply(as.list(Children), function(y) length(setdiff(rownames(MRPList[[x]]$Matrix), rownames(MRPList[[y]]$Matrix))))) == 0)) x}))
+  
+  # If redundant parents were found then collapse these data sets back to empty matrix and weights::
   if(length(RedundantParents) > 0) MRPList[RedundantParents] <- lapply(MRPList[RedundantParents], function(x) {x$Matrix <- matrix(ncol = 0, nrow = 0); x$Weights <- vector(mode = "numeric"); x})
   
   # Find any remaining active parent data sets:
@@ -1623,9 +1620,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # data set dependence weights (1 / (N siblings + 1)), and clade contradiction weights (1 / frequency of contradictory clades).
   # All weights are set on a zero to one scale initially and then multiplied by RelativeWeights:
   MRPList <- lapply(MRPList, function(x) {InputWeights <- x$Weights; x$Weights <- NULL; x$InputWeights <- RelativeWeights[1] * InputWeights; x$PublicationYearWeights <- RelativeWeights[2] * (rep(((2 ^ (0.5 * (as.numeric(x$PublicationYear) - CurrentVeilYear + 1))) - 1) / ((2 ^ (0.5 * (as.numeric(CurrentYear) - CurrentVeilYear + 1))) - 1), length(InputWeights))); x$DataSetDependenceWeights <- RelativeWeights[3] * rep(1 / (length(x$Sibling) + 1), length(InputWeights)); x$CladeContradictionWeights <- RelativeWeights[4] * MRPIntraMatrixWeights(x$Matrix); x})
-  
-  ###
-  
   
   # If using sum to combine weights collapse weights to just their sum:
   if(WeightCombination == "sum") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PublicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, sum); x$InputWeights <- NULL; x$PublicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
