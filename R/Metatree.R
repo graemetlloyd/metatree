@@ -286,6 +286,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
   # 6. Make operable as web site calls as well as/instead of local directory calls. (Needs proper XMLs to be available.)
+  # 7. More sophisticated check of which taxa cause non-monophyly issues and could be pruned.
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
@@ -1142,7 +1143,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
     # As long as the parent is not "Life" (top of taxonomic hierarchy not reached):
     while(currentparent != "Life") {
-      if(length(currentparent) > 1) stop("")
+      
+      # Check there is not a duplicate taxon issue and stop and warn user if there is:
+      if(length(currentparent) > 1) stop(paste(currentchild, " is duplicated in the Paleobiology Database! Fix and try again.", sep = ""))
+      
       # Update child with previous parent:
       currentchild <- currentparent
       
