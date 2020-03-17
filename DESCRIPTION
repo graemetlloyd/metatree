@@ -11,8 +11,9 @@ Depends:
     strap
 Imports:
     gdata,
+    plotrix,
     stats
-Description: A collection of functions to help generate meta-analytical hypotheses of species rrelationships.
+Description: A collection of functions to help generate meta-analytical hypotheses of species relationships.
 Encoding: UTF-8
 License: GPL (>=2)
 LazyData: yes

@@ -481,29 +481,6 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
   }
   
-  # Subfunction to "stretch" a vector of numbers so they fall on the Min-Max range:
-  NumberStretcher <- function(X, Min, Max) {
-    
-    # Check minimum is smaller than maximum value:
-    if(Min >= Max) stop("Minimum values exceeds maximum value.")
-    
-    # Get maximum value:
-    MaxVal <- max(X)
-    
-    # Get minimum value:
-    MinVal <- min(X)
-    
-    # Build multiplication factor:
-    MultiplicationFactor <- 1 / ((MaxVal - MinVal) / (Max - Min))
-    
-    # Build addition factor:
-    AdditionFactor <- 10 - (MinVal * MultiplicationFactor)
-    
-    # Return values streched over the min-max range:
-    return((X * MultiplicationFactor) + AdditionFactor)
-    
-  }
-
   # Check MRPDirectory is formatted correctly adn stop and warn user if not:
   if(!all(is.character(MRPDirectory)) || length(MRPDirectory) != 1) stop("MRPDirectory must be a single character string indicating the path to the folder containing the MRP files.")
   
@@ -1631,20 +1608,8 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # If using product to combine weights collapse weights to just their product (excluding zeroes) and remove other weights from list:
   if(WeightCombination == "product") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PublicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, function(y) {z <- as.character(y); z[z == "0"] <- NA; prod(as.numeric(z), na.rm = TRUE)}); x$InputWeights <- NULL; x$PublicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
   
-  # Get current maximum weight:
-  MaximumWeight <- max(unlist(lapply(MRPList, function(x) x$Weights)))
-  
-  # Get current minimum weight:
-  MinimumWeight <- min(unlist(lapply(MRPList, function(x) x$Weights)))
-  
-  # Calculate the multiplication factor for weight rescaling (10 to 1000), but use minimum weight if there is no variance:
-  MultiplicationFactor <- ifelse(1 / ((MaximumWeight - MinimumWeight) / 990) == Inf, MinimumWeight, 1 / ((MaximumWeight - MinimumWeight) / 990))
-  
-  # Calculate the addition factor for weight rescaling (10 to 1000):
-  AdditionFactor <- 10 - (MinimumWeight * MultiplicationFactor)
-  
   # Rescale weights (10 to 1000) and round results to two decimal places (best TNT can cope with):
-  MRPList <- lapply(MRPList, function(x) {x$Weights <- round((x$Weights * MultiplicationFactor) + AdditionFactor, 2); x})
+  MRPList <- lapply(MRPList, function(x) {x$Weights <- round(plotrix::rescale(x$Weights, c(10, 1000)), 2); x})
   
   # Print current processing status:
   cat("Done\nChecking for phylogeny-taxonomy contradictions...")

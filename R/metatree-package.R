@@ -31,5 +31,8 @@ NULL
 #' @importFrom gdata trim
 NULL
 
+#' @importFrom plotrix rescale
+NULL
+
 #' @importFrom stats dist
 NULL
