@@ -10,7 +10,8 @@ Metatree(MRPDirectory, XMLDirectory, InclusiveDataList = c(),
   MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE,
   IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL,
   MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1),
-  WeightCombination = "sum", ReportContradictionsToScreen = FALSE)
+  WeightCombination = "sum", ReportContradictionsToScreen = FALSE,
+  ExcludeTaxonomyMRP = FALSE)
 }
 \arguments{
 \item{MRPDirectory}{The directory in which the MRP files are to be read from. See details.}
@@ -44,6 +45,8 @@ Metatree(MRPDirectory, XMLDirectory, InclusiveDataList = c(),
 \item{WeightCombination}{How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.}
 
 \item{ReportContradictionsToScreen}{Logical indicating whether or not to print any taxonomy-phylogeny contradictions found to the screen. These can aid checking for congruence betwen taxonomy and phylogeny, i.e., they inform the user on whether either the Paleobiology Database or the metadata might need amending.}
+
+\item{ExcludeTaxonomyMRP}{Logical indicating whether to exclude the taxonomy MRP. NOT RECOMMENDED.}
 }
 \value{
 \item{FullMRPMatrix}{The full MRP matrix in the same format imported by \code{\link[Claddis]{ReadMorphNexus}}. This can be written out to a file in either NEXUS or TNT format using \code{\link[Claddis]{WriteMorphNexus}} or \code{\link[Claddis]{WriteMorphTNT}}.}

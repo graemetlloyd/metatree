@@ -20,6 +20,7 @@
 #' @param RelativeWeights A numeric vector of four values (default \code{c(1, 1, 1, 1)}) giving the respective weights to use for: 1) the input weights (the weights read in from the source MRP files), 2) the publication year weights (from equation 1 in the supplement of Lloyd et al. 2016), 3) the data set dependency weights (1 / the number of "sibling" data sets; see Lloyd et al. 2016), and 4) the within-matrix weights of individual clades (1 / number of conflicitng clades). Zeroes exclude particular weighting types. E.g., to only use input weights use \code{c(1, 0, 0, 0)}.
 #' @param WeightCombination How to combine the weights above. Must be one of either "product" or "sum". Note product will exclude zero weight values to avoid zero weight output. E.g., if only using input weights the result of combining weights will not be all zeroes simply because the other types of weight are set at zero.
 #' @param ReportContradictionsToScreen Logical indicating whether or not to print any taxonomy-phylogeny contradictions found to the screen. These can aid checking for congruence betwen taxonomy and phylogeny, i.e., they inform the user on whether either the Paleobiology Database or the metadata might need amending.
+#' @param ExcludeTaxonomyMRP Logical indicating whether to exclude the taxonomy MRP. NOT RECOMMENDED.
 #'
 #' @details
 #'
@@ -257,10 +258,11 @@
 #' #  BackboneConstraint = "Moon_inpressa", RelativeWeights = c(0, 100, 10, 1))
 #'
 #' @export Metatree
-Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), ExclusiveDataList = c(), TargetClade = "", HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE) {
+Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), ExclusiveDataList = c(), TargetClade = "", HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE, ExcludeTaxonomyMRP = FALSE) {
   
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
+  # NEED TO ADD CHECK IF EXCLUDING TAXONOMY MRP BUT USING GENUS OR ALL AS WILL CREATE MASSIVE ISSUES!
   
   # DEFO NEED TO IMPROVE NAME CHECKER AFTER RECON COS THAT IS WHERE MOST OF THE LATER ISSUES ARE (E.G. GENUS NAME NUMBER USED FOR SPECIES)
   # FOR HIGHER TAXA TO COLLAPSE HAVE TO ALSO EDIT CONSTRAINT TREES (AND CHECK THEY CAN EVEN MESH!)
@@ -1699,8 +1701,11 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Add in missing taxa as NAs to every taxon:
   MRPList <- lapply(MRPList, function(x) {MissingTaxa <- setdiff(rownames(TaxonomyMRP), rownames(x$Matrix)); if(length(MissingTaxa) > 0) x$Matrix <- rbind(x$Matrix, matrix(nrow = length(MissingTaxa), ncol = ncol(x$Matrix), dimnames = list(MissingTaxa, c()))); x$Matrix <- x$Matrix[rownames(TaxonomyMRP), , drop = FALSE]; x})
   
-  # Build full MRP matrix:
-  FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = cbind(do.call(cbind, lapply(MRPList, function(x) x$Matrix)), TaxonomyMRP), Weights = c(unname(unlist(lapply(MRPList, function(x) x$Weights))), rep(1, ncol(TaxonomyMRP))))
+  # Build full MRP matrix (with taxonomy MRP):
+  if(!ExcludeTaxonomyMRP) FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = cbind(do.call(cbind, lapply(MRPList, function(x) x$Matrix)), TaxonomyMRP), Weights = c(unname(unlist(lapply(MRPList, function(x) x$Weights))), rep(1, ncol(TaxonomyMRP))))
+  
+  # Build full MRP matrix (without taxonomy MRP):
+  if(ExcludeTaxonomyMRP) FullMRPMatrix <- MakeMorphMatrix(CharacterTaxonMatrix = do.call(cbind, lapply(MRPList, function(x) x$Matrix)), Weights = unname(unlist(lapply(MRPList, function(x) x$Weights))))
   
   # Add all zero outgroup to matrix:
   FullMRPMatrix$Matrix_1$Matrix <- rbind(matrix("0", nrow = 1, ncol = ncol(FullMRPMatrix$Matrix_1$Matrix), dimnames = list("allzero", c())), FullMRPMatrix$Matrix_1$Matrix)
