@@ -1337,7 +1337,10 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
     # If columns are to be deleted then delete them:
     if(length(ColumnsToDalete) > 0) TaxonomyMRP <- TaxonomyMRP[, -ColumnsToDalete]
-  
+    
+    # Update new valid OTUs:
+    NewValidOTUs <- sort(rownames(TaxonomyMRP))
+
   }
   
   # Delete taxa from every matrix they occur in:
