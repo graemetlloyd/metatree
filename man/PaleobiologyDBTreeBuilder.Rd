@@ -4,10 +4,19 @@
 \alias{PaleobiologyDBTreeBuilder}
 \title{Palaeobiology Database Tree Builder}
 \usage{
-PaleobiologyDBTreeBuilder(taxon_nos = NULL, taxon_names = NULL,
-  original = FALSE, interval = NULL, extant = "include",
-  stopfororphans = TRUE, validonly = TRUE, returnrank = "3",
-  breaker = 100, plot.tree = FALSE, TimeScale = FALSE)
+PaleobiologyDBTreeBuilder(
+  taxon_nos = NULL,
+  taxon_names = NULL,
+  original = FALSE,
+  interval = NULL,
+  extant = "include",
+  stopfororphans = TRUE,
+  validonly = TRUE,
+  returnrank = "3",
+  breaker = 100,
+  plot.tree = FALSE,
+  TimeScale = FALSE
+)
 }
 \arguments{
 \item{taxon_nos}{Either a vector of Paleobiology Database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.}

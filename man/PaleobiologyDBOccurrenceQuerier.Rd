@@ -4,8 +4,12 @@
 \alias{PaleobiologyDBOccurrenceQuerier}
 \title{Palaeobiology Database Occurrence Querier}
 \usage{
-PaleobiologyDBOccurrenceQuerier(taxon_nos, original = TRUE,
-  breaker = 100, RetainUncertainOccurrences = FALSE)
+PaleobiologyDBOccurrenceQuerier(
+  taxon_nos,
+  original = TRUE,
+  breaker = 100,
+  RetainUncertainOccurrences = FALSE
+)
 }
 \arguments{
 \item{taxon_nos}{A vector of Paleobiology database taxon number(s) to retrieve from the database.}

@@ -4,14 +4,25 @@
 \alias{Metatree}
 \title{Builds metatree from source data}
 \usage{
-Metatree(MRPDirectory, XMLDirectory, InclusiveDataList = c(),
-  ExclusiveDataList = c(), TargetClade = "",
-  HigherTaxaToCollapse = c(), SpeciesToExclude = c(),
-  MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE,
-  IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL,
-  MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1),
-  WeightCombination = "sum", ReportContradictionsToScreen = FALSE,
-  ExcludeTaxonomyMRP = FALSE)
+Metatree(
+  MRPDirectory,
+  XMLDirectory,
+  InclusiveDataList = c(),
+  ExclusiveDataList = c(),
+  TargetClade = "",
+  HigherTaxaToCollapse = c(),
+  SpeciesToExclude = c(),
+  MissingSpecies = "exclude",
+  Interval = NULL,
+  VeilLine = TRUE,
+  IncludeSpecimenLevelOTUs = TRUE,
+  BackboneConstraint = NULL,
+  MonophylyConstraint = NULL,
+  RelativeWeights = c(1, 1, 1, 1),
+  WeightCombination = "sum",
+  ReportContradictionsToScreen = FALSE,
+  ExcludeTaxonomyMRP = FALSE
+)
 }
 \arguments{
 \item{MRPDirectory}{The directory in which the MRP files are to be read from. See details.}

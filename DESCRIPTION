@@ -18,4 +18,4 @@ Encoding: UTF-8
 License: GPL (>=2)
 LazyData: yes
 ByteCompile: yes
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
