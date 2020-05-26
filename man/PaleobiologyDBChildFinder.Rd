@@ -4,9 +4,16 @@
 \alias{PaleobiologyDBChildFinder}
 \title{Palaeobiology Database Child Finder}
 \usage{
-PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL,
-  original = TRUE, interval = NULL, extant = "include",
-  validonly = TRUE, returnrank = NULL, breaker = 100)
+PaleobiologyDBChildFinder(
+  taxon_nos,
+  taxon_names = NULL,
+  original = TRUE,
+  interval = NULL,
+  extant = "include",
+  validonly = TRUE,
+  returnrank = NULL,
+  breaker = 100
+)
 }
 \arguments{
 \item{taxon_nos}{The Paleobiology database taxon number.}
@@ -15,11 +22,11 @@ PaleobiologyDBChildFinder(taxon_nos, taxon_names = NULL,
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 
-\item{interval}{The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).}
+\item{interval}{The beginning and ending geologic intervals if only wanting taxa from a specified time window (default is NULL).}
 
 \item{extant}{What to do with extant taxa, one of: "only" (only return extant taxa), "exclude" (exclude extant taxa), or "include" (make no distinction, the default).}
 
-\item{validonly}{Whether or not to only retunr valid taxa (TRUE) or all taxa (FALSE).}
+\item{validonly}{Whether or not to only return valid taxa (TRUE) or all taxa (FALSE).}
 
 \item{returnrank}{Whether or not to only return taxa of a specific rank (e.g., "3" for species, "5" for genera). See Paleobiology Database API for more infomation.}
 
@@ -33,6 +40,8 @@ Given a Paleobiology Database taxon number returns basic information on all spec
 }
 \details{
 Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
+
+Note that if using the \code{interval} option these must be terms used by the Paleobiology Database. Generally this means (for example) using Early/Late, not Lower/Upper.
 }
 \examples{
 

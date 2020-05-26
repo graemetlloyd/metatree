@@ -4,9 +4,15 @@
 \alias{PaleobiologyDBTaxaQuerier}
 \title{Palaeobiology Database Taxa Querier}
 \usage{
-PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL,
-  original = TRUE, interval = NULL, extant = "include",
-  stopfororphans = TRUE, breaker = 100)
+PaleobiologyDBTaxaQuerier(
+  taxon_nos,
+  taxon_names = NULL,
+  original = TRUE,
+  interval = NULL,
+  extant = "include",
+  stopfororphans = TRUE,
+  breaker = 100
+)
 }
 \arguments{
 \item{taxon_nos}{A vector of Paleobiology Database taxon numbers to retrieve from the database.}
@@ -15,7 +21,7 @@ PaleobiologyDBTaxaQuerier(taxon_nos, taxon_names = NULL,
 
 \item{original}{Whether or not to return the original (TRUE) or resolved version (FALSE).}
 
-\item{interval}{The beginning and ending geologic periods if only wanting taxa from a specified time window (default is NULL).}
+\item{interval}{The beginning and ending geologic intervals if only wanting taxa from a specified time window (default is NULL).}
 
 \item{extant}{What to do with extant taxa, one of: "only" (only return extant taxa), "exclude" (exclude extant taxa), or "include" (make no distinction, the default).}
 
@@ -31,6 +37,8 @@ Given a Paleobiology Database taxon name or number returns basic information on 
 }
 \details{
 Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query known taxon names or numbers and returns information on their validity, name, and rank. Intended for use in building dynamic taxonomic resolutions when constructing metatree matrices (see Lloyd et al. 2016).
+
+Note that if using the \code{interval} option these must be terms used by the Paleobiology Database. Generally this means (for example) using Early/Late, not Lower/Upper.
 }
 \examples{
 
