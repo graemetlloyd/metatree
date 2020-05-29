@@ -283,12 +283,14 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # OPTIONS TO ADD IN FUTURE:
   #
   # 1. Way to do historical metatrees (should be easy as just prune out starting data sets then run as normal - except setting current year to historical year).
-  # 2. Allow Purvis coding instead of Baum and Ragan. (Involves dealing with NA issues that would be caused currently.)
+  # 2. Allow Purvis coding instead of Baum and Ragan. (Involves dealing with NA issues that would be caused currently.) Possibly/probably too hard?
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
   # 5. Make Safe Taxonomic Reduction optional.
-  # 6. Make operable as web site calls as well as/instead of local directory calls. (Needs proper XMLs to be available.)
-  # 7. More sophisticated check of which taxa cause non-monophyly issues and could be pruned.
+  # 6. Make operable as web site calls as well as/instead of local directory calls. (Needs proper XMLs to be available.) E.g., can then work on a GitHub repo.
+  # 7. More sophisticated check of which taxa cause non-monophyly issues and hence could/should be pruned.
+  # 8. Way to prune out composite-only OTUs.
+  # 9. Way to have more granular monophyly options, e.g., enforce genus-level monophyly.
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
   ActiveMRP <- function(MRPList) unname(which(unlist(lapply(MRPList, function(x) prod(dim(x$Matrix)))) > 0))
