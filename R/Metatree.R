@@ -12,7 +12,7 @@
 #' @param HigherTaxaToCollapse Vector of any higher taxa to collapse (e.g., if you are focused on relationships in a stem-group). NB: It is very important that these are safely monophyletic or the results will be confounded.
 #' @param SpeciesToExclude Vector of any individual species to be excluded from the final metatree. Intended to deal with problematic taxa, for example, the dinosaurs Eshanosaurus and Ricardoestesia.
 #' @param MissingSpecies What to do with species assigned to the target clade, but not present in the source data. Options are: "exclude" (excludes these missing species; the default and safest option), "genus" (include those species in a genus-level polytomy if the genus is sampled in the source data), and "all" (every species assigned to the target clade will be included). Note that neither "genus" or "all" should be used without careful checks of the taxonomy.
-#' @param Interval If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBChildFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).
+#' @param Interval If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBDescendantFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).
 #' @param VeilLine A logical indicating whether to remove older data sets that do not increase taxonomic coverage (TRUE; the default and recommended) or not (FALSE). See Lloyd et al. (2016) and the details section below for more information.
 #' @param IncludeSpecimenLevelOTUs A logical indicating whether specimen-level OTUs should (TRUE; the default) or should not (FALSE) be included in the metatree. See details.
 #' @param BackboneConstraint The file name of one of the source data sets to be used as a backbone constraint (will enforce topology in final metatree but allows taxa not in topology to fall out inside the constraint). This is not required and the default (NULL) will mean no constraint is applied. See details for more information.
@@ -117,7 +117,7 @@
 #'
 #' \emph{Specifying a sampling interval}
 #'
-#' Another way of more specifically sampling taxa might be temporal. For example, if the desired tree is Cretaceous dinosaurs only. This can be specified using the \code{Interval} option. This works by using the \link{PaleobiologyDBChildFinder} function to identify valid species assigned to the specified interval. Here both a highest and a lowest interval must be specified, so for our Cretaceous example these would be the same, i.e., \code{Interval = c("Cretaceous", "Cretaceous")}. Note that currently the function only accepts geologic periods and not finer subdivisions. This option should also be used with caution as not all taxa in the database have temporal information (meaning Cretaceous species could be excluded unintentionally simply because their fossil occurrence(s) have not yet been entered into the database). Additionally, specimen-level OTUs (see below) cannot be excluded this way.
+#' Another way of more specifically sampling taxa might be temporal. For example, if the desired tree is Cretaceous dinosaurs only. This can be specified using the \code{Interval} option. This works by using the \link{PaleobiologyDBDescendantFinder} function to identify valid species assigned to the specified interval. Here both a highest and a lowest interval must be specified, so for our Cretaceous example these would be the same, i.e., \code{Interval = c("Cretaceous", "Cretaceous")}. Note that currently the function only accepts geologic periods and not finer subdivisions. This option should also be used with caution as not all taxa in the database have temporal information (meaning Cretaceous species could be excluded unintentionally simply because their fossil occurrence(s) have not yet been entered into the database). Additionally, specimen-level OTUs (see below) cannot be excluded this way.
 #'
 #' \emph{Use of a veil line}
 #'
@@ -945,7 +945,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   if(MissingSpecies != "exclude") {
     
     # Find all children of target clade:
-    AllChildren <- PaleobiologyDBChildFinder(taxon_nos = "1", taxon_names = TargetClade, validonly = TRUE, returnrank = "3", interval = Interval)
+    AllChildren <- PaleobiologyDBDescendantFinder(taxon_nos = "1", taxon_names = TargetClade, validonly = TRUE, returnrank = "3", interval = Interval)
     
     # Deal with subgenera:
     AllChildren[, "TaxonName"] <- gsub(" \\(|\\)", "", AllChildren[, "TaxonName"])
@@ -994,7 +994,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
       CurrentGenusNumbers <- ResolvedTaxonNumbers[which(ResolvedTaxonNumbers[, "TaxonRank"] == 5), "ResolvedTaxonNo"]
       
       # Get children of sampled genera:
-      GeneraChildren <- PaleobiologyDBChildFinder(taxon_nos = CurrentGenusNumbers, validonly = TRUE, returnrank = "3")
+      GeneraChildren <- PaleobiologyDBDescendantFinder(taxon_nos = CurrentGenusNumbers, validonly = TRUE, returnrank = "3")
       
       # Deal with subgenera:
       GeneraChildren[, "TaxonName"] <- gsub(" \\(|\\)", "", GeneraChildren[, "TaxonName"])

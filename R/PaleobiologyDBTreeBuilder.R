@@ -6,13 +6,13 @@
 #'
 #' @param taxon_nos Either a vector of Paleobiology Database taxon numbers that will serve as tips, or a single number that will define the clade requested. Number(s) must match Paleobiology Database records.
 #' @param taxon_names Either a vector of Paleobiology Database taxon names that will serve as tips, or a single name that will define the clade requested. Name(s) must match Paleobiology Database records.
-#' @param original Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.
-#' @param interval Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.
-#' @param extant Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.
+#' @param original Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.
+#' @param interval Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.
+#' @param extant Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.
 #' @param stopfororphans Option to be passed to \link{PaleobiologyDBTaxaQuerier}.
-#' @param validonly Option to be passed to \link{PaleobiologyDBChildFinder}.
-#' @param returnrank Option to be passed to \link{PaleobiologyDBChildFinder}. Default is "3" (species level).
-#' @param breaker Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.
+#' @param validonly Option to be passed to \link{PaleobiologyDBDescendantFinder}.
+#' @param returnrank Option to be passed to \link{PaleobiologyDBDescendantFinder}. Default is "3" (species level).
+#' @param breaker Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.
 #' @param plot.tree Logical whether or not to produce a plot of the resulting tree alongside the output (default is FALSE).
 #' @param TimeScale Logical indicating whether or not to timescale the tree. (NOT OPERATIONAL YET!)
 #'
@@ -22,7 +22,7 @@
 #'
 #' The function presented here can either be handed a single higher taxon (e.g., Dinosauria) or a series of (presumably) lower level taxa (genera, species) for which a taxonomic "phylogeny" is desired. Note that all names must appear in the Paleobiology Database, and that it is recommended you actual use the taxonomic number desired to avoid any potential homonym issues, either between animals and plants or lower- and higher-level taxa.
 #'
-#' Internally the function will call \link{PaleobiologyDBChildFinder} and/or \link{PaleobiologyDBTaxaQuerier} and most options refer to these functions. Note that this means the function will typically take several seconds to run so do not expect an immediate results, even if the desired clade is very small.
+#' Internally the function will call \link{PaleobiologyDBDescendantFinder} and/or \link{PaleobiologyDBTaxaQuerier} and most options refer to these functions. Note that this means the function will typically take several seconds to run so do not expect an immediate results, even if the desired clade is very small.
 #'
 #' The resulting tree is in ape format with node labels, but currently no ages or branch lengths (these are planned future additions).
 #'
@@ -102,7 +102,7 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
     if(length(taxon_names) == 1) {
       
       # Set taxon numbers as descendants of taxon name:
-      taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBChildFinder(taxon_nos = "1", taxon_names = taxon_names, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
+      taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBDescendantFinder(taxon_nos = "1", taxon_names = taxon_names, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
       
       # Now nullify taxon names:
       taxon_names <- NULL
@@ -119,7 +119,7 @@ PaleobiologyDBTreeBuilder <- function(taxon_nos = NULL, taxon_names = NULL, orig
   } else {
     
     # If a single taxon number then get all children of that taxon and set as new taxon numbers:
-    if(length(taxon_nos) == 1) taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBChildFinder(taxon_nos = taxon_nos, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
+    if(length(taxon_nos) == 1) taxon_nos <- gsub("txn:|var:", "", unname(unlist(lapply(apply(PaleobiologyDBDescendantFinder(taxon_nos = taxon_nos, original = original, interval = interval, extant = extant, validonly = validonly, returnrank = returnrank, breaker = breaker)[, c("OriginalTaxonNo", "ResolvedTaxonNo")], 1, list), function(x) unlist(x)[!is.na(unlist(x))][1]))))
     
   }
   

@@ -41,7 +41,7 @@ Metatree(
 
 \item{MissingSpecies}{What to do with species assigned to the target clade, but not present in the source data. Options are: "exclude" (excludes these missing species; the default and safest option), "genus" (include those species in a genus-level polytomy if the genus is sampled in the source data), and "all" (every species assigned to the target clade will be included). Note that neither "genus" or "all" should be used without careful checks of the taxonomy.}
 
-\item{Interval}{If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBChildFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).}
+\item{Interval}{If restricting the sample to a specific interval of geologic time then use this option (passed to \link{PaleobiologyDBDescendantFinder} which should be consulted for formatting). Default is NULL (no restriction on ages of tips to be included).}
 
 \item{VeilLine}{A logical indicating whether to remove older data sets that do not increase taxonomic coverage (TRUE; the default and recommended) or not (FALSE). See Lloyd et al. (2016) and the details section below for more information.}
 
@@ -165,7 +165,7 @@ Species can also be individually excluded and in multiple ways. A simple means i
 
 \emph{Specifying a sampling interval}
 
-Another way of more specifically sampling taxa might be temporal. For example, if the desired tree is Cretaceous dinosaurs only. This can be specified using the \code{Interval} option. This works by using the \link{PaleobiologyDBChildFinder} function to identify valid species assigned to the specified interval. Here both a highest and a lowest interval must be specified, so for our Cretaceous example these would be the same, i.e., \code{Interval = c("Cretaceous", "Cretaceous")}. Note that currently the function only accepts geologic periods and not finer subdivisions. This option should also be used with caution as not all taxa in the database have temporal information (meaning Cretaceous species could be excluded unintentionally simply because their fossil occurrence(s) have not yet been entered into the database). Additionally, specimen-level OTUs (see below) cannot be excluded this way.
+Another way of more specifically sampling taxa might be temporal. For example, if the desired tree is Cretaceous dinosaurs only. This can be specified using the \code{Interval} option. This works by using the \link{PaleobiologyDBDescendantFinder} function to identify valid species assigned to the specified interval. Here both a highest and a lowest interval must be specified, so for our Cretaceous example these would be the same, i.e., \code{Interval = c("Cretaceous", "Cretaceous")}. Note that currently the function only accepts geologic periods and not finer subdivisions. This option should also be used with caution as not all taxa in the database have temporal information (meaning Cretaceous species could be excluded unintentionally simply because their fossil occurrence(s) have not yet been entered into the database). Additionally, specimen-level OTUs (see below) cannot be excluded this way.
 
 \emph{Use of a veil line}
 

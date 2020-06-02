@@ -23,19 +23,19 @@ PaleobiologyDBTreeBuilder(
 
 \item{taxon_names}{Either a vector of Paleobiology Database taxon names that will serve as tips, or a single name that will define the clade requested. Name(s) must match Paleobiology Database records.}
 
-\item{original}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
+\item{original}{Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
-\item{interval}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
+\item{interval}{Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
-\item{extant}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
+\item{extant}{Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
 \item{stopfororphans}{Option to be passed to \link{PaleobiologyDBTaxaQuerier}.}
 
-\item{validonly}{Option to be passed to \link{PaleobiologyDBChildFinder}.}
+\item{validonly}{Option to be passed to \link{PaleobiologyDBDescendantFinder}.}
 
-\item{returnrank}{Option to be passed to \link{PaleobiologyDBChildFinder}. Default is "3" (species level).}
+\item{returnrank}{Option to be passed to \link{PaleobiologyDBDescendantFinder}. Default is "3" (species level).}
 
-\item{breaker}{Option to be passed to \link{PaleobiologyDBChildFinder} or \link{PaleobiologyDBTaxaQuerier}.}
+\item{breaker}{Option to be passed to \link{PaleobiologyDBDescendantFinder} or \link{PaleobiologyDBTaxaQuerier}.}
 
 \item{plot.tree}{Logical whether or not to produce a plot of the resulting tree alongside the output (default is FALSE).}
 
@@ -52,7 +52,7 @@ Taxonomies such as those in the Paleobiology Database (\code{paleobiodb.org}; qu
 
 The function presented here can either be handed a single higher taxon (e.g., Dinosauria) or a series of (presumably) lower level taxa (genera, species) for which a taxonomic "phylogeny" is desired. Note that all names must appear in the Paleobiology Database, and that it is recommended you actual use the taxonomic number desired to avoid any potential homonym issues, either between animals and plants or lower- and higher-level taxa.
 
-Internally the function will call \link{PaleobiologyDBChildFinder} and/or \link{PaleobiologyDBTaxaQuerier} and most options refer to these functions. Note that this means the function will typically take several seconds to run so do not expect an immediate results, even if the desired clade is very small.
+Internally the function will call \link{PaleobiologyDBDescendantFinder} and/or \link{PaleobiologyDBTaxaQuerier} and most options refer to these functions. Note that this means the function will typically take several seconds to run so do not expect an immediate results, even if the desired clade is very small.
 
 The resulting tree is in ape format with node labels, but currently no ages or branch lengths (these are planned future additions).
 
