@@ -36,10 +36,10 @@
 #' @examples
 #'
 #' # Taxon query for Loxommatinae (asking for species only):
-#' PaleobiologyDBChildFinder("339413", returnrank = "3")
+#' PaleobiologyDBDescendantFinder("339413", returnrank = "3")
 #'
-#' @export PaleobiologyDBChildFinder
-PaleobiologyDBChildFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", validonly = TRUE, returnrank = NULL, breaker = 100) {
+#' @export PaleobiologyDBDescendantFinder
+PaleobiologyDBDescendantFinder <- function(taxon_nos, taxon_names = NULL, original = TRUE, interval = NULL, extant = "include", validonly = TRUE, returnrank = NULL, breaker = 100) {
   
   # Dead code used to generate the matrix below (kept in case it needs to be updated in future):
   #GeologicIntervals <- matrix(NA, nrow = 0, ncol = 4, dimnames = list(c(), c("ID", "Name", "MaxMa", "MinMa"))); for(i in setdiff(1:1108, c(143, 742, 1080))) {x <- readLines(paste("https://paleobiodb.org/data1.2/intervals/single.json?id=", i, sep = "")); x <- strsplit(strsplit(x[grep("\\{\"oid", x)], split = "\\{|\\}")[[1]][2], split = ",")[[1]]; GeologicIntervals <- rbind(GeologicIntervals, c(i, gsub("\"", "", strsplit(x[grep("\"nam\"", x)], split = ":")[[1]][2]), gsub("\"", "", strsplit(x[grep("\"eag\"", x)], split = ":")[[1]][2]), gsub("\"", "", strsplit(x[grep("\"lag\"", x)], split = ":")[[1]][2])))}
