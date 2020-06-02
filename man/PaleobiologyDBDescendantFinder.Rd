@@ -2,7 +2,7 @@
 % Please edit documentation in R/PaleobiologyDBDescendantFinder.R
 \name{PaleobiologyDBDescendantFinder}
 \alias{PaleobiologyDBDescendantFinder}
-\title{Palaeobiology Database Child Finder}
+\title{Palaeobiology Database Descendant Finder}
 \usage{
 PaleobiologyDBDescendantFinder(
   taxon_nos,
@@ -33,13 +33,13 @@ PaleobiologyDBDescendantFinder(
 \item{breaker}{Size of breaker to use if querying a large number of taxa (reduces load on database of individual queries; default is 100).}
 }
 \value{
-A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all species-level children found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
+A ten-column matrix detailing the original taxon number (if relevant), the valid (resolved) taxon number, the taxon name, the taxon rank (Paleobiology Database rank number), the taxon number of the parent of this taxon, the taxon validity (if relevant; returns NA if already valid), the accepted taxon number (if relevant), the accepted taxon name (if relevant) of all descendants found, the attribution of the original name as currently entered in the database, and whether ("1") or not ("0") the species is extant.
 }
 \description{
-Given a Paleobiology Database taxon number returns basic information on all species-level children.
+Given a Paleobiology Database taxon number returns basic information on all descendants.
 }
 \details{
-Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query a known taxon number (or name) and returns information on the validity, name, and rank of all its species-level children. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
+Uses the Paleobiology Database (\code{paleobiodb.org}) API (Peters and McLennen 2016) to query a known taxon number (or name) and returns information on the validity, name, and rank of all its descendants. Intended for use in building dynamic taxonomic resolutions when building metatree matrices (see Lloyd et al. 2016).
 
 Note that if using the \code{interval} option these must be terms used by the Paleobiology Database. Generally this means (for example) using Early/Late, not Lower/Upper.
 }

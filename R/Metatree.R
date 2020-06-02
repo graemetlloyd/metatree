@@ -944,7 +944,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # If doing something with missing species (i.e., those not currently included as OTUs, but existing in target clade):
   if(MissingSpecies != "exclude") {
     
-    # Find all children of target clade:
+    # Find all descendants of target clade:
     AllChildren <- PaleobiologyDBDescendantFinder(taxon_nos = "1", taxon_names = TargetClade, validonly = TRUE, returnrank = "3", interval = Interval)
     
     # Deal with subgenera:
