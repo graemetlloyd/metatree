@@ -289,7 +289,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # 5. Make Safe Taxonomic Reduction optional.
   # 6. Make operable as web site calls as well as/instead of local directory calls. (Needs proper XMLs to be available.) E.g., can then work on a GitHub repo.
   # 7. More sophisticated check of which taxa cause non-monophyly issues and hence could/should be pruned.
-  # 8. Way to prune out composite-only OTUs.
+  # 8. Way to prune out composite-only OTUs. (I.e., if species-level taxon *only* appears in composite OTU(s) will lack resolution to place.)
   # 9. Way to have more granular monophyly options, e.g., enforce genus-level monophyly.
   
   # Subfunction that gives just MRPs where matrix is still intact (has rows and columns):
@@ -590,7 +590,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   if(length(setdiff(WeightCombination, c("product", "sum"))) > 0) stop("WeightCombination must be one of \"product\" or \"sum\" only. Check spelling and try again.")
   
   # Read in all MRP files and store in a list (include duplicate headers to store parent sibling info later):
-  MRPList <- lapply(lapply(as.list(MRPFileList), Claddis::ReadMorphNexus), function(x) {y <- list(x$Matrix_1$Matrix, x$Matrix_1$Weights, "", "", ""); names(y) <- c("Matrix", "Weights", "FileName", "Parent", "Sibling"); y})
+  MRPList <- lapply(as.list(MRPFileList), function(x) {y <- Claddis::ReadMorphNexus(x); y <- list(Matrix = y$Matrix_1$Matrix, Weights = y$Matrix_1$Weights, FileName = "", Parent = "", Sibling = ""); y})
   
   # Set names of MRP files:
   names(MRPList) <- gsub("mrp.nex", "", MRPFileList)
