@@ -42,7 +42,7 @@
 #'
 #' @return
 #'
-#' An MRP matrix in \code{Claddis::ReadMorphNexus} format.
+#' An MRP matrix in \code{Claddis::ReadMatrixNEXUS} format.
 #'
 #' @author
 #'
@@ -96,7 +96,7 @@ Tree2MRP <- function(Trees, AddAllZero = TRUE) {
     MRPMatrix <- MRPMatrix[, unlist(lapply(apply(MRPMatrix, 2, list), function(x) length(unique(unlist(x))))) == 2]
     
     # Format as Claddis matrix:
-    MRPMatrix <- Claddis::MakeMorphMatrix(MRPMatrix)
+    MRPMatrix <- Claddis::MatrixBuilder(MRPMatrix)
     
     # Return matrix as output:
     return(MRPMatrix)

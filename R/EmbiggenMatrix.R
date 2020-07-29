@@ -4,25 +4,25 @@
 #'
 #' Given a cladistic matrix, will duplicate each block of characters N times.
 #'
-#' @param CladisticMatrix A cladistic matrix in the format imported by \code{Claddis::ReadMorphNexus}.
+#' @param CladisticMatrix A cladistic matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}.
 #' @param N The number of times to duplicate the data.
 #'
 #' @details
 #'
-#' Given a cladistic matrix in the format imported by \code{Claddis::ReadMorphNexus} will duplicate each block N times. Thus if a block contains 10 characters and N is 5 the resulting block will have 50 characters total.
+#' Given a cladistic matrix in the format imported by \code{Claddis::ReadMatrixNEXUS} will duplicate each block N times. Thus if a block contains 10 characters and N is 5 the resulting block will have 50 characters total.
 #'
 #' This function exists for internal use in the \link{Metatree} function as a means of upweighting MRP data beyond the limits of TNT (maximum weight 1000) by duplicating blocks. However, it is also made available for individual use here.
 #'
 #' @return
 #'
-#' A cladistic matrix in the format imported by \code{Claddis::ReadMorphNexus}.
+#' A cladistic matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}.
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
 #'
 #' @examples
 #'
 #' # Build an example matrix of six species and four characters:
-#' ExampleMatrix <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+#' ExampleMatrix <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
 #'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
 #'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
 #'

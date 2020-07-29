@@ -7,7 +7,7 @@
 CollapseDuplicateTaxonMRP(MRPMatrix)
 }
 \arguments{
-\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::ReadMorphNexus}.}
+\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}.}
 }
 \description{
 Collapses an MRP matrix with duplicate taxa until all taxa are unique.
@@ -20,7 +20,7 @@ This function automates this process and is used internally by the \link{Metatre
 \examples{
 
 # Build an example matrix:
-ExampleMRP <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+ExampleMRP <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
 

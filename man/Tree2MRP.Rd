@@ -12,7 +12,7 @@ Tree2MRP(Trees, AddAllZero = TRUE)
 \item{AddAllZero}{Whether (TRUE; default) to add an allzero outgroup taxon or not (FALSE).}
 }
 \value{
-An MRP matrix in \code{Claddis::ReadMorphNexus} format.
+An MRP matrix in \code{Claddis::ReadMatrixNEXUS} format.
 }
 \description{
 Given an input tree or trees creates an MRP matrix.

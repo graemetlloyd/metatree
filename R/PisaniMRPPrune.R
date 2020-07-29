@@ -6,7 +6,7 @@
 #'
 #' @param
 #'
-#' MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMorphNexus}. Must contain only 0 or 1 states.
+#' MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}. Must contain only 0 or 1 states.
 #'
 #' @details
 #'
@@ -79,7 +79,7 @@
 #' @examples
 #'
 #' # Build the Pisani et al. (2002) example matrix:
-#' PisaniExample <- Claddis::MakeMorphMatrix(matrix(as.character(c(0, 0,
+#' PisaniExample <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
 #'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
 #'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
 #'
