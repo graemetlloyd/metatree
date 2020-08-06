@@ -12,7 +12,7 @@ Tree2MRP(Trees, AddAllZero = TRUE)
 \item{AddAllZero}{Whether (TRUE; default) to add an allzero outgroup taxon or not (FALSE).}
 }
 \value{
-An MRP matrix in \code{Claddis::ReadMatrixNEXUS} format.
+An MRP matrix in \code{Claddis::read_nexus_matrix} format.
 }
 \description{
 Given an input tree or trees creates an MRP matrix.
@@ -55,11 +55,11 @@ Currently an option to perform Purvis MRP (Purvis 1995) is not available.
 ExampleTrees <- ape::read.tree(text = c("(A,(B,(C,D)));", "(A,(C,(B,D)));"))
 
 # Convert to MRP and show just matrix:
-Tree2MRP(ExampleTrees)$Matrix_1$Matrix
+Tree2MRP(ExampleTrees)$matrix_1$matrix
 
 # To confirm this collapses duplicate nodes show individual tree results:
-Tree2MRP(ExampleTrees[[1]])$Matrix_1$Matrix
-Tree2MRP(ExampleTrees[[2]])$Matrix_1$Matrix
+Tree2MRP(ExampleTrees[[1]])$matrix_1$matrix
+Tree2MRP(ExampleTrees[[2]])$matrix_1$matrix
 
 }
 \references{

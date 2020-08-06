@@ -4,7 +4,7 @@
 #'
 #' Collapses an MRP matrix with duplicate taxa until all taxa are unique.
 #'
-#' @param MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}.
+#' @param MRPMatrix An MRP matrix in the format imported by \code{Claddis::read_nexus_matrix}.
 #'
 #' @details
 #'
@@ -27,25 +27,27 @@
 #' @examples
 #'
 #' # Build an example matrix:
-#' ExampleMRP <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
+#' ExampleMRP <- Claddis::build_cladistic_matrix(
+#'   character_taxon_matrix = matrix(as.character(c(0, 0,
 #'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
-#'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
+#'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE)
+#' )
 #'
 #' # Show taxon names are currently unique by inspection:
-#' rownames(ExampleMRP$Matrix_1$Matrix)
+#' rownames(ExampleMRP$matrix_1$matrix)
 #'
 #' # Now rename taxon F as taxon E:
-#' rownames(ExampleMRP$Matrix_1$Matrix)[6] <- "E"
+#' rownames(ExampleMRP$matrix_1$matrix)[6] <- "E"
 #'
 #' # Show taxon E is duplicated by inspection:
-#' rownames(ExampleMRP$Matrix_1$Matrix)
+#' rownames(ExampleMRP$matrix_1$matrix)
 #'
 #' # Now collapse to just unique taxa using function:
 #' ExampleMRP <- CollapseDuplicateTaxonMRP(ExampleMRP)
 #'
 #' # Confirm that matrix has now been collapsed to five unique taxa
 #' # (and four unique characters) by inspection:
-#' ExampleMRP$Matrix_1$Matrix
+#' ExampleMRP$matrix_1$matrix
 #'
 #' @export CollapseDuplicateTaxonMRP
 CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
@@ -57,34 +59,34 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
   if(length(MRPMatrix) > 2) stop("MRP matrices should consist of a single block.")
   
   # Check is only zeroes and ones and stop and warn user if not:
-  if(length(setdiff(unique(as.vector(MRPMatrix$Matrix_1$Matrix)), c("0", "1"))) > 0) stop("MRP matrix must consist on only zeroes and ones.")
+  if(length(setdiff(unique(as.vector(MRPMatrix$matrix_1$matrix)), c("0", "1"))) > 0) stop("MRP matrix must consist on only zeroes and ones.")
   
   # Check for zero weight characters and stop and warn user if found:
-  if(any(MRPMatrix$Matrix_1$Weights == 0)) stop("Function not intended for zero weight characters.")
+  if(any(MRPMatrix$matrix_1$weights == 0)) stop("Function not intended for zero weight characters.")
   
   # Check taxa are actually duplicated:
-  if(!any(duplicated(rownames(MRPMatrix$Matrix_1$Matrix)))) stop("No taxa are actually duplicated.")
+  if(!any(duplicated(rownames(MRPMatrix$matrix_1$matrix)))) stop("No taxa are actually duplicated.")
   
   # Store unique taxon names in order (to reorder matrix at end):
-  UniqueTaxonNames <- unique(rownames(MRPMatrix$Matrix_1$Matrix))
+  UniqueTaxonNames <- unique(rownames(MRPMatrix$matrix_1$matrix))
   
   # Build a vector of unique duplicated names:
-  DuplicatedNames <- sort(unique(rownames(MRPMatrix$Matrix_1$Matrix)[duplicated(rownames(MRPMatrix$Matrix_1$Matrix))]))
+  DuplicatedNames <- sort(unique(rownames(MRPMatrix$matrix_1$matrix)[duplicated(rownames(MRPMatrix$matrix_1$matrix))]))
   
   # Subfunction to collapse a single duplicated taxon:
   CollapseDuplicateTaxonMRPMatrix <- function(MRPMatrix, DuplicatedTaxon) {
     
     # Find rows corresponding to duplicated taxa:
-    DuplicateRows <- which(rownames(MRPMatrix$Matrix_1$Matrix) == DuplicatedTaxon)
+    DuplicateRows <- which(rownames(MRPMatrix$matrix_1$matrix) == DuplicatedTaxon)
     
     # Isolate block corresponding to duplicated taxa:
-    DuplicatedBlock <- MRPMatrix$Matrix_1$Matrix[DuplicateRows, , drop = FALSE]
+    DuplicatedBlock <- MRPMatrix$matrix_1$matrix[DuplicateRows, , drop = FALSE]
     
     # Get unique characters to use:
     CharactersToUse <- unlist(mapply(function(x, y) rep(x, y), x = as.list(1:ncol(DuplicatedBlock)), y = as.list(apply(DuplicatedBlock, 2, function(x) length(unique(x))))))
     
     # Build new block (without duplicated taxon):
-    NewBlock <- MRPMatrix$Matrix_1$Matrix[-DuplicateRows, CharactersToUse, drop = FALSE]
+    NewBlock <- MRPMatrix$matrix_1$matrix[-DuplicateRows, CharactersToUse, drop = FALSE]
     
     # Add duplicated taxon to new block:
     NewBlock <- rbind(NewBlock, unlist(apply(DuplicatedBlock, 2, function(x) as.list(unique(x)))))
@@ -93,19 +95,19 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
     rownames(NewBlock)[nrow(NewBlock)] <- DuplicatedTaxon
     
     # Replace current block with new block in MRP matrix:
-    MRPMatrix$Matrix_1$Matrix <- NewBlock
+    MRPMatrix$matrix_1$matrix <- NewBlock
     
     # Update ordering in MRP matrix:
-    MRPMatrix$Matrix_1$Ordering <- MRPMatrix$Matrix_1$Ordering[CharactersToUse]
+    MRPMatrix$matrix_1$ordering <- MRPMatrix$matrix_1$ordering[CharactersToUse]
     
     # Update weights in MRP matrix:
-    MRPMatrix$Matrix_1$Weights <- MRPMatrix$Matrix_1$Weights[CharactersToUse]
+    MRPMatrix$matrix_1$weights <- MRPMatrix$matrix_1$weights[CharactersToUse]
     
     # Update minimum values in MRP matrix:
-    MRPMatrix$Matrix_1$MinVals <- MRPMatrix$Matrix_1$MinVals[CharactersToUse]
+    MRPMatrix$matrix_1$minimum_values <- MRPMatrix$matrix_1$minimum_values[CharactersToUse]
     
     # Update maximum values in MRP matrix:
-    MRPMatrix$Matrix_1$MaxVals <- MRPMatrix$Matrix_1$MaxVals[CharactersToUse]
+    MRPMatrix$matrix_1$maximum_values <- MRPMatrix$matrix_1$maximum_values[CharactersToUse]
     
     # Return modified MRP matrix:
     return(MRPMatrix)
@@ -116,7 +118,7 @@ CollapseDuplicateTaxonMRP <- function(MRPMatrix) {
   for(i in DuplicatedNames) MRPMatrix <- CollapseDuplicateTaxonMRPMatrix(MRPMatrix = MRPMatrix, DuplicatedTaxon = i)
   
   # Resort matrix by original taxon ordering:
-  MRPMatrix$Matrix_1$Matrix <- MRPMatrix$Matrix_1$Matrix[UniqueTaxonNames, , drop = FALSE]
+  MRPMatrix$matrix_1$matrix <- MRPMatrix$matrix_1$matrix[UniqueTaxonNames, , drop = FALSE]
   
   # Return MRP matrix:
   return(MRPMatrix)

@@ -7,7 +7,7 @@
 PisaniMRPPrune(MRPMatrix)
 }
 \arguments{
-\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}. Must contain only 0 or 1 states.}
+\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::read_nexus_matrix}. Must contain only 0 or 1 states.}
 }
 \value{
 A modified MRP matrix with redundant (duplicate or autapomorphic) characters removed.
@@ -69,24 +69,24 @@ Note that primarily this function is intended for internal use by \link{Metatree
 \examples{
 
 # Build the Pisani et al. (2002) example matrix:
-PisaniExample <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
+PisaniExample <- Claddis::build_cladistic_matrix(matrix(as.character(c(0, 0,
   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
 
 # Confirm it matches the Pisani example by inspection:
-PisaniExample$Matrix_1$Matrix
+PisaniExample$matrix_1$matrix
 
 # Remove taxon D
-PisaniExample <- Claddis::MatrixPruner(PisaniExample, taxa2prune = c("D"))
+PisaniExample <- Claddis::prune_cladistic_matrix(PisaniExample, taxa2prune = c("D"))
 
 # Confirm that first two characters are redundant by inspection:
-PisaniExample$Matrix_1$Matrix
+PisaniExample$matrix_1$matrix
 
 # Apply pruning alogirhtm to data:
 PisaniExample <- PisaniMRPPrune(PisaniExample)
 
 # Confirm that first two characters are now merged by inspection:
-PisaniExample$Matrix_1$Matrix
+PisaniExample$matrix_1$matrix
 
 }
 \references{

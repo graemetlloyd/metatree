@@ -42,7 +42,7 @@
 #'
 #' @return
 #'
-#' An MRP matrix in \code{Claddis::ReadMatrixNEXUS} format.
+#' An MRP matrix in \code{Claddis::read_nexus_matrix} format.
 #'
 #' @author
 #'
@@ -64,11 +64,11 @@
 #' ExampleTrees <- ape::read.tree(text = c("(A,(B,(C,D)));", "(A,(C,(B,D)));"))
 #'
 #' # Convert to MRP and show just matrix:
-#' Tree2MRP(ExampleTrees)$Matrix_1$Matrix
+#' Tree2MRP(ExampleTrees)$matrix_1$matrix
 #'
 #' # To confirm this collapses duplicate nodes show individual tree results:
-#' Tree2MRP(ExampleTrees[[1]])$Matrix_1$Matrix
-#' Tree2MRP(ExampleTrees[[2]])$Matrix_1$Matrix
+#' Tree2MRP(ExampleTrees[[1]])$matrix_1$matrix
+#' Tree2MRP(ExampleTrees[[2]])$matrix_1$matrix
 #'
 #' @export Tree2MRP
 Tree2MRP <- function(Trees, AddAllZero = TRUE) {
@@ -96,7 +96,7 @@ Tree2MRP <- function(Trees, AddAllZero = TRUE) {
     MRPMatrix <- MRPMatrix[, unlist(lapply(apply(MRPMatrix, 2, list), function(x) length(unique(unlist(x))))) == 2]
     
     # Format as Claddis matrix:
-    MRPMatrix <- Claddis::MatrixBuilder(MRPMatrix)
+    MRPMatrix <- Claddis::build_cladistic_matrix(MRPMatrix)
     
     # Return matrix as output:
     return(MRPMatrix)

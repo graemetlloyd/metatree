@@ -7,7 +7,7 @@
 CollapseDuplicateTaxonMRP(MRPMatrix)
 }
 \arguments{
-\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}.}
+\item{MRPMatrix}{An MRP matrix in the format imported by \code{Claddis::read_nexus_matrix}.}
 }
 \description{
 Collapses an MRP matrix with duplicate taxa until all taxa are unique.
@@ -20,25 +20,27 @@ This function automates this process and is used internally by the \link{Metatre
 \examples{
 
 # Build an example matrix:
-ExampleMRP <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
+ExampleMRP <- Claddis::build_cladistic_matrix(
+  character_taxon_matrix = matrix(as.character(c(0, 0,
   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
-  nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
+  nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE)
+)
 
 # Show taxon names are currently unique by inspection:
-rownames(ExampleMRP$Matrix_1$Matrix)
+rownames(ExampleMRP$matrix_1$matrix)
 
 # Now rename taxon F as taxon E:
-rownames(ExampleMRP$Matrix_1$Matrix)[6] <- "E"
+rownames(ExampleMRP$matrix_1$matrix)[6] <- "E"
 
 # Show taxon E is duplicated by inspection:
-rownames(ExampleMRP$Matrix_1$Matrix)
+rownames(ExampleMRP$matrix_1$matrix)
 
 # Now collapse to just unique taxa using function:
 ExampleMRP <- CollapseDuplicateTaxonMRP(ExampleMRP)
 
 # Confirm that matrix has now been collapsed to five unique taxa
 # (and four unique characters) by inspection:
-ExampleMRP$Matrix_1$Matrix
+ExampleMRP$matrix_1$matrix
 
 }
 \seealso{

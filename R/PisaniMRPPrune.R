@@ -6,7 +6,7 @@
 #'
 #' @param
 #'
-#' MRPMatrix An MRP matrix in the format imported by \code{Claddis::ReadMatrixNEXUS}. Must contain only 0 or 1 states.
+#' MRPMatrix An MRP matrix in the format imported by \code{Claddis::read_nexus_matrix}. Must contain only 0 or 1 states.
 #'
 #' @details
 #'
@@ -79,24 +79,24 @@
 #' @examples
 #'
 #' # Build the Pisani et al. (2002) example matrix:
-#' PisaniExample <- Claddis::MatrixBuilder(matrix(as.character(c(0, 0,
+#' PisaniExample <- Claddis::build_cladistic_matrix(matrix(as.character(c(0, 0,
 #'   0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
 #'   nrow = 6, dimnames = list(LETTERS[1:6], c()), byrow = TRUE))
 #'
 #' # Confirm it matches the Pisani example by inspection:
-#' PisaniExample$Matrix_1$Matrix
+#' PisaniExample$matrix_1$matrix
 #'
 #' # Remove taxon D
-#' PisaniExample <- Claddis::MatrixPruner(PisaniExample, taxa2prune = c("D"))
+#' PisaniExample <- Claddis::prune_cladistic_matrix(PisaniExample, taxa2prune = c("D"))
 #'
 #' # Confirm that first two characters are redundant by inspection:
-#' PisaniExample$Matrix_1$Matrix
+#' PisaniExample$matrix_1$matrix
 #'
 #' # Apply pruning alogirhtm to data:
 #' PisaniExample <- PisaniMRPPrune(PisaniExample)
 #'
 #' # Confirm that first two characters are now merged by inspection:
-#' PisaniExample$Matrix_1$Matrix
+#' PisaniExample$matrix_1$matrix
 #'
 #' @export PisaniMRPPrune
 PisaniMRPPrune <- function(MRPMatrix) {
@@ -108,40 +108,40 @@ PisaniMRPPrune <- function(MRPMatrix) {
   if(length(MRPMatrix) > 2) stop("MRP matrices should consist of a single block.")
   
   # Check is only zeroes and ones and stop and warn user if not:
-  if(length(setdiff(unique(as.vector(MRPMatrix$Matrix_1$Matrix)), c("0", "1"))) > 0) stop("MRP matrix must consist on only zeroes and ones.")
+  if(length(setdiff(unique(as.vector(MRPMatrix$matrix_1$matrix)), c("0", "1"))) > 0) stop("MRP matrix must consist on only zeroes and ones.")
   
   # Check for zero weight characters and stop and warn user if found:
-  if(any(MRPMatrix$Matrix_1$Weights == 0)) stop("Function not intended for zero weight characters.")
+  if(any(MRPMatrix$matrix_1$weights == 0)) stop("Function not intended for zero weight characters.")
   
   # Get any duplicated characters:
-  DuplicatedCharacters <- which(duplicated(apply(MRPMatrix$Matrix_1$Matrix, 2, paste, collapse = "")))
+  DuplicatedCharacters <- which(duplicated(apply(MRPMatrix$matrix_1$matrix, 2, paste, collapse = "")))
   
   # Get any constant characters:
-  ConstantCharacters <- which(apply(MRPMatrix$Matrix_1$Matrix, 2, function(x) length(unique(x))) < 2)
+  ConstantCharacters <- which(apply(MRPMatrix$matrix_1$matrix, 2, function(x) length(unique(x))) < 2)
   
   # Get any autapomorphic characters:
-  AutapomorphicCharacters <- which(apply(MRPMatrix$Matrix_1$Matrix, 2, function(x) sum(as.numeric(x))) == 1)
+  AutapomorphicCharacters <- which(apply(MRPMatrix$matrix_1$matrix, 2, function(x) sum(as.numeric(x))) == 1)
   
   # Join to make characters to prune:
   CharactersToPrune <- sort(unique(c(DuplicatedCharacters, ConstantCharacters, AutapomorphicCharacters)))
   
   # Special case of all characters being pruned:
-  if(length(CharactersToPrune) == ncol(MRPMatrix$Matrix_1$Matrix)) {
+  if(length(CharactersToPrune) == ncol(MRPMatrix$matrix_1$matrix)) {
     
     # Make matrix empty (zero by zero):
-    MRPMatrix$Matrix_1$Matrix <- matrix(nrow = 0, ncol = 0)
+    MRPMatrix$matrix_1$matrix <- matrix(nrow = 0, ncol = 0)
     
     # Make ordering an empty character vector:
-    MRPMatrix$Matrix_1$Ordering <- vector(mode = "character")
+    MRPMatrix$matrix_1$ordering <- vector(mode = "character")
     
     # Make all otehr values an empty numeric vector:
-    MRPMatrix$Matrix_1$Weights <- MRPMatrix$Matrix_1$MinVals <- MRPMatrix$Matrix_1$MaxVals <- vector(mode = "numeric")
+    MRPMatrix$matrix_1$weights <- MRPMatrix$matrix_1$minimum_values <- MRPMatrix$matrix_1$maximum_values <- vector(mode = "numeric")
   
   # As longas characters to prune is fewer than total number of characters:
   } else {
     
     # If characters to prune are found then prune them:
-    if(length(CharactersToPrune) > 0) MRPMatrix <- MatrixPruner(MRPMatrix, characters2prune = CharactersToPrune)
+    if(length(CharactersToPrune) > 0) MRPMatrix <- Claddis::prune_cladistic_matrix(MRPMatrix, characters2prune = CharactersToPrune)
   
   }
   
