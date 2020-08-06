@@ -111,7 +111,7 @@ PisaniMRPPrune <- function(MRPMatrix) {
   if(length(setdiff(unique(as.vector(MRPMatrix$matrix_1$matrix)), c("0", "1"))) > 0) stop("MRP matrix must consist on only zeroes and ones.")
   
   # Check for zero weight characters and stop and warn user if found:
-  if(any(MRPMatrix$matrix_1$weights == 0)) stop("Function not intended for zero weight characters.")
+  if(any(MRPMatrix$matrix_1$character_weights == 0)) stop("Function not intended for zero weight characters.")
   
   # Get any duplicated characters:
   DuplicatedCharacters <- which(duplicated(apply(MRPMatrix$matrix_1$matrix, 2, paste, collapse = "")))
@@ -135,7 +135,7 @@ PisaniMRPPrune <- function(MRPMatrix) {
     MRPMatrix$matrix_1$ordering <- vector(mode = "character")
     
     # Make all otehr values an empty numeric vector:
-    MRPMatrix$matrix_1$weights <- MRPMatrix$matrix_1$minimum_values <- MRPMatrix$matrix_1$maximum_values <- vector(mode = "numeric")
+    MRPMatrix$matrix_1$character_weights <- MRPMatrix$matrix_1$minimum_values <- MRPMatrix$matrix_1$maximum_values <- vector(mode = "numeric")
   
   # As longas characters to prune is fewer than total number of characters:
   } else {

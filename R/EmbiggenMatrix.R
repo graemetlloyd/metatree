@@ -45,22 +45,22 @@ EmbiggenMatrix <- function(CladisticMatrix, N) {
   CladisticMatrix[2:length(CladisticMatrix)] <- lapply(CladisticMatrix[2:length(CladisticMatrix)], function(x) {
     
     # Isolate matrix block:
-    MatrixBlock <- x$Matrix
+    MatrixBlock <- x$matrix
     
     # Keep adding block to end of matrix N times:
-    for(i in 2:N) x$Matrix <- cbind(x$Matrix, MatrixBlock)
+    for(i in 2:N) x$matrix <- cbind(x$matrix, MatrixBlock)
     
     # Now update ordering:
-    x$Ordering <- rep(x$Ordering, times = N)
+    x$ordering <- rep(x$ordering, times = N)
     
     # Now update weights:
-    x$Weights <- rep(x$Weights, times = N)
+    x$character_weights <- rep(x$character_weights, times = N)
     
     # Now update minimum values:
-    x$MinVals <- rep(x$MinVals, times = N)
+    x$minimum_values <- rep(x$minimum_values, times = N)
     
     # Now update maximum values:
-    x$MaxVals <- rep(x$MaxVals, times = N)
+    x$maximum_values <- rep(x$maximum_values, times = N)
     
     # Return duplicated block:
     return(x)
