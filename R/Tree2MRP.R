@@ -87,10 +87,13 @@ Tree2MRP <- function(Trees, AddAllZero = TRUE) {
     MRPMatrix <- do.call(cbind, lapply(MRPVectors, function(x) strsplit(x, split = "")[[1]]))
     
     # All zero outgroup at top:
-    if(AddAllZero) MRPMatrix <- rbind(rep(0, ncol(MRPMatrix)), MRPMatrix)
+    if (AddAllZero) MRPMatrix <- rbind(rep(0, ncol(MRPMatrix)), MRPMatrix)
     
     # Add taxa as rownames:
-    if(AddAllZero) rownames(MRPMatrix) <- c("allzero", sort(Trees[[1]]$tip.label))
+    if (AddAllZero) rownames(MRPMatrix) <- c("allzero", sort(Trees[[1]]$tip.label))
+    
+    # Add taxa as rownames:
+    if (!AddAllZero) rownames(MRPMatrix) <- sort(Trees[[1]]$tip.label)
     
     # Collapse to just variable characters:
     MRPMatrix <- MRPMatrix[, unlist(lapply(apply(MRPMatrix, 2, list), function(x) length(unique(unlist(x))))) == 2]
