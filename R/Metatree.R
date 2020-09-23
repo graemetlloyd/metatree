@@ -260,6 +260,7 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), ExclusiveDataList = c(), TargetClade = "", HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE, ExcludeTaxonomyMRP = FALSE) {
   
+  
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
   # NEED TO ADD CHECK IF EXCLUDING TAXONOMY MRP BUT USING GENUS OR ALL AS WILL CREATE MASSIVE ISSUES!
@@ -282,7 +283,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   
   # OPTIONS TO ADD IN FUTURE:
   #
-  # 1. Way to do historical metatrees (should be easy as just prune out starting data sets then run as normal - except setting current year to historical year).
+  # 1. Way to do historical metatrees (should be easy as just prune out starting data sets then run as normal - except setting current year to historical year). Hmmm, except this ma mess up dependencies as these can end up not chronological by publication year.
   # 2. Allow Purvis coding instead of Baum and Ragan. (Involves dealing with NA issues that would be caused currently.) Possibly/probably too hard?
   # 3. Proper chunking and maybe even terminal/TNT calls.
   # 4. Species to include option as alternative to species to exclude.
