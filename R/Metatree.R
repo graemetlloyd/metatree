@@ -1510,7 +1510,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   ChildDataSets <- lapply(ChildDataSets, function(x) sort(unique(c(x, unname(unlist(ChildDataSets[intersect(x, names(ChildDataSets))]))))))
   
   # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
-  MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); if(!is.null(MRPList[[x$Parent[1]]]$Parent)) while(nchar(MRPList[[x$Parent[1]]]$Parent) > 0) x$Parent <- c(MRPList[[x$Parent[1]]]$Parent, x$Parent); x})
+  MRPList <- lapply(MRPList, function(x) {SiblingVector <- c(x$Sibling, setdiff(ChildDataSets[[match(x$Parent, ParentDataSets)]], x$FileName)); if(any(nchar(SiblingVector)) > 0) SiblingVector <- SiblingVector[nchar(SiblingVector) > 0]; x$Sibling <- unique(SiblingVector); if(!is.null(MRPList[[x$Parent[1]]]$Parent)) while(!is.null(MRPList[[x$Parent[1]]]$Parent) && nchar(MRPList[[x$Parent[1]]]$Parent) > 0) x$Parent <- c(MRPList[[x$Parent[1]]]$Parent, x$Parent); x})
   
   # OLD LINE FOR ABOVE THAT I AM PRETTY SURE IS BROKEN BUT AM LEAVING HERE FOR NOW IN CASE IT AIN'T
   # Add sibling relationships to data sets with shared parents and update parents field with grandparents, greatgrandparents etc.:
