@@ -259,6 +259,19 @@ PaleobiologyDBTaxaQuerier <- function(taxon_nos, taxon_names = NULL, original = 
     # Sort output by taxon names in order they were supplied:
     Output <- Output[match(gsub("_", " ", taxon_names), Output[, "TaxonName" ]), , drop = FALSE]
     
+    # If any names didn't show up (can happen when a subgenus gets wrongly inserted):
+    if(any(is.na(Output[, "TaxonName"]))) {
+      
+      # Compile missing names:
+      MissingNames <- taxon_names[which(is.na(Output[, "TaxonName"]))]
+      
+      # Try and find correct name by searching for descendants of the genus:
+      FoundNames <- do.call(rbind, lapply(as.list(MissingNames), function(x) {GenusPart <- strsplit(x, " ")[[1]][1]; DescendantQuery <- PaleobiologyDBDescendantFinder("1", GenusPart, returnrank = 3); if(!any(DescendantQuery[, "TaxonName"] == x)) paste0("Could not find ", x, " in database. Something weird is going on so check this taxon,"); DescendantQuery[DescendantQuery[, "TaxonName"] == x, colnames(Output)]}))
+      
+      # Update output accordingly:
+      Output[which(is.na(Output[, "TaxonName"])), ] <- FoundNames
+      
+    }
   }
   
   # If stopping for orphans check for them (excluding life) and stop if found:
