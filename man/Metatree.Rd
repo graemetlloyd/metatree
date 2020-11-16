@@ -67,6 +67,7 @@ Metatree(
 \item{SafelyRemovedTaxa}{The results of the safe taxonomic reduction. This is the \code{$str.list} part of the output of \code{\link[Claddis]{safe_taxonomic_reduction}} and can be used to reinsert taxa later with the \code{\link[Claddis]{safe_taxonomic_reinsertion}} function.}
 \item{RemovedSourceData}{A vector of source data removed throughout the Metatree function. Note that currently the function does not distinguish between the reasons for this (e.g., too many invalid taxa, too few taxa, redundant through non-independence, removed through the veil year process etc.). Importantly it is not therefore safe to remove these data sets from the input as they may still be contributing to the non-independence information.}
 \item{VeilYear}{The veil year applied (i.e., only data sets this age or younger are included in the output).}
+\item{CharacterWeights}{Table of character weightings used.}
 }
 \description{
 Builds a metatree data set from a set of source data.
