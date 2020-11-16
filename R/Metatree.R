@@ -581,7 +581,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Check relative weights are numeric and stop and warn user if not:
   if(!is.numeric(RelativeWeights)) stop("RelativeWeights must consist of numeric values. Fix and try again.")
   
-  # Check there are no negative weights and at least one positive weight is being used and stop and wanr user if not:
+  # Check there are no negative weights and at least one positive weight is being used and stop and warn user if not:
   if(sum(RelativeWeights) <= 0 || any(RelativeWeights < 0)) stop("RelativeWeights must include at least one positive value and negative values are not allowed. Fix and try again.")
   
   # Check only a single weight combination value is being used and stop and warn user if not:
@@ -1081,7 +1081,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
     
     # Update new children:
     newchildren <- setdiff(ResolvedTaxonNumbers[match(newchildren, ResolvedTaxonNumbers[, "ResolvedTaxonNo"]), "ParentTaxonNo"], "28595")
-    
+    if(is.na(newchildren)) stop("")
   }
   
   # If Life is missing then add it at bottom:
@@ -1751,19 +1751,20 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   
 }
 
-#MRPDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/mrp" # MRP file directory
-#XMLDirectory <- "/Users/eargtl/Documents/Homepage/www.graemetlloyd.com/xml" # XML file directory
-#TargetClade <- "Cetacea"
-#InclusiveDataList <- c("Aguirre-Fernandez_etal_2009a", "Aguirre-Fernandez_et_Fordyce_2014a", "Albright_etal_2018a", "Arnold_etal_2005a", "Benoit_etal_2011a", "Bianucci_2013a", "Bianucci_et_Gingerich_2011a", "Bianucci_et_Landini_2006a", "Bianucci_etal_2007a", "Bianucci_etal_2010a", "Bianucci_etal_2013a", "Bianucci_etal_2016a", "Bianucci_etal_2018aa", "Bianucci_etal_2018ab", "Bisconti_2008a", "Bisconti_2010a", "Bisconti_2015a", "Bisconti_et_Bosselaers_2016a", "Bisconti_etal_2013a", "Bisconti_etal_2019a", "Bisconti_2015a", "Boersma_et_Pyenson_2015a", "Boersma_et_Pyenson_2016a", "Boersma_etal_2017a", "Boessenecker_et_Fordyce_2015a", "Boessenecker_et_Fordyce_2015b", "Boessenecker_et_Fordyce_2017a", "Boessenecker_et_Fordyce_2015b", "Boessenecker_etal_2017a", "Bosselaers_et_Post_2010a", "Bouetel_et_de_Muizon_2006a", "Buono_et_Cozzuol_2013a", "Buono_etal_2017a", "Churchill_etal_2012a", "Churchill_etal_2016a", "Collareta_etal_2017a", "Colpaert_etal_2015a", "Demere_etal_2008a", "Dooley_etal_2004a", "Ekdale_etal_2011a", "El_Adli_etal_2014a", "Fajardo-Mellor_etal_2006a", "Fitzgerald_2010a", "Fordyce_1994a", "Fordyce_et_Marx_2013a", "Fordyce_et_Marx_2016a", "Fordyce_et_Marx_2018a", "Geisler_2001a", "Geisler_et_Luo_1996a", "Geisler_et_Sanders_2003a", "Geisler_et_Theodor_2009a", "Geisler_et_Uhen_2003a", "Geisler_et_Uhen_2005a", "Geisler_etal_2005a", "Geisler_etal_2011a", "Geisler_etal_2012a", "Geisler_etal_2014a", "Geisler_etal_2017a", "Gibson_etal_2018a", "Godfrey_etal_2016a", "Godfrey_etal_2017a", "Goldin_2018a", "Goldin_et_Startsev_2014a", "Goldin_et_Startsev_2017a", "Goldin_et_Steeman_2015a", "Goldin_et_Zvonok_2013a", "Goldin_etal_2014a", "Goldin_etal_2014b", "Hernandez_Cisneros_2018a", "Heyning_1997a", "Kimura_et_Hasegawa_2010a", "Lambert_2008a", "Lambert_2008b", "Lambert_et_Louwye_2016a", "Lambert_etal_2008a", "Lambert_etal_2009a", "Lambert_etal_2010a", "Lambert_etal_2013a", "Lambert_etal_2014a", "Lambert_etal_2015a", "Lambert_etal_2017a", "Lambert_etal_2017b", "Lambert_etal_2018a", "Lambert_etal_2018ba", "Lambert_etal_2018bb", "Lambert_etal_2019a", "Lambert_etal_inpressa", "Luo_et_Marsh_1996a", "Martinez-Caceres_etal_2017a", "Marx_2011a", "Marx_et_Fordyce_2015a", "Marx_et_Fordyce_2016a", "Marx_etal_2015a", "Marx_etal_2016a", "Marx_etal_2017a", "McGowen_etal_2009a", "Messenger_et_McGuire_1998a", "Mijan_etal_inpressa", "Muizon_etal_2019a", "Murakami_etal_2012a", "Murakami_etal_2012b", "Murakami_etal_2014a", "Murakami_etal_2014b", "Murakami_etal_inpressa", "Nelson_et_Uhen_inpressa", "OLeary_et_Gatesy_2008a", "Paolucci_etal_inpressa", "Peredo_et_Pyenson_2018a", "Peredo_et_Uhen_2016a", "Peredo_etal_inpressa", "Post_etal_2017a", "Pyenson_etal_2015a", "Racicot_etal_2019aa", "Racicot_etal_2019ab", "Ramassamy_2016a", "Sanders_et_Geisler_inpressa", "Solis-Anorve_etal_2019a", "Spaulding_etal_2009a", "Steeman_2007a", "Tanaka_et_Fordyce_2014a", "Tanaka_et_Fordyce_2015a", "Tanaka_et_Fordyce_2016a", "Tanaka_et_Fordyce_inpressa", "Tanaka_et_Watanabe_inpressa", "Tanaka_etal_2018a", "Theodor_et_Foss_2005a", "Thewissen_etal_2001a", "Thewissen_etal_2007a", "Tsai_et_Fordyce_2018a", "Tsai_et_Fordyce_inpressa", "Tsai_et_Fordyce_inpressb", "Uhen_1999a", "Uhen_2004a", "Uhen_2014a", "Uhen_et_Gingerich_2001a", "Velez-Juarbe_etal_2015a", "Velez-Juarbe_inpressa", "Viglino_etal_2019a", "Viglino_etal_inpressa", "Wichura_etal_2015a")
-#ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
-#HigherTaxaToCollapse = c()
-#SpeciesToExclude = c()
-#MissingSpecies = "exclude"
-#Interval = NULL
-#VeilLine = TRUE
-#IncludeSpecimenLevelOTUs = TRUE
-#BackboneConstraint = "McGowen_etal_2009a"
-#MonophylyConstraint = NULL
-#RelativeWeights = c(0, 100, 10, 1)
-#WeightCombination = "sum"
-#ReportContradictionsToScreen = FALSE
+# MRPDirectory <- "~/Documents/Homepage/www.graemetlloyd.com/mrp"
+# XMLDirectory <- "~/Documents/Homepage/www.graemetlloyd.com/xml"
+# InclusiveDataList <- GetFilesForClade("matricht.html")
+# ExclusiveDataList <- c("Averianov_inpressa", "Bravo_et_Gaete_2015a", "Brocklehurst_etal_2013a", "Brocklehurst_etal_2015aa", "Brocklehurst_etal_2015ab", "Brocklehurst_etal_2015ac", "Brocklehurst_etal_2015ad", "Brocklehurst_etal_2015ae", "Brocklehurst_etal_2015af", "Bronzati_etal_2012a", "Bronzati_etal_2015ab", "Brusatte_etal_2009ba", "Campbell_etal_2016ab", "Carr_et_Williamson_2004a", "Carr_etal_2017ab", "Frederickson_et_Tumarkin-Deratzian_2014aa", "Frederickson_et_Tumarkin-Deratzian_2014ab", "Frederickson_et_Tumarkin-Deratzian_2014ac", "Frederickson_et_Tumarkin-Deratzian_2014ad", "Garcia_etal_2006a", "Gatesy_etal_2004ab", "Grellet-Tinner_2006a", "Grellet-Tinner_et_Chiappe_2004a", "Grellet-Tinner_et_Makovicky_2006a", "Knoll_2008a", "Kurochkin_1996a", "Lopez-Martinez_et_Vicens_2012a", "Lu_etal_2014aa", "Norden_etal_inpressa", "Pisani_etal_2002a", "Ruiz-Omenaca_etal_1997a", "Ruta_etal_2003ba", "Ruta_etal_2003bb", "Ruta_etal_2007a", "Selles_et_Galobart_2016a", "Sereno_1993a", "Sidor_2001a", "Skutschas_etal_inpressa", "Tanaka_etal_2011a", "Toljagic_et_Butler_2013a", "Tsuihiji_etal_2011aa", "Varricchio_et_Jackson_2004a", "Vila_etal_2017a", "Wilson_2005aa", "Wilson_2005ab", "Zelenitsky_et_Therrien_2008a")
+# TargetClade <- "Ichthyosauromorpha"
+# HigherTaxaToCollapse <- c()
+# SpeciesToExclude <- c()
+# MissingSpecies <- "exclude"
+# Interval <- NULL
+# VeilLine <- TRUE
+# IncludeSpecimenLevelOTUs <- TRUE
+# BackboneConstraint <- NULL
+# MonophylyConstraint <- NULL
+# RelativeWeights <- c(0, 1, 1, 1)
+# WeightCombination <- "sum"
+# ReportContradictionsToScreen <- FALSE
+# ExcludeTaxonomyMRP <- FALSE
