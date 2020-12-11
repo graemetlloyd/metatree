@@ -211,6 +211,7 @@
 #' \item{SafelyRemovedTaxa}{The results of the safe taxonomic reduction. This is the \code{$str.list} part of the output of \code{\link[Claddis]{safe_taxonomic_reduction}} and can be used to reinsert taxa later with the \code{\link[Claddis]{safe_taxonomic_reinsertion}} function.}
 #' \item{RemovedSourceData}{A vector of source data removed throughout the Metatree function. Note that currently the function does not distinguish between the reasons for this (e.g., too many invalid taxa, too few taxa, redundant through non-independence, removed through the veil year process etc.). Importantly it is not therefore safe to remove these data sets from the input as they may still be contributing to the non-independence information.}
 #' \item{VeilYear}{The veil year applied (i.e., only data sets this age or younger are included in the output).}
+#' \item{DataSetDependenceWeights}{Table of data set weightings used.}
 #' \item{CharacterWeights}{Table of character weightings used.}
 #'
 #' @author Graeme T. Lloyd \email{graemetlloyd@@gmail.com}
@@ -1611,6 +1612,9 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # All weights are set on a zero to one scale initially and then multiplied by RelativeWeights:
   MRPList <- lapply(MRPList, function(x) {InputWeights <- x$Weights; x$Weights <- NULL; x$InputWeights <- RelativeWeights[1] * InputWeights; x$PublicationYearWeights <- RelativeWeights[2] * (rep(((2 ^ (0.5 * (as.numeric(x$PublicationYear) - CurrentVeilYear + 1))) - 1) / ((2 ^ (0.5 * (as.numeric(CurrentYear) - CurrentVeilYear + 1))) - 1), length(InputWeights))); x$DataSetDependenceWeights <- RelativeWeights[3] * rep(1 / (length(x$Sibling) + 1), length(InputWeights)); x$CladeContradictionWeights <- RelativeWeights[4] * MRPIntraMatrixWeights(x$Matrix); x})
   
+  # Make Data Set Weights table ready for output later:
+  WeightsForOutput <- do.call(rbind, lapply(MRPList, function(x) c(x$PublicationYearWeights[1], x$DataSetDependenceWeights[1])))
+
   # If using sum to combine weights collapse weights to just their sum:
   if(WeightCombination == "sum") MRPList <- lapply(MRPList, function(x) {x$Weights <- apply(rbind(x$InputWeights, x$PublicationYearWeights, x$DataSetDependenceWeights, x$CladeContradictionWeights), 2, sum); x$InputWeights <- NULL; x$PublicationYearWeights <- NULL; x$DataSetDependenceWeights <- NULL; x$CladeContradictionWeights <- NULL; x})
   
@@ -1656,7 +1660,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
       # Print warnings to screen:
       cat(ContradictionWarnings)
       
-      # NEED TO BREAK THIS DOWN FURTHER AS CLEARLY SOME REDUNDANCY! (E.G. GROUPING HIGHER TAXA WITH SAME ISSUE, OR DATA SETS WITH SAME ISSUE)
+      # NEED TO BREAK THIS DOWN FURTHER AS CLEARLY SOME REDUNDANCY TO OUTPUT! (E.G. GROUPING HIGHER TAXA WITH SAME ISSUE, OR DATA SETS WITH SAME ISSUE)
       
     }
     
@@ -1742,7 +1746,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   cat("Done\nCompiling and returning output...")
   
   # Compile output:
-  Output <- list(FullMRPMatrix = FullMRPMatrix, STRMRPMatrix = STRMRPMatrix, TaxonomyTree = TaxonomyMRPTree, MonophyleticTaxa = MonophyleticTaxa, SafelyRemovedTaxa = STRData$str_taxa, RemovedSourceData = RemovedSourceData, VeilYear = CurrentVeilYear, CharacterWeights = matrix(data = c(1:length(FullMRPMatrix$matrix_1$character_weights), FullMRPMatrix$matrix_1$character_weights), ncol = 2, dimnames = list(c(unname(unlist(lapply(MRPList, function(x) rep(x = x$FileName, times = ncol(x$Matrix))))), rep("TaxonTree", length(FullMRPMatrix$matrix_1$character_weights) - sum(unlist(lapply(MRPList, function(x) ncol(x$Matrix)))))), c("Character", "Weight"))))
+  Output <- list(FullMRPMatrix = FullMRPMatrix, STRMRPMatrix = STRMRPMatrix, TaxonomyTree = TaxonomyMRPTree, MonophyleticTaxa = MonophyleticTaxa, SafelyRemovedTaxa = STRData$str_taxa, RemovedSourceData = RemovedSourceData, VeilYear = CurrentVeilYear, DataSetWeights = do.call(cbind, list(PublicationYearWeights = round(WeightsForOutput[, 1] * 100, 4), DataSetDependenceWeights = round(WeightsForOutput[, 2] * 100, 4))), CharacterWeights = matrix(data = c(1:length(FullMRPMatrix$matrix_1$character_weights), FullMRPMatrix$matrix_1$character_weights), ncol = 2, dimnames = list(c(unname(unlist(lapply(MRPList, function(x) rep(x = x$FileName, times = ncol(x$Matrix))))), rep("TaxonTree", length(FullMRPMatrix$matrix_1$character_weights) - sum(unlist(lapply(MRPList, function(x) ncol(x$Matrix)))))), c("Character", "Weight"))))
   
   # Print current processing status:
   cat("Done")
