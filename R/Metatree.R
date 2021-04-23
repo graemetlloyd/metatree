@@ -262,7 +262,6 @@
 #' @export Metatree
 Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), ExclusiveDataList = c(), TargetClade = "", HigherTaxaToCollapse = c(), SpeciesToExclude = c(), MissingSpecies = "exclude", Interval = NULL, VeilLine = TRUE, IncludeSpecimenLevelOTUs = TRUE, BackboneConstraint = NULL, MonophylyConstraint = NULL, RelativeWeights = c(1, 1, 1, 1), WeightCombination = "sum", ReportContradictionsToScreen = FALSE, ExcludeTaxonomyMRP = FALSE) {
   
-  
   # DOUBLE CHECK PARENT REPLACEMENT LINE NOW MULTIPLE PARENTS EXIST - SEEMS TO WORK BUT MIGHT NOT.
   # Weights are also super slow (IntraMatrixWeights really?). Can this be sped up somehow? E.g., way STR is.
   # NEED TO ADD CHECK IF EXCLUDING TAXONOMY MRP BUT USING GENUS OR ALL AS WILL CREATE MASSIVE ISSUES!
@@ -817,34 +816,39 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Create empty matrix to store senior synoyms:
   SeniorSynonyms <- matrix(nrow = 0, ncol = 8, dimnames = list(c(), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")))
   
-  # Reconcile senior synonym with database:
-  currenttaxa <- PaleobiologyDBTaxaQuerier(gsub("txn:", "", ResolvedTaxonNumbers[synonymrows, "AcceptedNumber"]))
+  # As long as there are synonyms:
+  if (length(synonymrows) > 0) {
   
-  # Deal with subgenera:
-  currenttaxa[, "TaxonName"] <- gsub(" \\(|\\)", "", currenttaxa[, "TaxonName"])
+    # Reconcile senior synonym with database:
+    currenttaxa <- PaleobiologyDBTaxaQuerier(gsub("txn:", "", ResolvedTaxonNumbers[synonymrows, "AcceptedNumber"]))
   
-  # While there are taxa with validity issues:
-  while(any(!is.na(currenttaxa[, "TaxonValidity"]))) {
-    
-    # Isolate rows to check (i.e., just rows where validity isn't NA (i.e., resolved):
-    rowstocheck <- which(!is.na(currenttaxa[, "TaxonValidity"]))
-    
-    # Check just those taxa:
-    currenttaxa[rowstocheck, ] <- PaleobiologyDBTaxaQuerier(taxon_nos = gsub("txn:", "", currenttaxa[rowstocheck, "AcceptedNumber"]), taxon_names = currenttaxa[rowstocheck, "AcceptedName"])
-    
     # Deal with subgenera:
-    currenttaxa[rowstocheck, "TaxonName"] <- gsub(" \\(|\\)", "", currenttaxa[rowstocheck, "TaxonName"])
-    
-  }
+    currenttaxa[, "TaxonName"] <- gsub(" \\(|\\)", "", currenttaxa[, "TaxonName"])
   
-  # Make current taxa into senior synonyms list:
-  SeniorSynonyms <- currenttaxa
-  
-  # If using an Interval:
-  if(!all(is.null(Interval))) {
+    # While there are taxa with validity issues:
+    while(any(!is.na(currenttaxa[, "TaxonValidity"]))) {
     
-    # Update resolved taxon numbers to valid taxa only:
-    ResolvedTaxonNumbersInterval[which(!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- SeniorSynonyms[match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"])[!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
+      # Isolate rows to check (i.e., just rows where validity isn't NA (i.e., resolved):
+      rowstocheck <- which(!is.na(currenttaxa[, "TaxonValidity"]))
+    
+      # Check just those taxa:
+      currenttaxa[rowstocheck, ] <- PaleobiologyDBTaxaQuerier(taxon_nos = gsub("txn:", "", currenttaxa[rowstocheck, "AcceptedNumber"]), taxon_names = currenttaxa[rowstocheck, "AcceptedName"])
+    
+      # Deal with subgenera:
+      currenttaxa[rowstocheck, "TaxonName"] <- gsub(" \\(|\\)", "", currenttaxa[rowstocheck, "TaxonName"])
+    
+    }
+  
+    # Make current taxa into senior synonyms list:
+    SeniorSynonyms <- currenttaxa
+    
+    # If using an Interval:
+    if(!all(is.null(Interval))) {
+    
+      # Update resolved taxon numbers to valid taxa only:
+      ResolvedTaxonNumbersInterval[which(!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))), c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")] <- SeniorSynonyms[match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"])[!is.na(match(ResolvedTaxonNumbersInterval[, "InputNo"], JuniorSynonyms[, "InputNo"]))], c("OriginalTaxonNo", "ResolvedTaxonNo", "TaxonName", "TaxonRank", "ParentTaxonNo", "TaxonValidity", "AcceptedNumber", "AcceptedName")]
+    
+    }
     
   }
   
@@ -1551,7 +1555,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   # Remove any dead siblings:
   MRPList <- lapply(MRPList, function(x) {x$Sibling <- intersect(x$Sibling, names(MRPList)); x})
   
-  # If usinga  veil line:
+  # If using a veil line:
   if(VeilLine) {
     
     # Print current processing status:
