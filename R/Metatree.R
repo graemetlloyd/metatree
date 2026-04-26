@@ -557,7 +557,7 @@ Metatree <- function(MRPDirectory, XMLDirectory, InclusiveDataList = c(), Exclus
   if(!is.logical(ReportContradictionsToScreen)) stop("ReportContradictionsToScreen must be a logical (TRUE or FALSE).")
   
   # List of types of resolution that require finding a senior synonym:
-  synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of")
+  synonyms <- c("corrected to", "misspelling of", "objective synonym of", "obsolete variant of", "recombined as", "replaced by", "subjective synonym of", "variant of")
   
   # List of types of resolution that require changing reconciliation to DELETE:
   DeletionCategories <- c("nomen dubium", "nomen vanum", "nomen nudum", "nomen oblitum", "invalid subgroup of")
